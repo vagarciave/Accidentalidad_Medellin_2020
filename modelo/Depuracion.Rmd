@@ -331,8 +331,11 @@ base_completa$DISENO[is.na(base_completa$DISENO)] <-
 
 ```{r}
 #base_completa <- na.omit(base_completa)
-#write.csv(base_completa, "Base_Completa_NAomit.csv")
+#write.csv(base_completa, "Base_Completa_NAomit.csv", fileEncoding = "UTF-8",
+#          row.names = F)
 ```
+
+
 
 ## PARA COMUNA
 
@@ -442,7 +445,8 @@ base_completa <- na.omit(base_completa)
 # BASE COMPLETA CON NA IMPUTADOS
 
 ```{r}
-write.csv(base_completa, "Base_Completa_NAimp.csv")
+write.csv(base_completa, "Base_Completa_NAimp.csv", fileEncoding = "UTF-8",
+          row.names = F)
 ```
 
 
