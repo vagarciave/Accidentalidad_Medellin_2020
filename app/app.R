@@ -13,6 +13,12 @@
 # Load R packages
 library(shiny)
 library(shinythemes)
+library(DT)
+require(RMySQL)
+require(dplyr)
+require(tidyr)
+require(lubridate)
+library(readr)
 
 
 # Define UI
@@ -48,7 +54,11 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                              ) # mainPanel
                              
                     ), # Navbar 1, tabPanel
-                    tabPanel("Visualizacion", "This panel is intentionally left blank"),
+                    tabPanel("Visualizacion",
+                             titlePanel("Incidentes Georreferenciados"),
+                             fluidRow(column(DT::dataTableOutput("Data"), 
+                                             width=12))
+                             ),
                     tabPanel("Prediccion", "This panel is intentionally left blank"),
                     tabPanel("Agrupamiento", "This panel is intentionally left blank")
                     
@@ -56,12 +66,27 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
 ) # fluidPage
 
 
+
+
+datos <- read.csv("https://raw.githubusercontent.com/vagarciave/Project_x/master/modelo/Base_Completa_NAimp.csv", encoding = 'UTF-8', stringsAsFactors=T)
+datos <- datos[sample(1:dim(datos)[1],1000),]
 # Define server function  
 server <- function(input, output) {
     
     output$txtout <- renderText({
         paste( input$txt1, input$txt2, sep = " " )
     })
+    
+    output$Data <- DT::renderDataTable(
+      DT::datatable({
+        datos
+      },
+      options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
+        filter = "top",
+        selection = "multiple",
+        style = "bootstrap"
+      ))
+    
 } # server
 
 
