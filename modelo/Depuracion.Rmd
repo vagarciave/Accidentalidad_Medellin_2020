@@ -193,18 +193,29 @@ base_completa[!(base_completa$COMUNA %in% c('Popular', 'Santa Cruz', 'Manrique',
   mutate(temp_barrio = NULL)
 ```
 
+Se decide quitar lo acentos para evitar posibles problemas:
+
+```{r}
+base_completa$COMUNA <- as.character(base_completa$COMUNA)
+base_completa$COMUNA <- iconv(base_completa$COMUNA,from="UTF-8",to="ASCII//TRANSLIT")
+base_completa$COMUNA <- as.factor(base_completa$COMUNA)
+```
+
 A continuación se observan las comunas diferentes a las planteadas por la ciudad de Medellín.
 
 ```{r}
 base_completa %>% filter(!(COMUNA %in% c('Popular', 'Santa Cruz', 'Manrique', 'Aranjuez',
                                 'Castilla', 'Doce de Octubre', 'Robledo', 'Villa Hermosa',
                                 'Buenos Aires', 'La Candelaria', 'Laureles Estadio',
-                                'La América', 'San Javier', 'El Poblado', 'Guayabal',
-                                'Belén', 'Corregimiento de San Cristóbal',
+                                'La America', 'San Javier', 'El Poblado', 'Guayabal',
+                                'Belen', 'Corregimiento de San Cristobal',
                                 'Corregimiento de San Antonio de Prado',
                                 'Corregimiento de Santa Elena', 'Corregimiento de Altavista',
-                                'Corregimiento de San Sebastián de Palmitas', NA))) %>% count(COMUNA, BARRIO, sort = T)
+                                'Corregimiento de San Sebastian de Palmitas', NA))) %>% count(COMUNA, BARRIO, sort = T)
 ```
+
+
+Se deciden marcar estas columnas como NA
 
 ```{r}
 base_completa$COMUNA[base_completa$COMUNA %in% c("In", "AU", "SN", "0")] <- NA
@@ -225,12 +236,15 @@ length(levels(base_completa$BARRIO))
 # Número de barrios en el conjunto de entrenamiento
 base_completa[base_completa$BARRIO %in% c('Berlin', 'Berlín'), ] %>% count(COMUNA, BARRIO)
 ```
+Se quitan las tildes
 
 ```{r}
 base_completa$BARRIO <- as.character(base_completa$BARRIO)
 base_completa$BARRIO <- iconv(base_completa$BARRIO,from="UTF-8",to="ASCII//TRANSLIT")
 base_completa$BARRIO <- as.factor(base_completa$BARRIO)
 ```
+
+
 
 También se detecta que los Barrios que contienen algunos problemas de espacios, algunos ejemplos:
 
@@ -294,6 +308,9 @@ levels(base_completa$GRAVEDAD)
 ### Para DISENO
 
 ```{r}
+base_completa$DISENO <- as.character(base_completa$DISENO)
+base_completa$DISENO <- iconv(base_completa$DISENO,from="UTF-8",to="ASCII//TRANSLIT")
+base_completa$DISENO <- as.factor(base_completa$DISENO)
 levels(base_completa$DISENO)
 ```
 
@@ -311,7 +328,36 @@ levels(base_completa$DIA_NOMBRE)
 ```
 
 
-## IMPUTACIÓN
+# IMPUTACIÓN
+
+En los faltantes de la variable DISENO, se decide usar el nombre de "No Registrado".
+
+```{r}
+levels(base_completa$DISENO) <- c(levels(base_completa$DISENO), "No Registrado")
+base_completa$DISENO[is.na(base_completa$DISENO)] <-
+  rep("No Registrado", times = length(base_completa$DISENO[is.na(base_completa$DISENO)]))
+```
+
+## BASE REMOVIENDO FALTANTES
+
+```{r, eval=FALSE}
+base_completa <- na.omit(base_completa)
+base_completa <- base_completa[!(base_completa$COMUNA %in% c('Corregimiento de San Cristobal',
+                                                             'Corregimiento de San Antonio de Prado',
+                                                             'Corregimiento de Santa Elena',
+                                                             'Corregimiento de Altavista',
+                                                             'Corregimiento de San Sebastian de Palmitas')), ]
+base_completa$COMUNA <- as.character(base_completa$COMUNA)
+base_completa$COMUNA <- as.factor(base_completa$COMUNA)
+
+base_completa$BARRIO <- as.character(base_completa$BARRIO)
+base_completa$BARRIO <- as.factor(base_completa$BARRIO)
+
+write.csv(base_completa, "Base_Completa_NAomit.csv", fileEncoding = "UTF-8",
+          row.names = F)
+```
+
+## BASE IMPUTANDO FALTANTES
 
 A continuación se muestran la variables y sus datos faltantes en la base base_completa
 
@@ -321,23 +367,9 @@ sort(sapply(base_completa, function(y) sum(length(which(is.na(y))))), decreasing
 
 Dado que representan una cantidad importante de la base de datos se procede a depurar mediante diferentes métodos.
 
-**Nota:** Depende de lo que responda el profesor, trabajaremos los NA
-
-```{r}
-levels(base_completa$DISENO) <- c(levels(base_completa$DISENO), "No Registrado")
-base_completa$DISENO[is.na(base_completa$DISENO)] <-
-  rep("No Registrado", times = length(base_completa$DISENO[is.na(base_completa$DISENO)]))
-```
-
-```{r}
-#base_completa <- na.omit(base_completa)
-#write.csv(base_completa, "Base_Completa_NAomit.csv", fileEncoding = "UTF-8",
-#          row.names = F)
-```
 
 
-
-## PARA COMUNA
+### PARA COMUNA
 
 ```{r}
 set.seed(120120)
@@ -442,14 +474,27 @@ Como solo son 6 NA en esta variable, se decide omitirlos
 base_completa <- na.omit(base_completa)
 ```
 
+
 # BASE COMPLETA CON NA IMPUTADOS
 
 ```{r}
+base_completa <- base_completa[!(base_completa$COMUNA %in% c('Corregimiento de San Cristobal',
+                                                             'Corregimiento de San Antonio de Prado',
+                                                             'Corregimiento de Santa Elena',
+                                                             'Corregimiento de Altavista',
+                                                             'Corregimiento de San Sebastian de Palmitas')), ]
+base_completa$COMUNA <- as.character(base_completa$COMUNA)
+base_completa$COMUNA <- as.factor(base_completa$COMUNA)
+
+base_completa$BARRIO <- as.character(base_completa$BARRIO)
+base_completa$BARRIO <- as.factor(base_completa$BARRIO)
+
 write.csv(base_completa, "Base_Completa_NAimp.csv", fileEncoding = "UTF-8",
-          row.names = F)
+          row.names = F) 
 ```
 
 
+# Arreglo de Fechas
 
 
 
