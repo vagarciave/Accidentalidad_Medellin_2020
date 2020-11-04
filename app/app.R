@@ -68,10 +68,10 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
 
 
 
-datos <- read.csv("https://raw.githubusercontent.com/vagarciave/Project_x/master/modelo/Base_Completa_NAimp.csv", encoding = 'UTF-8', stringsAsFactors=T)
+datos <- read.csv("C:/Users/Usuario/Documents/GitHub/Project_x/modelo/Base_Completa_NAimp.csv", encoding = 'UTF-8', stringsAsFactors=T)
 datos$FECHA <- as.Date(datos$FECHA) 
 datos <- subset( datos, select = -c(DIA, MES, PERIODO, HORA) )
-datos <- datos[sample(1:dim(datos)[1],1000),]
+# datos <- datos[sample(1:dim(datos)[1],1000),]
 
 # Define server function  
 server <- function(input, output) {
