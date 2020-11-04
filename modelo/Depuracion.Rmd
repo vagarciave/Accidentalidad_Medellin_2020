@@ -108,10 +108,10 @@ Eliminando variables innecesarias:
 ```{r}
 base_completa <- base_completa %>%
   select(OBJECTID, CLASE, GRAVEDAD, COMUNA, BARRIO, DISENO,
-         LATITUD, LONGITUD, FECHA, DIA, MES, PERIODO, HORA, DIA_NOMBRE)
+         LATITUD, LONGITUD, FECHA, DIA, MES, PERIODO, DIA_NOMBRE)
 ```
 
-Por lo tanto, las variables de interés que se usan en este proyecto son las siguentes:
+Por lo tanto, las variables de interés que se usan en este proyecto son las siguientes:
 
 - OBJECTID: Id de cada incidente.+
 - CLASE: Tipo de accidente
@@ -125,7 +125,6 @@ Por lo tanto, las variables de interés que se usan en este proyecto son las sig
 - DIA: Día del mes en el que ocurre el incidente
 - MES: Mes del incidente en número (del 1 al 12)
 - PERIODO: Año del incidente.
-- HORA: Hora del incidente.
 - DIA_NOMBRE: Día de la semana en el que ocurre el incidente
 
 ## Limpieza de datos
@@ -296,8 +295,21 @@ base_completa$CLASE <- gsub(pattern = "Caida de Ocupante", replacement = "Caida 
                          x = base_completa$CLASE)
 
 base_completa$CLASE <- as.factor(base_completa$CLASE)
+```
+
+Se elimina la observación con CLASE =  "Choque y Atropello" ya que solo hay una.
+
+```{r}
+base_completa %>% group_by(CLASE) %>% summarise(n = n())
+```
+
+```{r}
+base_completa <- base_completa[!(base_completa$CLASE == "Choque y Atropello"), ]
+base_completa$CLASE <- as.character(base_completa$CLASE)
+base_completa$CLASE <- as.factor(base_completa$CLASE)
 levels(base_completa$CLASE)
 ```
+
 
 ### Para GRAVEDAD
 
@@ -489,6 +501,11 @@ base_completa$COMUNA <- as.factor(base_completa$COMUNA)
 base_completa$BARRIO <- as.character(base_completa$BARRIO)
 base_completa$BARRIO <- as.factor(base_completa$BARRIO)
 
+base_completa$FECHA <- as.Date(base_completa$FECHA)
+```
+
+
+```{r}
 write.csv(base_completa, "Base_Completa_NAimp.csv", fileEncoding = "UTF-8",
           row.names = F) 
 ```
