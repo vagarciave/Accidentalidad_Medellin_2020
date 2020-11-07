@@ -1,0 +1,519 @@
+---
+title: "Depuracion"
+author: "Jaime Andres Molina Correa"
+date: "21/10/2020"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r, include=FALSE}
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  ifelse(options$size != "normalsize", paste0("\n \\", options$size,"\n\n", x, "\n\n \\normalsize"), x)
+})
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', size="footnotesize",
+                      message = F)
+```
+
+```{r, message=FALSE, warning=F}
+library(stringr)
+library(roperators)
+library(dplyr)
+library(caret)
+library(class)
+```
+
+## Lectura de las bases de datos
+
+```{r}
+incidentes2014 <- read.csv('Incidentes_georreferenciados_2014.csv', sep = ',', header = T,
+                           stringsAsFactors = T, encoding = "UTF-8",
+                           na.strings=c(""," ","NA"))
+
+incidentes2015 <- read.csv('Incidentes_georreferenciados_2015.csv', sep = ',', header = T,
+                           stringsAsFactors = T, encoding = "UTF-8",
+                           na.strings=c(""," ","NA"))
+
+incidentes2016 <- read.csv('Incidentes_georreferenciados_2016.csv', sep = ',', header = T,
+                           stringsAsFactors = T, encoding = "UTF-8",
+                           na.strings=c(""," ","NA"))
+
+incidentes2017 <- read.csv('Incidentes_georreferenciados_2017.csv', sep = ',', header = T,
+                           stringsAsFactors = T, encoding = "UTF-8",
+                           na.strings=c(""," ","NA"))
+
+incidentes2018 <- read.csv('Incidentes_georreferenciados_2018.csv', sep = ',', header = T,
+                           stringsAsFactors = T, encoding = "UTF-8",
+                           na.strings=c(""," ","NA"))
+```
+
+Se unen las bases de datos de 2014, 2015, 2016, 2017 y 2018.
+
+```{r}
+base_completa <- incidentes2014 %>% union(incidentes2015) %>%
+  union(incidentes2016) %>% union(incidentes2017) %>%
+  union(incidentes2018)
+
+colnames(base_completa)[1] <- gsub('X.U.FEFF.','',colnames(base_completa)[1])
+
+# Se remueven las bases innecesarias.
+remove(incidentes2014, incidentes2015, incidentes2016, incidentes2017, incidentes2018)
+```
+
+Variables:
+
+- X: Componente de coordenada.
+- Y: Componente de coordenada.
+- OBJECTID: Id de cada incidente.
+- RADICADO: Código emitido por la secretaría de movilidad de Medellín.
+- FECHA: Fecha del incidente.
+- HORA: Hora del incidente.
+- DIA: Día del mes en el que ocurre el incidente
+- PERIODO: Año del incidente.
+- CLASE: Tipo de accidente
+- DIRECCION.
+- DIRECCION_ENC.
+- CBML: Código de ubicación del predio en la ciudad.
+- TIPO_GEOCOD: Tipo de 
+- GRAVEDAD: repercusiones del accidente
+- BARRIO.
+- COMUNA.
+- DISENO: clasificación del lugar del accidente.
+- DIA_NOMBRE: Día de la semana en el que ocurre el incidente
+- MES: Mes del incidente en número (del 1 al 12)
+- MES_NOMBRE: Mes del incidente
+- X_MAGNAMED: Componente de coordenada
+- Y_MAGNAMED: Componente de coordenada
+- LONGITUD: Componente de coordenada
+- LATITUD: Componente de coordenada
+
+
+Se deciden eliminar las variables "X", "Y", "X_MAGNAMED" y "Y_MAGNAMED" ya que cumplen la misma función que las variables "LONGITUD" y "LATITUD".
+
+También se elimina la variable "RADICADO" ya que sirve para identificar a un respectivo incidente, al igual que la variable "OBJECTID"
+
+Se elimina la variable "MES_NOMBRE" ya que es redundante el la base de datos, debido a que se encuentra la misma información variable "MES". Además ponerle los nombres a partir de la variable "MES" traería un aumento al coste computacional innecesario.
+
+También se decide eliminar las variables "DIRECCION", "DIRECCION_ENC", "CBML",  ya no serán de utilidad en el modelo.
+
+Se elimina también la variable "TIPO_GEOCOD" 
+
+Eliminando variables innecesarias:
+
+```{r}
+base_completa <- base_completa %>%
+  select(OBJECTID, CLASE, GRAVEDAD, COMUNA, BARRIO, DISENO,
+         LATITUD, LONGITUD, FECHA, DIA, MES, PERIODO, DIA_NOMBRE)
+```
+
+Por lo tanto, las variables de interés que se usan en este proyecto son las siguientes:
+
+- OBJECTID: Id de cada incidente.+
+- CLASE: Tipo de accidente
+- GRAVEDAD: repercusiones del accidente
+- COMUNA.
+- BARRIO.
+- DISENO: clasificación del lugar del accidente.
+- LATITUD: Componente de coordenada
+- LONGITUD: Componente de coordenada
+- FECHA: Fecha del incidente.
+- DIA: Día del mes en el que ocurre el incidente
+- MES: Mes del incidente en número (del 1 al 12)
+- PERIODO: Año del incidente.
+- DIA_NOMBRE: Día de la semana en el que ocurre el incidente
+
+## Limpieza de datos
+
+### Para COMUNA
+
+La variable COMUNA debe tener las comunas urbanas de Medellín y sus corregimientos.
+
+Se sabe que en Medellín hay 16 comunas urbanas y 5 corregimientos, ambos están compuestos por barrios, por lo que la variable debería tener 16 + 5 = 21 niveles. Pero al observar los niveles de la variable "COMUNA" en el conjunto de entrenamiento, se evidencian 84 comunas, por lo cual se decide buscar las razones de esto y tratar de corregirlo.
+
+**Comunas:** Popular, Santa Cruz, Manrique, Aranjuez, Castilla, Doce de Octubre, Robledo, Villa Hermosa, Buenos Aires, La Candelaria, Laureles-Estadio, La América, San Javier, El Poblado, Guayabal, Belén.
+
+**Corregimientos:** Corregimiento de San Cristóbal, Corregimiento de San Antonio de Prado, Corregimiento de Santa Elena, Corregimiento de Altavista, Corregimiento de San Sebastián de Palmitas.
+
+```{r}
+# Número de comunas en el conjunto de entrenamiento
+length(levels(base_completa$COMUNA))
+```
+
+A continuación se observan todas las comunas diferentes a las mencionadas anteriormente
+
+```{r}
+base_completa %>% filter(!(COMUNA %in% c('Popular', 'Santa Cruz', 'Manrique', 'Aranjuez',
+                                'Castilla', 'Doce de Octubre', 'Robledo', 'Villa Hermosa',
+                                'Buenos Aires', 'La Candelaria', 'Laureles Estadio',
+                                'La América', 'San Javier', 'El Poblado', 'Guayabal',
+                                'Belén', 'Corregimiento de San Cristóbal',
+                                'Corregimiento de San Antonio de Prado',
+                                'Corregimiento de Santa Elena', 'Corregimiento de Altavista',
+                                'Corregimiento de San Sebastián de Palmitas', NA))) %>% count(COMUNA, BARRIO, sort = T) 
+```
+
+Uno de los posibles problemas es que la persona encargada de digitar los datos se confundió entre las variables "COMUNA" y "BARRIO". Un ejemplo de esto es el barrio Boston que aparece como comuna en 2 observaciones, con su respectiva comuna (La candelaria) en barrio.
+
+```{r, rows.print = 1, cols.print = 3}
+# Comuna y barrio como debería ser
+base_completa[base_completa$BARRIO %in% 'Boston', ] %>% count(COMUNA, BARRIO)
+
+# Comuna y barrio truncados
+(base_completa[base_completa$COMUNA %in% 'Boston', ] %>% count(COMUNA, BARRIO))
+```
+
+Por lo que se decide ponerlas en su posición correcta.
+
+```{r}
+base_completa[!(base_completa$COMUNA %in% c('Popular', 'Santa Cruz', 'Manrique',
+                                'Aranjuez', 'Castilla', 'Doce de Octubre', 'Robledo',
+                                'Villa Hermosa', 'Buenos Aires', 'La Candelaria',
+                                'Laureles Estadio','La América', 'San Javier','El Poblado',
+                                'Guayabal','Belén', 'Corregimiento de San Cristóbal',
+                                'Corregimiento de San Antonio de Prado',
+                                'Corregimiento de Santa Elena','Corregimiento de Altavista',
+                                'Corregimiento de San Sebastián de Palmitas', NA, 'In', 
+                                'AU', 'SN')), ] <- base_completa %>% 
+  filter(!(COMUNA %in% c('Popular', 'Santa Cruz', 'Manrique',
+                                'Aranjuez', 'Castilla', 'Doce de Octubre', 'Robledo',
+                                'Villa Hermosa', 'Buenos Aires', 'La Candelaria',
+                                'Laureles Estadio','La América', 'San Javier','El Poblado',
+                                'Guayabal','Belén', 'Corregimiento de San Cristóbal',
+                                'Corregimiento de San Antonio de Prado',
+                                'Corregimiento de Santa Elena', 'Corregimiento de Altavista',
+                                'Corregimiento de San Sebastián de Palmitas', NA, 'In', 
+                                'AU', 'SN'))) %>%
+  mutate(temp_barrio = COMUNA, COMUNA = BARRIO, BARRIO = temp_barrio) %>%
+  mutate(temp_barrio = NULL)
+```
+
+Se decide quitar lo acentos para evitar posibles problemas:
+
+```{r}
+base_completa$COMUNA <- as.character(base_completa$COMUNA)
+base_completa$COMUNA <- iconv(base_completa$COMUNA,from="UTF-8",to="ASCII//TRANSLIT")
+base_completa$COMUNA <- as.factor(base_completa$COMUNA)
+```
+
+A continuación se observan las comunas diferentes a las planteadas por la ciudad de Medellín.
+
+```{r}
+base_completa %>% filter(!(COMUNA %in% c('Popular', 'Santa Cruz', 'Manrique', 'Aranjuez',
+                                'Castilla', 'Doce de Octubre', 'Robledo', 'Villa Hermosa',
+                                'Buenos Aires', 'La Candelaria', 'Laureles Estadio',
+                                'La America', 'San Javier', 'El Poblado', 'Guayabal',
+                                'Belen', 'Corregimiento de San Cristobal',
+                                'Corregimiento de San Antonio de Prado',
+                                'Corregimiento de Santa Elena', 'Corregimiento de Altavista',
+                                'Corregimiento de San Sebastian de Palmitas', NA))) %>% count(COMUNA, BARRIO, sort = T)
+```
+
+
+Se deciden marcar estas columnas como NA
+
+```{r}
+base_completa$COMUNA[base_completa$COMUNA %in% c("In", "AU", "SN", "0")] <- NA
+base_completa$BARRIO[base_completa$BARRIO %in% c("Inst", "AUC1", "AUC2", "SN", "0")] <- NA
+base_completa$COMUNA <- factor(base_completa$COMUNA)
+```
+
+
+### Para BARRIO
+
+En la base de entrenamiento
+
+Se observa que hay muchos barrios que tienen valores diferentes en la base de datos aunque son el mismo, un ejemplo de esto es el barrio Berlin de la comuna Aranjuez, el cual aparece 647 veces con el nombre de "Berlin" y 15 veces con el nombre de "Berlín". Por lo tanto se decide arreglar este problema.
+
+```{r}
+length(levels(base_completa$BARRIO))
+
+# Número de barrios en el conjunto de entrenamiento
+base_completa[base_completa$BARRIO %in% c('Berlin', 'Berlín'), ] %>% count(COMUNA, BARRIO)
+```
+Se quitan las tildes
+
+```{r}
+base_completa$BARRIO <- as.character(base_completa$BARRIO)
+base_completa$BARRIO <- iconv(base_completa$BARRIO,from="UTF-8",to="ASCII//TRANSLIT")
+base_completa$BARRIO <- as.factor(base_completa$BARRIO)
+```
+
+
+
+También se detecta que los Barrios que contienen algunos problemas de espacios, algunos ejemplos:
+
+```{r}
+# Algunos ejemplos
+base_completa[base_completa$BARRIO %in% c("Asomadera No. 1", "Asomadera No.1", "Aures No. 2", "Aures No.2", "Bombona No. 1", "Bombona No.1", "B. Cerro  El Volador", "B. Cerro El Volador"), ] %>% count(COMUNA, BARRIO)
+```
+
+Solución del problema
+
+```{r}
+base_completa$BARRIO <- str_trim(base_completa$BARRIO) # Elimina espacios antes y despues (no en el medio)
+
+base_completa$BARRIO <- gsub(pattern = "  ", replacement = " ",
+                         x = base_completa$BARRIO)
+
+base_completa$BARRIO <- gsub(pattern = "   ", replacement = " ",
+                         x = base_completa$BARRIO)
+
+base_completa$BARRIO <- gsub(pattern = "No. ", replacement = "No.",
+                         x = base_completa$BARRIO)
+
+base_completa$BARRIO <- gsub(pattern = "Barrios", replacement = "Barrio",
+                         x = base_completa$BARRIO)
+
+base_completa$BARRIO <- gsub(pattern = "de La Iguana", replacement = "de la Iguana",
+                         x = base_completa$BARRIO)
+
+base_completa$BARRIO <- gsub(pattern = "de Los Angeles", replacement = "de los Angeles",
+                         x = base_completa$BARRIO)
+
+base_completa$BARRIO <- gsub(pattern = "Villa Lilliam", replacement = "Villa Liliam",
+                         x = base_completa$BARRIO)
+
+base_completa$BARRIO <- factor(base_completa$BARRIO)
+
+length(levels(base_completa$BARRIO))
+```
+
+### Para CLASE
+
+```{r}
+base_completa$CLASE <- as.character(base_completa$CLASE)
+base_completa$CLASE <- iconv(base_completa$CLASE,from="UTF-8",to="ASCII//TRANSLIT")
+
+base_completa$CLASE <- str_trim(base_completa$CLASE) # Elimina espacios antes y despues (no en el medio)
+
+base_completa$CLASE <- gsub(pattern = "Caida de Ocupante", replacement = "Caida Ocupante",
+                         x = base_completa$CLASE)
+
+base_completa$CLASE <- as.factor(base_completa$CLASE)
+```
+
+Se elimina la observación con CLASE =  "Choque y Atropello" ya que solo hay una.
+
+```{r}
+base_completa %>% group_by(CLASE) %>% summarise(n = n())
+```
+
+```{r}
+base_completa <- base_completa[!(base_completa$CLASE == "Choque y Atropello"), ]
+base_completa$CLASE <- as.character(base_completa$CLASE)
+base_completa$CLASE <- as.factor(base_completa$CLASE)
+levels(base_completa$CLASE)
+```
+
+
+### Para GRAVEDAD
+
+```{r}
+levels(base_completa$GRAVEDAD)
+```
+
+### Para DISENO
+
+```{r}
+base_completa$DISENO <- as.character(base_completa$DISENO)
+base_completa$DISENO <- iconv(base_completa$DISENO,from="UTF-8",to="ASCII//TRANSLIT")
+base_completa$DISENO <- as.factor(base_completa$DISENO)
+levels(base_completa$DISENO)
+```
+
+### Para DIA_NOMBRE
+
+```{r}
+base_completa$DIA_NOMBRE <- as.character(base_completa$DIA_NOMBRE)
+base_completa$DIA_NOMBRE <- iconv(base_completa$DIA_NOMBRE,from="UTF-8",to="ASCII//TRANSLIT")
+
+base_completa$DIA_NOMBRE <- str_trim(base_completa$DIA_NOMBRE) # Elimina espacios antes y despues (no en el medio)
+
+base_completa$DIA_NOMBRE <- as.factor(base_completa$DIA_NOMBRE)
+
+levels(base_completa$DIA_NOMBRE)
+```
+
+
+# IMPUTACIÓN
+
+En los faltantes de la variable DISENO, se decide usar el nombre de "No Registrado".
+
+```{r}
+levels(base_completa$DISENO) <- c(levels(base_completa$DISENO), "No Registrado")
+base_completa$DISENO[is.na(base_completa$DISENO)] <-
+  rep("No Registrado", times = length(base_completa$DISENO[is.na(base_completa$DISENO)]))
+```
+
+## BASE REMOVIENDO FALTANTES
+
+```{r, eval=FALSE}
+base_completa <- na.omit(base_completa)
+base_completa <- base_completa[!(base_completa$COMUNA %in% c('Corregimiento de San Cristobal',
+                                                             'Corregimiento de San Antonio de Prado',
+                                                             'Corregimiento de Santa Elena',
+                                                             'Corregimiento de Altavista',
+                                                             'Corregimiento de San Sebastian de Palmitas')), ]
+base_completa$COMUNA <- as.character(base_completa$COMUNA)
+base_completa$COMUNA <- as.factor(base_completa$COMUNA)
+
+base_completa$BARRIO <- as.character(base_completa$BARRIO)
+base_completa$BARRIO <- as.factor(base_completa$BARRIO)
+
+write.csv(base_completa, "Base_Completa_NAomit.csv", fileEncoding = "UTF-8",
+          row.names = F)
+```
+
+## BASE IMPUTANDO FALTANTES
+
+A continuación se muestran la variables y sus datos faltantes en la base base_completa
+
+```{r}
+sort(sapply(base_completa, function(y) sum(length(which(is.na(y))))), decreasing = T)
+```
+
+Dado que representan una cantidad importante de la base de datos se procede a depurar mediante diferentes métodos.
+
+
+
+### PARA COMUNA
+
+```{r}
+set.seed(120120)
+trControl <- trainControl(method  = "cv",
+                          number  = 10)
+fit <- train(COMUNA ~ scale(LATITUD) + scale(LONGITUD),
+             method     = "knn",
+             tuneGrid   = expand.grid(k = seq(1, 20, 3)),
+             trControl  = trControl,
+             metric     = "Accuracy",
+             data       = base_completa[base_completa$PERIODO != 2018, ],
+             na.action = "na.omit")
+
+plot(fit)
+```
+
+```{r}
+knnPredict <- predict(fit,newdata = base_completa[base_completa$PERIODO == 2018, ],
+                      na.action = "na.omit")
+
+confu1 <- confusionMatrix(knnPredict, base_completa[base_completa$PERIODO == 2018, "COMUNA"])
+confu1$overall
+```
+
+Reemplazando los NA:
+
+```{r}
+base_completa$COMUNA[is.na(base_completa$COMUNA)] <- 
+  predict(fit, newdata = base_completa[is.na(base_completa$COMUNA), ])
+```
+
+```{r}
+base_completa %>% count(COMUNA, sort = T)
+```
+
+### PARA BARRIO
+
+```{r}
+fit2 <- knn.cv(train = cbind(scale(base_completa[!is.na(base_completa$BARRIO),
+                                              c("LATITUD", "LONGITUD")]),
+                          base_completa[!is.na(base_completa$BARRIO), "COMUNA"]),
+               k = 1,
+               cl = base_completa[!is.na(base_completa$BARRIO), "BARRIO"],
+               use.all = T)
+```
+
+```{r}
+confu2 <- table(factor(fit2), base_completa[!is.na(base_completa$BARRIO), "BARRIO"])
+dim(confu2)
+```
+
+```{r}
+colnames(confu2)[-which(colnames(confu2) %in% rownames(confu2))]
+```
+```{r}
+confu2 <- confu2[, !(colnames(confu2) %in% c("9086", "El Plan", "El Uvito",
+                                             "Piedra Gorda", "Suburbano Potrerito",
+                                             "Travesias", "Volcana Guayabal"))]
+dim(confu2)
+```
+
+Precisión:
+
+```{r}
+sum(diag(confu2)) / sum(confu2)
+```
+
+Por lo tanto se decide usar este modelo para predecir los barrios faltantes:
+
+```{r}
+fit3 <- knn(train = cbind(scale(base_completa[!is.na(base_completa$BARRIO),
+                                              c("LATITUD", "LONGITUD")]),
+                          base_completa[!is.na(base_completa$BARRIO), "COMUNA"]),
+            test = cbind(scale(base_completa[is.na(base_completa$BARRIO),c("LATITUD", "LONGITUD")]),
+                          base_completa[is.na(base_completa$BARRIO), "COMUNA"]),
+            k = 1,
+            cl = base_completa[!is.na(base_completa$BARRIO), "BARRIO"],
+            use.all = T)
+```
+
+**PELIGRO**, ninguno de estos barrios pertenece al corregimiento san sebastian de palmitas
+
+```{r}
+levels(factor(fit3))
+```
+
+Reemplazando los NA
+
+```{r}
+base_completa$BARRIO[is.na(base_completa$BARRIO)] <- factor(fit3)
+```
+
+### PARA CLASE
+
+```{r}
+sort(sapply(base_completa, function(y) sum(length(which(is.na(y))))), decreasing = T)
+```
+
+Como solo son 6 NA en esta variable, se decide omitirlos
+
+```{r}
+base_completa <- na.omit(base_completa)
+```
+
+
+# BASE COMPLETA CON NA IMPUTADOS
+
+```{r}
+base_completa <- base_completa[!(base_completa$COMUNA %in% c('Corregimiento de San Cristobal',
+                                                             'Corregimiento de San Antonio de Prado',
+                                                             'Corregimiento de Santa Elena',
+                                                             'Corregimiento de Altavista',
+                                                             'Corregimiento de San Sebastian de Palmitas')), ]
+base_completa$COMUNA <- as.character(base_completa$COMUNA)
+base_completa$COMUNA <- as.factor(base_completa$COMUNA)
+
+base_completa$BARRIO <- as.character(base_completa$BARRIO)
+base_completa$BARRIO <- as.factor(base_completa$BARRIO)
+
+base_completa$FECHA <- as.Date(base_completa$FECHA)
+```
+
+
+```{r}
+write.csv(base_completa, "Base_Completa_NAimp.csv", fileEncoding = "UTF-8",
+          row.names = F) 
+```
+
+
+# Arreglo de Fechas
+
+
+
+
+
