@@ -26,6 +26,7 @@ library(roperators)
 library(dplyr)
 library(caret)
 library(class)
+library(lubridate)
 ```
 
 ## Lectura de las bases de datos
@@ -64,6 +65,8 @@ colnames(base_completa)[1] <- gsub('X.U.FEFF.','',colnames(base_completa)[1])
 # Se remueven las bases innecesarias.
 remove(incidentes2014, incidentes2015, incidentes2016, incidentes2017, incidentes2018)
 ```
+
+
 
 Variables:
 
@@ -225,7 +228,7 @@ base_completa$COMUNA <- factor(base_completa$COMUNA)
 
 ### Para BARRIO
 
-En la base de entrenamiento
+
 
 Se observa que hay muchos barrios que tienen valores diferentes en la base de datos aunque son el mismo, un ejemplo de esto es el barrio Berlin de la comuna Aranjuez, el cual aparece 647 veces con el nombre de "Berlin" y 15 veces con el nombre de "Berlín". Por lo tanto se decide arreglar este problema.
 
@@ -297,6 +300,7 @@ base_completa$CLASE <- gsub(pattern = "Caida de Ocupante", replacement = "Caida 
 base_completa$CLASE <- as.factor(base_completa$CLASE)
 ```
 
+
 Se elimina la observación con CLASE =  "Choque y Atropello" ya que solo hay una.
 
 ```{r}
@@ -304,7 +308,7 @@ base_completa %>% group_by(CLASE) %>% summarise(n = n())
 ```
 
 ```{r}
-base_completa <- base_completa[!(base_completa$CLASE == "Choque y Atropello"), ]
+base_completa$CLASE[base_completa$CLASE == "Choque y Atropello"] <- NA
 base_completa$CLASE <- as.character(base_completa$CLASE)
 base_completa$CLASE <- as.factor(base_completa$CLASE)
 levels(base_completa$CLASE)
@@ -342,6 +346,7 @@ levels(base_completa$DIA_NOMBRE)
 
 # IMPUTACIÓN
 
+
 En los faltantes de la variable DISENO, se decide usar el nombre de "No Registrado".
 
 ```{r}
@@ -377,6 +382,11 @@ A continuación se muestran la variables y sus datos faltantes en la base base_c
 sort(sapply(base_completa, function(y) sum(length(which(is.na(y))))), decreasing = T)
 ```
 
+```{r}
+base_completa[is.na(base_completa$OBJECTID), ]
+```
+
+
 Dado que representan una cantidad importante de la base de datos se procede a depurar mediante diferentes métodos.
 
 
@@ -395,8 +405,10 @@ fit <- train(COMUNA ~ scale(LATITUD) + scale(LONGITUD),
              data       = base_completa[base_completa$PERIODO != 2018, ],
              na.action = "na.omit")
 
-plot(fit)
+p <- plot(fit, main = "Precisión vs Número de vecinos (1, 4, 7, 10, 13, 16 y 19)")
+p
 ```
+
 
 ```{r}
 knnPredict <- predict(fit,newdata = base_completa[base_completa$PERIODO == 2018, ],
@@ -436,6 +448,7 @@ dim(confu2)
 ```{r}
 colnames(confu2)[-which(colnames(confu2) %in% rownames(confu2))]
 ```
+
 ```{r}
 confu2 <- confu2[, !(colnames(confu2) %in% c("9086", "El Plan", "El Uvito",
                                              "Piedra Gorda", "Suburbano Potrerito",
@@ -462,7 +475,6 @@ fit3 <- knn(train = cbind(scale(base_completa[!is.na(base_completa$BARRIO),
             use.all = T)
 ```
 
-**PELIGRO**, ninguno de estos barrios pertenece al corregimiento san sebastian de palmitas
 
 ```{r}
 levels(factor(fit3))
@@ -474,13 +486,14 @@ Reemplazando los NA
 base_completa$BARRIO[is.na(base_completa$BARRIO)] <- factor(fit3)
 ```
 
+
 ### PARA CLASE
 
 ```{r}
 sort(sapply(base_completa, function(y) sum(length(which(is.na(y))))), decreasing = T)
 ```
 
-Como solo son 6 NA en esta variable, se decide omitirlos
+Como solo son 7 NA en esta variable, se decide omitirlos
 
 ```{r}
 base_completa <- na.omit(base_completa)
@@ -504,7 +517,15 @@ base_completa$BARRIO <- as.factor(base_completa$BARRIO)
 base_completa$FECHA <- as.Date(base_completa$FECHA)
 ```
 
-### Agregar variable DIA_FESTIVO y SEMANA_MES
+# Arreglo de Fechas
+
+```{r}
+# Crear orden para los días
+base_completa$DIA_NOMBRE <- factor(base_completa$DIA_NOMBRE,levels = c('LUNES','MARTES','MIERCOLES', 'JUEVES','VIERNES','SABADO','DOMINGO'))
+# Solo la fecha, sin hora
+base_completa$FECHA <- sapply(base_completa$FECHA, function(x) substr(x,1,10))
+```
+
 
 ```{r}
 #  Vector con fechas de dias festivos
@@ -535,21 +556,16 @@ base_completa$FECHA <- as.Date(base_completa$FECHA)
     '2018-07-20','2018-08-07', '2018-08-20','2018-10-15','2018-11-05','2018-11-11',
     '2018-12-08','2018-12-25'
     ))
+dia_festivo <- ifelse(ymd(base_completa$FECHA) %in% festivos,1,0)
+
+# Crear variable de dia festivo
+base_completa$DIA_FESTIVO <- dia_festivo
 ```
 
 
 ```{r}
-base_completa$FECHA <- sapply(base_completa$FECHA, function(x) substr(x,1,10))
-base_completa <- base_completa %>% 
-  mutate(SEMANA_MES = isoweek(FECHA) - isoweek(ceiling_date(FECHA, "month") - months(1)) + 1,
-         DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
+write.csv(base_completa, "Base_definitiva.csv", fileEncoding = "UTF-8",
+          row.names = F)
 ```
-
-
-```{r}
-write.csv(base_completa, "Base_Completa_NAimp.csv", fileEncoding = "UTF-8",
-          row.names = F) 
-```
-
 
 

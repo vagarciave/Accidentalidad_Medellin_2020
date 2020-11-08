@@ -15,7 +15,7 @@ library(plotly)
 
 ```{r}
 # lectura base de datos
-datos <- read.csv("https://raw.githubusercontent.com/vagarciave/Project_x/master/modelo/Base_Completa_NAimp.csv", encoding = 'UTF-8', stringsAsFactors=FALSE)
+datos <- read.csv("https://raw.githubusercontent.com/vagarciave/Project_x/master/modelo/Base_Definitiva.csv", encoding = 'UTF-8', stringsAsFactors=FALSE)
 ```
 
 

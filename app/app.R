@@ -68,7 +68,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
 
 
 
-datos <- read.csv("C:/Users/Usuario/Documents/GitHub/Project_x/modelo/Base_Completa_NAimp.csv", encoding = 'UTF-8', stringsAsFactors=T)
+datos <- read.csv("Base_Definiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
 datos$FECHA <- as.Date(datos$FECHA) 
 datos <- subset( datos, select = -c(DIA, MES, PERIODO, HORA) )
 # datos <- datos[sample(1:dim(datos)[1],1000),]

@@ -67,7 +67,7 @@ La base de datos original cuenta con las siguientes variables:
 
 Se deciden eliminar las variables "X", "Y", "X_MAGNAMED" y "Y_MAGNAMED" ya que cumplen la misma función que las variables "LONGITUD" y "LATITUD". También se elimina la variable "RADICADO" ya que sirve para identificar a un respectivo incidente, al igual que la variable "OBJECTID". Se elimina la variable "MES_NOMBRE" ya que es redundante el la base de datos, debido a que se encuentra la misma información en la variable "MES". Además ponerle los nombres a partir de la variable "MES" traería un aumento al coste computacional innecesario. También se decide eliminar las variables "DIRECCION", "DIRECCION_ENC", "CBML", "TIPO_GEOCOD" y "HORA" ya no serán de utilidad en el modelo.
 
-Además se crean otras dos variables "SEMANA" y "FECHA_ESPECIAL". Para poder analizar el número de accidentes por semana y en días féstivos y demás fechas especiales. Por lo tanto, las variables de interés que se usan en este proyecto son las siguientes:
+Además se crean otras dos variables "SEMANA" y "DIA_FESTIVO". Para poder analizar el número de accidentes por semana y en días féstivos y demás fechas especiales. Por lo tanto, las variables de interés que se usan en este proyecto son las siguientes:
 
 - OBJECTID: Id de cada incidente.
 - CLASE: Tipo de accidente
@@ -83,7 +83,7 @@ Además se crean otras dos variables "SEMANA" y "FECHA_ESPECIAL". Para poder ana
 - PERIODO: Año del incidente.
 - DIA_NOMBRE: Día de la semana en el que ocurre el incidente
 - SEMANA.
-- FECHA_ESPECIAL.
+- DIA_FESTIVO.
 
 Definido lo anterior, se realiza una limpieza en la base de datos, ya que hay registros u observaciones que están mal escritos o simplemente no deberían estar. A continuación se explican los cambios realizados.
 
@@ -138,12 +138,37 @@ Como la variable CLASE solo tiene 7 datos faltantes, se decide eliminar estas ob
 
 Primero se decide realizar la imputación en la variable COMUNA, se utiliza un modelo knn (k-Nearest Neighbour) con variable respuesta COMUNA y como predictoras las variables LATITUD y LONGITUD escaladas. Dado que este es un modelo que usa la distancia euclidiana para clasificar observaciones, se piensa que funcionaría bien para clasificar a las comunas teniendo su ubicación en latitud y longitud.
 
-Para ajustar el modelo se usó la función *train* del paquete *caret*, usando K-Fold CV con $K=10$ y el número de vecinos igual a 1, 4, 7, 10, 13, 16 y 19. Se usó la precisión del modelo como función de optimización. Los resultados obtenidos son los siguientes:
+Para ajustar el modelo se usó la función *train* del paquete *caret*, usando K-Fold CV con $K=10$ y el número de vecinos igual a 1, 4, 7, 10, 13, 16 y 19. Se entrenó el modelo usando los años de 2014 a 2017 y se validó con el año 2018. Se usó la precisión de prueba del modelo como función de optimización. Los resultados obtenidos son los siguientes:
 
-![Caption for the picture.](/path/to/image.png)
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Accuracy & Kappa  & AccuracyLower & AccuracyUpper & AccuracyNull & AccuracyPValue \\
+\hline
+0.9985 & 0.9984 & 0.9981 & 0.9989 & 0.2062 & 0 \\
+\hline         
+\end{tabular}
+\end{center}
+\end{table}
 
+![precision comuna](precision_comuna_NA.pdf){#id .class width=50% height=50%}
 
+Los resultados se consideran buenos y se decide realizar el reemplazo de los valores faltantes de COMUNA por medio de este modelo.
 
+\newpage
+
+### Para BARRIO
+
+Se decide usar un modelo knn (k-Nearest Neighbour) con variable respuesta BARRIO y como predictoras las variables LATITUD y LONGITUD escaladas y COMUNA.
+
+Dado que habían valores de barrios que están en el año 2018 pero no en los demás, no se pudo hacer uso del paquete *caret* ya que presentaba un error al entrenar el modelo, por lo que se decide usar  la función *knn.cv* del paquete *class*, para medir el comportamiento del modelo knn con k = 1 mediante LOOCV, entrenando el modelo con los años de 2014 hasta 2017 y validando el resultado con el año 2018. Se obtiene una precisión de prueba de 0.9975, por lo que se decide usar este modelo para imputar los datos faltantes en BARRIO.
+
+## Base final
+
+Finalmente se decide usar solo las comunas del área urbana de Medellín y dejar a un lado los corregimientos, es decir, solo se tendrán las 16 comunas mencionadas anteriormente en este reporte.
+
+Tras las modificaciones mencionadas, de las 228693 observaciones originales entre las bases de datos del 2014 al 2018, se utilizarán 204002 observaciones en el análisis y construcción de los modelos.
 
 ## Análisis descriptivo
 
