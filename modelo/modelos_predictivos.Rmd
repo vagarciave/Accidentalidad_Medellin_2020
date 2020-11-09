@@ -1,0 +1,94 @@
+---
+title: "Modelos"
+author: "Jaime Andres Molina Correa"
+date: "8/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+datos <- read.csv("Base_definitiva.csv", header = T, stringsAsFactors = T,
+                  encoding = "UTF-8")
+```
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(magrittr)
+library(lubridate)
+library("zoo")
+
+library(lme4)
+```
+
+```{r}
+datos$FECHA <- as.Date(datos$FECHA)
+
+datos$MES_NOMBRE <- paste(datos$PERIODO, datos$MES, sep="-") %>% as.yearmon("%Y-%m")
+
+# Para obtener la inversa se usaría: zoo::as.Date(datos$FECHA, origin="2014-01-01")
+datos$TIEMPO <- as.numeric(as.Date(datos$FECHA)) - as.numeric(as.Date("2014-01-01")) + 1
+```
+
+```{r}
+datos$N_ACCIDENTES <- 1
+datos <- datos %>% spread(CLASE, N_ACCIDENTES, fill = 0)
+```
+
+```{r}
+bd1 <- datos %>% count(COMUNA, PERIODO, FECHA, DIA_FESTIVO, TIEMPO, Atropello, `Caida Ocupante`,
+                       Choque, Incendio, Otro, Volcamiento)
+str(bd1)
+bd1
+
+```
+68,610
+
+```{r}
+test <- bd1[bd1$PERIODO == 2018, ]
+train <- bd1[bd1$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+```{r}
+mod0 <- glmer(n ~ poly(TIEMPO, 1) + (1 + poly(TIEMPO, 1)| COMUNA),
+              data = train, family= poisson())
+mod1 <- glmer(n ~ poly(TIEMPO, 1) + DIA_FESTIVO + (1 + poly(TIEMPO, 1)| COMUNA),
+              data = train, family= poisson())
+mod2 <- glmer(n ~ poly(TIEMPO, 2) + DIA_FESTIVO + (1 + poly(TIEMPO, 1)| COMUNA),
+              data = train, family= poisson())
+mod3 <- glmer(n ~ poly(TIEMPO, 3) + DIA_FESTIVO + (1 + poly(TIEMPO, 1)| COMUNA),
+              data = train, family= poisson())
+anova(mod0, mod1, mod2, mod3)
+```
+
+
+
+```{r}
+MSE <- function(y, y_est) mean((y-y_est)**2)
+y_est <- round(predict(mod1, newdata = test, type = "response"), 0)
+MSE(test$n, y_est)
+
+v <- data.frame(test[,c("COMUNA", "FECHA","n")], y_est)
+v[sample(1:nrow(v), 1000), ]
+```
+```{r}
+
+```
+
+
+
+```{r}
+datos$FECHA <- sapply(datos$FECHA, function(x) substr(x,1,10))
+datos <- datos %>% 
+  mutate(FECHA = ymd(FECHA)) %>%
+  mutate(SEMANA_MES = isoweek(FECHA) - isoweek(ceiling_date(FECHA, "month") - months(1)) + 1)
+```
+
+
+
+
+
