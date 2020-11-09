@@ -515,6 +515,12 @@ base_completa$BARRIO <- as.character(base_completa$BARRIO)
 base_completa$BARRIO <- as.factor(base_completa$BARRIO)
 
 base_completa$FECHA <- as.Date(base_completa$FECHA)
+
+base_completa$GRAVEDAD <- as.character(base_completa$GRAVEDAD)
+base_completa$GRAVEDAD <- gsub(pattern = "SOLO DAÃ‘OS", replacement = "SOLO DAÑOS",
+                         x = base_completa$GRAVEDAD)
+base_completa$GRAVEDAD <- factor(base_completa$GRAVEDAD)
+levels(base_completa$GRAVEDAD)
 ```
 
 # Arreglo de Fechas
