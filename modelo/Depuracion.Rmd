@@ -568,6 +568,16 @@ dia_festivo <- ifelse(ymd(base_completa$FECHA) %in% festivos,1,0)
 base_completa$DIA_FESTIVO <- dia_festivo
 ```
 
+Creacion de la variable semana:
+
+```{r}
+base_completa$FECHA <- sapply(base_completa$FECHA, function(x) substr(x,1,10))
+base_completa <- base_completa %>% 
+  mutate(FECHA = ymd(FECHA)) %>%
+  mutate(SEMANA_MES = isoweek(FECHA) - isoweek(ceiling_date(FECHA, "month") - months(1)) + 1)
+```
+
+Escribir la base de datos:
 
 ```{r}
 write.csv(base_completa, "Base_definitiva.csv", fileEncoding = "UTF-8",
