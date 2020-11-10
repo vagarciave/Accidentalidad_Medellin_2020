@@ -19,6 +19,7 @@ require(dplyr)
 require(tidyr)
 require(lubridate)
 library(readr)
+library(leaflet)
 
 
 # Define UI
@@ -60,7 +61,9 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                                              width=12))
                              ),
                     tabPanel("Prediccion", "This panel is intentionally left blank"),
-                    tabPanel("Agrupamiento", "This panel is intentionally left blank")
+                    tabPanel("Agrupamiento", 
+                             leafletOutput("mymap"),
+                             p())
                     
                 ) # navbarPage
 ) # fluidPage
@@ -68,9 +71,9 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
 
 
 
-datos <- read.csv("Base_Definiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
-datos$FECHA <- as.Date(datos$FECHA) 
-datos <- subset( datos, select = -c(DIA, MES, PERIODO, HORA) )
+library(readr)
+datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
+datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
 # datos <- datos[sample(1:dim(datos)[1],1000),]
 
 # Define server function  
@@ -89,6 +92,17 @@ server <- function(input, output) {
         selection = "multiple",
         style = "bootstrap"
       ))
+    
+    output$mymap <- renderLeaflet({
+      leaflet() %>%
+        addTiles() %>%
+        addMarkers(lat = datos[1:100, "LATITUD"],
+                   lng = datos[1:100, "LONGITUD"], popup = datos[1:100,"FECHA"])
+    })
+    
+    
+    
+    
     
 } # server
 
