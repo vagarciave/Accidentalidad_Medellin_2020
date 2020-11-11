@@ -1,0 +1,147 @@
+---
+title: "Modelos"
+author: "Jaime Andres Molina Correa"
+date: "8/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Se carga la base de datos
+
+```{r}
+datos <- read.csv("Base_definitiva.csv", header = T, stringsAsFactors = T,
+                  encoding = "UTF-8")
+```
+
+Librerías
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(dplyr)
+library(magrittr)
+library(lubridate)
+library("zoo")
+
+library(lme4)
+library(gamlss)
+library(randomForest)
+```
+
+Se agrega la vafiable tiempo y MES_NOMBRE
+```{r}
+datos$FECHA <- as.Date(datos$FECHA)
+
+datos$MES_NOMBRE <- paste(datos$PERIODO, datos$MES, sep="-") %>% as.yearmon("%Y-%m")
+
+# Para obtener la inversa se usaría: zoo::as.Date(datos$FECHA, origin="2014-01-01")
+datos$TIEMPO <- as.numeric(as.Date(datos$FECHA)) - as.numeric(as.Date("2014-01-01")) + 1
+```
+
+```{r}
+datos$N_ACCIDENTES <- 1
+datos <- datos %>% spread(CLASE, N_ACCIDENTES, fill = 0)
+```
+
+```{r}
+bd1 <- datos %>% count(COMUNA, PERIODO, FECHA, DIA_FESTIVO, TIEMPO,
+                       GRAVEDAD, Atropello, `Caida Ocupante`,
+                       Choque, Incendio, Otro, Volcamiento)
+str(bd1)
+bd1
+
+```
+La base tiene 85,981 observaciones 
+
+# Base de entrenamiento y de prueba:
+
+```{r}
+test <- bd1[bd1$PERIODO == 2018, ]
+train <- bd1[bd1$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+# Funcion MSE
+```{r}
+MSE <- function(y, y_est) mean((y-y_est)**2)
+```
+
+
+# Modelos Lineales Generalizados
+
+```{r}
+mod10 <- glm(n ~ TIEMPO + COMUNA, family = poisson, data = train)
+mod11 <- glm(n ~ TIEMPO + COMUNA + DIA_FESTIVO ,
+             family = poisson, data = train)
+mod12 <- glm(n ~ TIEMPO + COMUNA + DIA_FESTIVO + GRAVEDAD,
+             family = poisson, data = train)
+summary(mod12)
+```
+
+Se conserva el modelo 12
+
+```{r}
+y_est12 <- round(predict(mod12, newdata = test, type = "response"), 0)
+MSE(test$n, y_est12)
+```
+
+# Modelos Gamlss
+
+```{r}
+mod21 <- gamlss(n ~ 1, data=train, family=PO) # Poisson
+sup <- formula(~ TIEMPO + COMUNA + DIA_FESTIVO + GRAVEDAD)
+mod21 <- stepGAICAll.A(mod21, trace=F, k=log(nrow(train)),
+                       scope=list(lower=~1, upper=sup))
+summary(mod21)
+```
+
+El modelo 21 obtiene el mismos test_MSE que el modelo 12.
+
+```{r}
+mod22 <- gamlss(n ~ 1, data=train, family=ZIP)
+sup <- formula(~ TIEMPO + COMUNA + DIA_FESTIVO + GRAVEDAD)
+mod22 <- stepGAICAll.A(mod22, trace=F, k=log(nrow(train)),
+                       scope=list(lower=~1, upper=sup),
+                       sigma.scope=list(lower=~1, upper=sup))
+```
+
+
+```{r}
+y_est22 <- round(predict(mod22, newdata = test, type = "response"), 0)
+MSE(test$n, y_est22)
+```
+
+Es mejor el modelo poisson
+
+# Modelos Mixtos
+
+```{r}
+mod31 <- glmer(n ~ TIEMPO + DIA_FESTIVO + GRAVEDAD +
+                 (1 + TIEMPO |COMUNA),
+              data = train, family= poisson())
+```
+
+```{r}
+y_est31 <- round(predict(mod31, newdata = test, type = "response"), 0)
+MSE(test$n, y_est31)
+```
+El mejor hasta el momento, seguido por el glm 12
+
+# Bosques Aleaorios
+
+Ocupa mucho espacio en la memoria
+
+```{r}
+mod41 <- randomForest(n ~ TIEMPO + DIA_FESTIVO + COMUNA,
+                      data = bd1, subset = rownames(train))
+```
+
+```{r}
+y_est41 <- round(predict(mod41, newdata = test), 0)
+MSE(test$n, y_est41)
+```
+
+
+
+
