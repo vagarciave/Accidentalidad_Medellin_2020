@@ -62,8 +62,23 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                              ),
                     tabPanel("Prediccion", "This panel is intentionally left blank"),
                     tabPanel("Agrupamiento", 
-                             leafletOutput("mymap"),
-                             p())
+                             titlePanel("Seleccione el tipo de incidente:"),
+                             
+                             sidebarLayout(
+                               
+                               sidebarPanel(
+                                 actionButton("runif", "Promedio de Colisiones"),
+                                 actionButton("rnorm", "Colisiones con peatones"),
+                                 actionButton("rnorm", "Heridos"), 
+                               ),
+                               
+                               mainPanel(
+                                 leafletOutput("mymap"),
+                                 p()
+                               )
+                             
+                             )
+                    )
                     
                 ) # navbarPage
 ) # fluidPage
