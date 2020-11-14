@@ -1,0 +1,477 @@
+---
+title: "Modelos"
+author: "Jaime Andres Molina Correa"
+date: "8/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Librerías
+
+```{r, message=F, warning=F}
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library("zoo")
+
+library(lme4)
+library(gamlss)
+library(randomForest)
+
+library(plotly)
+```
+
+Se carga la base de datos
+
+```{r}
+datos <- read.csv("Base_definitiva.csv", header = T, stringsAsFactors = T,
+                  encoding = "UTF-8")
+
+datos$FECHA <- as.Date(datos$FECHA)
+
+# Se agrega la variable TIEMPO y MES_NOMBRE
+datos$MES_NOMBRE <- paste(datos$PERIODO, datos$MES, sep="-") %>% as.yearmon("%Y-%m")
+
+# Para obtener la inversa se usaría: zoo::as.Date(datos$FECHA, origin="2014-01-01")
+datos$TIEMPO_DIA <- as.numeric(as.Date(datos$FECHA)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Se crea la variable semana
+datos <- datos %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
+                          TIEMPO_SEMANA = match(SEMANA, sort(unique(SEMANA))))
+
+datos <- datos %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
+                          TIEMPO_MES = match(MES, sort(unique(MES))))
+```
+
+# Funcion MSE
+```{r}
+MSE <- function(y, y_est) mean((y-y_est)**2)
+```
+
+
+## MODELO DIARIO ---------------------------------------------------------------------------------
+
+# base para el modelo
+
+```{r}
+base_dia <- datos %>% count(COMUNA, CLASE, PERIODO, FECHA, TIEMPO_DIA,
+                       DIA_FESTIVO) %>% rename(ACCIDENTALIDAD = n)
+```
+
+```{r}
+summary(base_dia$ACCIDENTALIDAD)
+```
+
+**Nota:** el mínimo debería ser 0.
+
+# Base de entrenamiento y de prueba:
+
+```{r}
+test_dia <- base_dia[base_dia$PERIODO == 2018, ]
+train_dia <- base_dia[base_dia$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+# Modelos Mixtos
+
+Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
+
+
+```{r, message=FALSE, warning=FALSE}
+mod1_dia <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_dia, family= poisson())
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod1_dia)
+```
+
+```{r}
+y_est1_train_dia <- predict(mod1_dia, newdata = train_dia, type = "response")
+y_est1_test_dia <- predict(mod1_dia, newdata = test_dia, type = "response")
+MSE(train_dia$ACCIDENTALIDAD, y_est1_train_dia)
+MSE(test_dia$ACCIDENTALIDAD, y_est1_test_dia)
+```
+
+
+```{r}
+data.frame(observado = train_dia$ACCIDENTALIDAD, predicho = y_est1_train_dia)[sample(1:length(y_est1_train_dia), 500),]
+```
+
+
+Modelo con efectos aleatorios en COMUNA y CLASE, CLASE y COMUNA no anidadas.
+
+```{r, message=FALSE, warning=FALSE}
+mod2_dia <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1  | COMUNA) + (1 | CLASE),
+                  data = train_dia, family= poisson())
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod2_dia)
+```
+
+```{r}
+y_est2_train_dia <- predict(mod2_dia, newdata = train_dia, type = "response")
+y_est2_test_dia <- predict(mod2_dia, newdata = test_dia, type = "response")
+MSE(train_dia$ACCIDENTALIDAD, y_est2_train_dia)
+MSE(test_dia$ACCIDENTALIDAD, y_est2_test_dia)
+```
+
+Se concluye que el modelo mod1_dia presenta mejores resultados, pero el modelo mod2_dia se entrena más rápido. (pero no es mucha la diferencia).
+
+
+# GRAFICOS DIA
+
+## Para implementarlo en la app
+
+Para la app hay que crear una lista de opciones y no un readline (input en python)
+
+```{r}
+# Selecciona una comuna para enseñar sus accidentalidad por tipo de accidente
+comuna <- readline(prompt = "Introduzca una comuna sin ningún acento: ")
+
+# Fecha inicial considerada, DEBE SER MAYOR A 2014-01-01
+fecha_inicial <- readline(prompt = "Introduzca una fecha inicial: ")
+TIEMPO_DIA_inicial <- as.numeric(as.Date(fecha_inicial)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Fecha final considerada
+fecha_final <- readline(prompt = "Introduzca la fecha final: ")
+TIEMPO_DIA_final <- as.numeric(as.Date(fecha_final)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Unidades de TIEMPO_DIA. Si TIEMPO_DIA = 1, entonces FECHA = "2014-01-01"
+TIEMPO_DIA <- TIEMPO_DIA_inicial:TIEMPO_DIA_final
+```
+
+Salida dependiendo de las fechas ingresadas
+
+```{r}
+if (TIEMPO_DIA_final <= max(base_dia$TIEMPO_DIA)) {
+  fig <- plot_ly(data = train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Atropello" &
+                              train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+               x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
+               type = 'scatter', mode = 'lines+markers') %>%
+  
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Caida Ocupante" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Choque" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Incendio" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Otro" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Volcamiento" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+             y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
+  
+  fig <- fig %>% layout(legend=list(title=list(text='<b> Tipo de accidente </b>')))
+  
+  fig
+  
+} else {
+  print("error")
+}
+```
+
+Pensar en una manera de crear una base de datos con todas la comunas, clase de accidentes y días festivos a partir de la fecha inicial y final.
+
+
+
+
+
+
+
+
+## MODELO SEMANAL ---------------------------------------------------------------------------------
+
+Base para el modelo semanal
+
+```{r}
+base_semana <- datos %>% count(COMUNA, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA,
+                       DIA_FESTIVO) %>% rename(ACCIDENTALIDAD = n)
+
+base_semana <- base_semana %>% dplyr::group_by(COMUNA, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+
+```{r}
+summary(base_semana)
+```
+
+
+**Nota:** el mínimo debería ser 0.
+
+# Base de entrenamiento y de prueba:
+
+```{r}
+test_semana <- base_semana[base_semana$PERIODO == 2018, ]
+train_semana <- base_semana[base_semana$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+# Modelos Mixtos
+
+Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
+
+```{r, message=FALSE, warning=FALSE}
+mod1_semana <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_semana, family= poisson())
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod1_semana)
+```
+
+```{r}
+y_est1_train_semana <- predict(mod1_semana, newdata = train_semana, type = "response")
+y_est1_test_semana <- predict(mod1_semana, newdata = test_semana, type = "response")
+MSE(train_semana$ACCIDENTALIDAD, y_est1_train_semana)
+MSE(test_semana$ACCIDENTALIDAD, y_est1_test_semana)
+```
+
+```{r}
+data.frame(observado = train_semana$ACCIDENTALIDAD, predicho = y_est1_train_semana)[sample(1:length(y_est1_train_semana), 500),]
+```
+
+
+Modelo con efectos aleatorios en COMUNA y CLASE, CLASE y COMUNA no anidadas.
+
+```{r, message=FALSE, warning=FALSE}
+mod2_semana <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1  | COMUNA) + (1 | CLASE),
+               data = train_semana, family= poisson())
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod2_semana)
+```
+
+```{r}
+y_est2_train_semana <- predict(mod2_semana, newdata = train_semana, type = "response")
+y_est2_test_semana <- predict(mod2_semana, newdata = test_semana, type = "response")
+MSE(train_semana$ACCIDENTALIDAD, y_est2_train_semana)
+MSE(test_semana$ACCIDENTALIDAD, y_est2_test_semana)
+```
+
+Se concluye que el modelo mod1_semana presenta mejores resultados.
+
+
+# GRAFICOS
+
+## Para implementarlo en la app
+
+Para la app hay que crear una lista de opciones y no un readline (input en python)
+hay que hacerlo funcionar para semanas
+
+```{r}
+# Selecciona una comuna para enseñar sus accidentalidad por tipo de accidente
+comuna <- readline(prompt = "Introduzca una comuna sin ningún acento: ")
+
+# Fecha inicial considerada, DEBE SER MAYOR A 2014-01-01
+fecha_inicial <- readline(prompt = "Introduzca una fecha inicial: ")
+TIEMPO_DIA_inicial <- as.numeric(as.Date(fecha_inicial)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Fecha final considerada
+fecha_final <- readline(prompt = "Introduzca la fecha final: ")
+TIEMPO_DIA_final <- as.numeric(as.Date(fecha_final)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Unidades de TIEMPO_DIA. Si TIEMPO_DIA = 1, entonces FECHA = "2014-01-01"
+TIEMPO_DIA <- TIEMPO_DIA_inicial:TIEMPO_DIA_final
+```
+
+
+```{r}
+
+```
+
+Salida dependiendo de las fechas ingresadas
+
+```{r}
+if (TIEMPO_DIA_final <= max(base_dia$TIEMPO_DIA)) {
+  fig <- plot_ly(data = train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Atropello" &
+                              train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+               x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
+               type = 'scatter', mode = 'lines+markers') %>%
+  
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Caida Ocupante" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Choque" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Incendio" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Otro" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Volcamiento" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+             y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
+  
+  fig <- fig %>% layout(legend=list(title=list(text='<b> Tipo de accidente </b>')))
+  
+  fig
+  
+} else {
+  print("error")
+}
+```
+
+
+
+
+
+
+
+
+
+## MODELO MENSUAL ---------------------------------------------------------------------------------
+
+Base para el modelo mensual
+
+```{r}
+base_mes <- datos %>% count(COMUNA, CLASE, PERIODO, MES, TIEMPO_MES,
+                       DIA_FESTIVO) %>% rename(ACCIDENTALIDAD = n)
+
+base_mes <- base_mes %>% dplyr::group_by(COMUNA, CLASE, PERIODO, MES, TIEMPO_MES) %>% summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+
+```{r}
+summary(base_mes)
+```
+
+
+**Nota:** el mínimo debería ser 0.
+
+# Base de entrenamiento y de prueba:
+
+```{r}
+test_mes <- base_mes[base_mes$PERIODO == 2018, ]
+train_mes <- base_mes[base_mes$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+# Modelos Mixtos
+
+Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
+
+```{r, message=FALSE, warning=FALSE}
+mod1_mes <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_mes, family= poisson())
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod1_mes)
+```
+
+```{r}
+y_est1_train_mes <- predict(mod1_mes, newdata = train_mes, type = "response")
+y_est1_test_mes <- predict(mod1_mes, newdata = test_mes, type = "response")
+MSE(train_mes$ACCIDENTALIDAD, y_est1_train_mes)
+MSE(test_mes$ACCIDENTALIDAD, y_est1_test_mes)
+```
+
+```{r}
+data.frame(observado = train_mes$ACCIDENTALIDAD, predicho = y_est1_train_mes)[sample(1:length(y_est1_train_mes), 500),]
+```
+
+Modelo con efectos aleatorios en COMUNA y CLASE, CLASE y COMUNA no anidadas.
+
+```{r, message=FALSE, warning=FALSE}
+mod2_mes <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1  | COMUNA) + (1 | CLASE),
+               data = train_mes, family= poisson())
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod2_mes)
+```
+
+```{r}
+y_est2_train_mes <- predict(mod2_mes, newdata = train_mes, type = "response")
+y_est2_test_mes <- predict(mod2_mes, newdata = test_mes, type = "response")
+MSE(train_mes$ACCIDENTALIDAD, y_est2_train_mes)
+MSE(test_mes$ACCIDENTALIDAD, y_est2_test_mes)
+```
+
+Se concluye que el modelo mod1_mes presenta mejores resultados.
+
+
+# GRAFICOS
+
+## Para implementarlo en la app
+
+Para la app hay que crear una lista de opciones y no un readline (input en python)
+hay que hacerlo funcionar para mes
+
+```{r}
+# Selecciona una comuna para enseñar sus accidentalidad por tipo de accidente
+comuna <- readline(prompt = "Introduzca una comuna sin ningún acento: ")
+
+# Fecha inicial considerada, DEBE SER MAYOR A 2014-01-01
+fecha_inicial <- readline(prompt = "Introduzca una fecha inicial: ")
+TIEMPO_DIA_inicial <- as.numeric(as.Date(fecha_inicial)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Fecha final considerada
+fecha_final <- readline(prompt = "Introduzca la fecha final: ")
+TIEMPO_DIA_final <- as.numeric(as.Date(fecha_final)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Unidades de TIEMPO_DIA. Si TIEMPO_DIA = 1, entonces FECHA = "2014-01-01"
+TIEMPO_DIA <- TIEMPO_DIA_inicial:TIEMPO_DIA_final
+```
+
+
+```{r}
+
+```
+
+Salida dependiendo de las fechas ingresadas
+
+```{r}
+if (TIEMPO_DIA_final <= max(base_dia$TIEMPO_DIA)) {
+  fig <- plot_ly(data = train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Atropello" &
+                              train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+               x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
+               type = 'scatter', mode = 'lines+markers') %>%
+  
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Caida Ocupante" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Choque" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Incendio" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Otro" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Volcamiento" &
+                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+             y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
+  
+  fig <- fig %>% layout(legend=list(title=list(text='<b> Tipo de accidente </b>')))
+  
+  fig
+  
+} else {
+  print("error")
+}
+```
