@@ -20,7 +20,6 @@ Librerías
 
 ```{r, message=F, warning=F}
 library(tidyverse)
-library(dplyr)
 library(magrittr)
 library(lubridate)
 library("zoo")
@@ -28,6 +27,8 @@ library("zoo")
 library(lme4)
 library(gamlss)
 library(randomForest)
+
+library(plotly)
 ```
 
 Se agrega la variable TIEMPO y MES_NOMBRE
@@ -42,22 +43,15 @@ datos$TIEMPO <- as.numeric(as.Date(datos$FECHA)) - as.numeric(as.Date("2014-01-0
 
 
 ```{r}
-# datos$N_ACCIDENTES <- 1
-# datos <- datos %>% spread(CLASE, N_ACCIDENTES, fill = 0)
-
-# bd1 <- datos %>% count(COMUNA, PERIODO, FECHA, DIA_FESTIVO, TIEMPO,
-#                        GRAVEDAD, Atropello, `Caida Ocupante`,
-#                        Choque, Incendio, Otro, Volcamiento)
-# str(bd1)
-# bd1
+bd1 <- datos %>% count(COMUNA, CLASE, PERIODO, FECHA, TIEMPO,
+                       DIA_FESTIVO) %>% rename(ACCIDENTALIDAD = n)
 ```
-La base tiene 85,981 observaciones 
-
 
 ```{r}
-bd1 <- datos %>% count(COMUNA, CLASE, PERIODO, FECHA, TIEMPO, DIA_FESTIVO) %>% rename(CANTIDAD_T = n)
+summary(bd1$ACCIDENTALIDAD)
 ```
 
+**Nota:** el mínimo debería ser 0.
 
 # Base de entrenamiento y de prueba:
 
@@ -73,67 +67,75 @@ MSE <- function(y, y_est) mean((y-y_est)**2)
 
 # Modelos Mixtos
 
-Modelo solo con efectos aleatorios en COMUNA
-
-```{r, message=FALSE, warning=FALSE}
-mod30 <- glmer(CANTIDAD_T ~ TIEMPO + DIA_FESTIVO +
-                 (1 + TIEMPO | COMUNA),
-               data = train, family= poisson())
-```
-
-
-```{r, message=FALSE, warning=FALSE}
-summary(mod30)
-```
-
-```{r}
-y_est30_train <- predict(mod30, newdata = train, type = "response")
-y_est30_test <- predict(mod30, newdata = test, type = "response")
-MSE(train$CANTIDAD_T, y_est30_train)
-MSE(test$CANTIDAD_T, y_est30_test)
-```
-
 Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 
 ```{r, message=FALSE, warning=FALSE}
-mod31 <- glmer(CANTIDAD_T ~ TIEMPO + DIA_FESTIVO +
+mod1 <- glmer(ACCIDENTALIDAD ~ TIEMPO + DIA_FESTIVO +
                  (1 + TIEMPO | COMUNA/CLASE),
                data = train, family= poisson())
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-summary(mod31)
+summary(mod1)
 ```
 
 ```{r}
-y_est31_train <- predict(mod31, newdata = train, type = "response")
-y_est31_test <- predict(mod31, newdata = test, type = "response")
-MSE(train$CANTIDAD_T, y_est31_train)
-MSE(test$CANTIDAD_T, y_est31_test)
+y_est1_train <- predict(mod1, newdata = train, type = "response")
+y_est1_test <- predict(mod1, newdata = test, type = "response")
+MSE(train$ACCIDENTALIDAD, y_est1_train)
+MSE(test$ACCIDENTALIDAD, y_est1_test)
 ```
 
 ```{r}
-data.frame(observado = train$CANTIDAD_T, predicho = y_est31_train)[sample(1:length(y_est31_train), 500),]
+data.frame(observado = train$ACCIDENTALIDAD, predicho = y_est1_train)[sample(1:length(y_est1_train), 500),]
 ```
 
 
 Modelo con efectos aleatorios en COMUNA y CLASE, CLASE y COMUNA no anidadas.
 
 ```{r, message=FALSE, warning=FALSE}
-mod32 <- glmer(CANTIDAD_T ~ TIEMPO + DIA_FESTIVO +
+mod2 <- glmer(ACCIDENTALIDAD ~ TIEMPO + DIA_FESTIVO +
                  (1 + TIEMPO | COMUNA) + (1 + TIEMPO | CLASE),
                data = train, family= poisson())
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-summary(mod32)
+summary(mod2)
 ```
 
 ```{r}
-y_est32_train <- predict(mod32, newdata = train, type = "response")
-y_est32_test <- predict(mod32, newdata = test, type = "response")
-MSE(train$CANTIDAD_T, y_est32_train)
-MSE(test$CANTIDAD_T, y_est32_test)
+y_est2_train <- predict(mod2, newdata = train, type = "response")
+y_est2_test <- predict(mod2, newdata = test, type = "response")
+MSE(train$ACCIDENTALIDAD, y_est2_train)
+MSE(test$ACCIDENTALIDAD, y_est2_test)
+```
+
+Se concluye que se usará el modelo mod1 debido a que obtiene un MSE de prueba y de entrenamiento menor que el modelo mod2
+
+
+# GRAFICOS
+
+```{r}
+fig <- plot_ly(data = train[train$COMUNA == "Belen" & train$CLASE == "Atropello", ],
+               x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
+               type = 'scatter', mode = 'lines+markers') %>%
+  
+  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Caida Ocupante", ],
+            y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
+  
+  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Choque", ],
+            y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
+  
+  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Incendio", ],
+            y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
+  
+  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Otro", ],
+            y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
+  
+  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Volcamiento", ],
+            y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
+
+fig
 ```
 
 
