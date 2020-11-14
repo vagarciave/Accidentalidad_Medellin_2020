@@ -110,33 +110,68 @@ MSE(train$ACCIDENTALIDAD, y_est2_train)
 MSE(test$ACCIDENTALIDAD, y_est2_test)
 ```
 
-Se concluye que se usará el modelo mod1 debido a que obtiene un MSE de prueba y de entrenamiento menor que el modelo mod2
+Se concluye que se usará el modelo mod1 debido a que obtiene un MSE de prueba y de entrenamiento menor que el del modelo mod2.
 
 
 # GRAFICOS
 
+## Para implementarlo en la app
+
+Para la app hay que crear una lista de opciones y no un readline (input en python)
+
 ```{r}
-fig <- plot_ly(data = train[train$COMUNA == "Belen" & train$CLASE == "Atropello", ],
+# Selecciona una comuna para enseñar sus accidentalidad por tipo de accidente
+comuna <- readline(prompt = "Introduzca una comuna sin ningún acento: ")
+
+# Fecha inicial considerada, DEBE SER MAYOR A 2014-01-01
+fecha_inicial <- readline(prompt = "Introduzca una fecha inicial: ")
+tiempo_inicial <- as.numeric(as.Date(fecha_inicial)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Fecha final considerada
+fecha_final <- readline(prompt = "Introduzca la fecha final: ")
+tiempo_final <- as.numeric(as.Date(fecha_final)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Unidades de tiempo. Si TIEMPO = 1, entonces FECHA = "2014-01-01"
+tiempo <- tiempo_inicial:tiempo_final
+```
+
+Salida dependiendo de las fechas ingresadas
+
+```{r}
+if (tiempo_final <= max(bd1$TIEMPO)) {
+  fig <- plot_ly(data = train[train$COMUNA == comuna & train$CLASE == "Atropello" &
+                              train$TIEMPO %in% tiempo, ],
                x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
                type = 'scatter', mode = 'lines+markers') %>%
   
-  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Caida Ocupante", ],
-            y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
+    add_trace(data =train[train$COMUNA == comuna & train$CLASE == "Caida Ocupante" &
+                                train$TIEMPO %in% tiempo, ],
+              y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
+    
+    add_trace(data =train[train$COMUNA == comuna & train$CLASE == "Choque" &
+                                train$TIEMPO %in% tiempo, ],
+              y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
+    
+    add_trace(data =train[train$COMUNA == comuna & train$CLASE == "Incendio" &
+                                train$TIEMPO %in% tiempo, ],
+              y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
+    
+    add_trace(data =train[train$COMUNA == comuna & train$CLASE == "Otro" &
+                                train$TIEMPO %in% tiempo, ],
+              y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
+    
+    add_trace(data =train[train$COMUNA == comuna & train$CLASE == "Volcamiento" &
+                                train$TIEMPO %in% tiempo, ],
+             y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
   
-  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Choque", ],
-            y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
+  fig <- fig %>% layout(legend=list(title=list(text='<b> Tipo de accidente </b>')))
   
-  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Incendio", ],
-            y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
+  fig
   
-  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Otro", ],
-            y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
-  
-  add_trace(data =train[train$COMUNA == "Belen" & train$CLASE == "Volcamiento", ],
-            y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
-
-fig
+} else {
+  print("error")
+}
 ```
-
+Pensar en una manera de crear una base de datos con todas la comunas, clase de accidentes y días festivos a partir de la fecha inicial y final.
 
 
