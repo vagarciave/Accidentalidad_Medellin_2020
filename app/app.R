@@ -53,6 +53,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                                  #,
                                  #submitButton("Visualizar", icon("car-crash")),
                                  # Esto me daña los paneles condicionales
+                                 
                              ), # sidebarPanel
                              mainPanel(
                                  h1("Header 1"),
@@ -137,7 +138,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
 server <- function(input, output) {
     
     output$txtout <- renderText({
-        paste('Seleccionaste', input$tipo)
+        paste(input$daterange3)
     })
     
     output$Data <- DT::renderDataTable(
@@ -157,14 +158,28 @@ server <- function(input, output) {
                    lng = datos[1:100, "LONGITUD"], popup = datos[1:100,"FECHA"])
     })
     
-    output$plotpred <- renderPlotly(
+    # Funcion para obtener todas las predicciones de los modelos
+    # Tambien obtiene los graficos y las tablas
+    control_predictions <- function(fecha_inicio, fecha_fin, tipo = 'comuna'){
+      
+    } 
+    
+    # Funcion de prueba
+    output$plotpred <- renderPlotly({
+      validate(
+        need(input$daterange_pred[1] < input$daterange_pred[2],
+             "Error: la fecha final no puede ser menor que la fecha de inicio")
+      )
+      fecha_inicio <- input$daterange_pred[2]
+      fecha_fin <- input$daterange_pred[1]
       plot1 <- plot_ly(
         x = rnorm(10),
         y = 1:10, 
         type = 'scatter',
         mode = 'markers')
+      }
     )
-    
+
     
     
 } # server
