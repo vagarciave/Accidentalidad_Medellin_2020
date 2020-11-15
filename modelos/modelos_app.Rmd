@@ -111,4 +111,92 @@ if (TIEMPO_DIA_final <= max(accidentes_dia_comuna$TIEMPO_DIA)) {
 }
 ```
 
+#  BARRIO
 
+## PARA DIA
+
+```{r}
+load(file = "mod_dia_barrio.RData") # base de datos
+```
+
+
+## PARA SEMANA
+
+Base para el modelo semanal
+
+```{r}
+accidentes_semana_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+
+## PARA MES
+
+Base para el modelo mensual
+
+```{r}
+accidentes_mes_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, MES, TIEMPO_MES) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+
+## Para implementarlo en la app
+
+Para la app hay que crear una lista de opciones y no un readline (input en python)
+
+```{r}
+# Selecciona una barrio para enseñar sus accidentalidad por tipo de accidente
+barrio <- readline(prompt = "Introduzca una barrio sin ningún acento: ")
+
+# Fecha inicial considerada, DEBE SER MAYOR A 2014-01-01
+fecha_inicial <- as.Date(readline(prompt = "Introduzca una fecha inicial: "))
+TIEMPO_DIA_inicial <- as.numeric(as.Date(fecha_inicial)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Fecha final considerada
+fecha_final <- as.Date(readline(prompt = "Introduzca la fecha final: "))
+TIEMPO_DIA_final <- as.numeric(as.Date(fecha_final)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Unidades de TIEMPO_DIA. Si TIEMPO_DIA = 1, entonces FECHA = "2014-01-01"
+TIEMPO_DIA <- TIEMPO_DIA_inicial:TIEMPO_DIA_final
+```
+
+
+# GRAFICOS DIA
+
+Salida dependiendo de las fechas ingresadas
+
+```{r}
+if (TIEMPO_DIA_final <= max(accidentes_dia_barrio$TIEMPO_DIA)) {
+  fig <- plot_ly(data = train_dia_barrio[train_dia_barrio$BARRIO == barrio & train_dia_barrio$CLASE == "Atropello" &
+                              train_dia_barrio$TIEMPO_DIA %in% TIEMPO_DIA, ],
+               x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
+               type = 'scatter', mode = 'lines+markers') %>%
+  
+    add_trace(data =train_dia_barrio[train_dia_barrio$BARRIO == barrio & train_dia_barrio$CLASE == "Caida Ocupante" &
+                                train_dia_barrio$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia_barrio[train_dia_barrio$BARRIO == barrio & train_dia_barrio$CLASE == "Choque" &
+                                train_dia_barrio$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia_barrio[train_dia_barrio$BARRIO == barrio & train_dia_barrio$CLASE == "Incendio" &
+                                train_dia_barrio$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia_barrio[train_dia_barrio$BARRIO == barrio & train_dia_barrio$CLASE == "Otro" &
+                                train_dia_barrio$TIEMPO_DIA %in% TIEMPO_DIA, ],
+              y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
+    
+    add_trace(data =train_dia_barrio[train_dia_barrio$BARRIO == barrio & train_dia_barrio$CLASE == "Volcamiento" &
+                                train_dia_barrio$TIEMPO_DIA %in% TIEMPO_DIA, ],
+             y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
+  
+  fig <- fig %>% layout(legend=list(title=list(text='<b> Tipo de accidente </b>')))
+  
+  fig
+  
+} else {
+  print("error")
+}
+```
