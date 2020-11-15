@@ -20,6 +20,13 @@ require(tidyr)
 require(lubridate)
 library(readr)
 library(leaflet)
+library(readr)
+library(plotly)
+datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
+datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
+# datos <- datos[sample(1:dim(datos)[1],1000),]
+list_barrios <- sort(unique(datos$BARRIO))
+list_comunas <- sort(unique(datos$COMUNA))
 
 
 # Define UI
@@ -42,13 +49,13 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                                              c("Choque" = "Choque",
                                                "Atropello" = "Atropello",
                                                "Caida de Ocupante" = "Caida de Ocupante",
-                                               "Incendio" = "Incendio")),
-                                 submitButton("Visualizar", icon("car-crash")),
-                                 
+                                               "Incendio" = "Incendio"))
+                                 #,
+                                 #submitButton("Visualizar", icon("car-crash")),
+                                 # Esto me daña los paneles condicionales
                              ), # sidebarPanel
                              mainPanel(
                                  h1("Header 1"),
-                                 
                                  h4("Output 1"),
                                  verbatimTextOutput("txtout"),
                                  
@@ -58,9 +65,51 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                     tabPanel("Visualizacion",
                              titlePanel("Incidentes Georreferenciados"),
                              fluidRow(column(DT::dataTableOutput("Data"), 
+                                             style = "height:500px; overflow-y: scroll;overflow-x: scroll;",
                                              width=12))
                              ),
-                    tabPanel("Prediccion", "This panel is intentionally left blank"),
+                    tabPanel("Prediccion",
+                             sidebarPanel(
+                               tags$h3("Entradas:"),
+                               dateRangeInput("daterange_pred", "Rango de Tiempo:",
+                                              start  = "2014-01-01",
+                                              end    = "2018-12-31",
+                                              min    = "2014-01-01",
+                                              max    = "2018-12-31",
+                                              format = "dd/mm/yyyy",
+                                              separator = " - ",
+                                              language = "es"),
+                               
+                               selectInput("tipo_modelo", "Seleccione el tipo de modelo",
+                                           c(Comuna = "comuna",
+                                             Barrio = "barrio")),
+                               # Only show this panel if tipo_modelo is comuna
+                               conditionalPanel(
+                                 condition = "input.tipo_modelo == 'comuna'",
+                                 selectInput("nombre_comuna", "Nombre de la comuna",
+                                             list_comunas)
+                               ),
+                               
+                               # Only show this panel if tipo_modelo is barrio
+                               conditionalPanel(
+                                 condition = "input.tipo_modelo == 'barrio'",
+                                 selectInput("nombre_comuna", "Nombre del barrio",
+                                             list_barrios)
+                               ),
+                             ),
+
+                               mainPanel(
+                                 tabsetPanel(
+                                 # Muestra el grafico de predichos por accidente diarios
+                                 tabPanel("Predicción por dia",plotlyOutput('plotpred')),
+                                 # Muestra el grafico de predichos por accidente semanal
+                                 tabPanel("Predicción por semana"),
+                                 # Muestra el grafico de predichos por accidente mensual
+                                 tabPanel("Predicción por mes")
+                                 
+                               )
+                              )
+                            ),
                     tabPanel("Agrupamiento", 
                              titlePanel("Seleccione el tipo de incidente:"),
                              
@@ -84,18 +133,11 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
 ) # fluidPage
 
 
-
-
-library(readr)
-datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
-datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
-# datos <- datos[sample(1:dim(datos)[1],1000),]
-
 # Define server function  
 server <- function(input, output) {
     
     output$txtout <- renderText({
-        paste( input$txt1, input$txt2, sep = " " )
+        paste('Seleccionaste', input$tipo)
     })
     
     output$Data <- DT::renderDataTable(
@@ -115,7 +157,13 @@ server <- function(input, output) {
                    lng = datos[1:100, "LONGITUD"], popup = datos[1:100,"FECHA"])
     })
     
-    
+    output$plotpred <- renderPlotly(
+      plot1 <- plot_ly(
+        x = rnorm(10),
+        y = 1:10, 
+        type = 'scatter',
+        mode = 'markers')
+    )
     
     
     
