@@ -77,29 +77,29 @@ Salida dependiendo de las fechas ingresadas
 
 ```{r}
 if (TIEMPO_DIA_final <= max(accidentes_dia_comuna$TIEMPO_DIA)) {
-  fig <- plot_ly(data = train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Atropello" &
-                              train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
+  fig <- plot_ly(data = accidentes_dia_comuna[accidentes_dia_comuna$COMUNA == comuna & accidentes_dia_comuna$CLASE == "Atropello" &
+                              accidentes_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
                x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
                type = 'scatter', mode = 'lines+markers') %>%
   
-    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Caida Ocupante" &
-                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =accidentes_dia_comuna[accidentes_dia_comuna$COMUNA == comuna & accidentes_dia_comuna$CLASE == "Caida Ocupante" &
+                                accidentes_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Choque" &
-                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =accidentes_dia_comuna[accidentes_dia_comuna$COMUNA == comuna & accidentes_dia_comuna$CLASE == "Choque" &
+                                accidentes_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Incendio" &
-                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =accidentes_dia_comuna[accidentes_dia_comuna$COMUNA == comuna & accidentes_dia_comuna$CLASE == "Incendio" &
+                                accidentes_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Otro" &
-                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =accidentes_dia_comuna[accidentes_dia_comuna$COMUNA == comuna & accidentes_dia_comuna$CLASE == "Otro" &
+                                accidentes_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Volcamiento" &
-                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =accidentes_dia_comuna[accidentes_dia_comuna$COMUNA == comuna & accidentes_dia_comuna$CLASE == "Volcamiento" &
+                                accidentes_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
              y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
   
   fig <- fig %>% layout(legend=list(title=list(text='<b> Tipo de accidente </b>')))
