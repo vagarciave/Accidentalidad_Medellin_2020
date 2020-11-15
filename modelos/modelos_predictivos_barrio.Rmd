@@ -234,8 +234,8 @@ Modelo con efectos aleatorios en BARRIO y CLASE, CLASE dentro de BARRIO.
 ```{r, message=FALSE, warning=FALSE}
 mod_mes_barrio <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | BARRIO/CLASE),
                data = train_mes_barrio, family= poisson())
-save(mod_semana_barrio, file = "mod_semana_barrio.RData")
-load(file = "mod_semana_barrio.RData")
+save(mod_mes_barrio, file = "mod_mes_barrio.RData")
+load(file = "mod_mes_barrio.RData")
 ```
 
 ```{r, message=FALSE, warning=FALSE}

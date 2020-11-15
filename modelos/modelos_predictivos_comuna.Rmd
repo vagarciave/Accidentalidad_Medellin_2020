@@ -335,8 +335,8 @@ Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 ```{r, message=FALSE, warning=FALSE}
 mod_mes_comuna <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
                data = train_mes_comuna, family= poisson())
-save(mod_semana_comuna, file = "mod_semana_comuna.RData")
-load(file = "mod_semana_comuna.RData")
+save(mod_mes_comuna, file = "mod_mes_comuna.RData")
+load(file = "mod_mes_comuna.RData")
 ```
 
 ```{r, message=FALSE, warning=FALSE}
