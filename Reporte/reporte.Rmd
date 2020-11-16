@@ -3,9 +3,9 @@ title: "Reporte Técnico"
 author: "Jaime Andres Molina Correa <br> Valentina García Velasquez <br> Felipe Villarreal Piedrahita <br> Ricardo Penaloza Velasquez <br> Daniel Chanci Restrepo"
 output:
   html_document:
-    css: format.css
-    theme: flatly
+    theme: cosmo
     highlight: kate
+    css: format.css
     df_print: paged
     code_download: yes
     toc: true
@@ -33,7 +33,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', size="footnotesize",
 # Objetivos
 
 
-# Descripción de los datos
+# Descripción y Limpieza de los datos
 
 Los datos utilizados se encuentran en las bases de datos de Geomedellín (Portal Geográfico del Municipio de Medellín) y contienen información referente a múltiples accidentes de tránsito, en los que se detalla el tipo de accidente, dónde y cuándo ocurrió. La base de datos utilizada en este trabajo es una unión de las bases de incidentes en 2014, 2015, 2016, 2017 y 2018, se usará este último año para validar los modelos planteados.
 
@@ -125,7 +125,7 @@ También se reemplaza "Barrios de Jesús" por "Barrio de Jesús", "Nueva Villa d
 
 Se eliminan los espacios que hay antes de la primera letra y después de la última letra en todas las observaciones.
 
-## IMPUTACIÓN
+## Imputación
 
 En los datos faltantes de la variable DISENO, se decide usar el nombre de "No Registrado" para reemplazarlos.
 
@@ -185,9 +185,9 @@ df; remove(df)
 
 A continuación se encuentra el acceso al código utilizado en todo este proceso
 
-Link: https://github.com/vagarciave/Project_x/blob/master/limpieza/Depuracion.Rmd
+Enlace: https://github.com/vagarciave/Project_x/blob/master/limpieza/Depuracion.Rmd
 
-## Análisis descriptivo
+# Análisis descriptivo
 
 
 # Clustering
