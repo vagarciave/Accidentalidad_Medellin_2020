@@ -10,6 +10,9 @@
 # Concepts about Reactive programming used by Shiny, 
 # https://shiny.rstudio.com/articles/reactivity-overview.html
 
+
+# This is a shiny dashboard
+
 # Load R packages
 library(shiny)
 library(shinythemes)
@@ -22,6 +25,8 @@ require(lubridate)
 library(readr)
 library(leaflet)
 library(readr)
+library(plotly)
+
 datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
 datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
 # datos <- datos[sample(1:dim(datos)[1],1000),]
@@ -45,10 +50,11 @@ ui <- dashboardPage(
       # First tab content
       # First tab content
       tabItem(tabName = "inicio",
-              
+              # En esta parte de inicio se pone el video
+              # la descripcion de la app
               box(
                 tags$h3("Entradas:"),
-                dateRangeInput("daterange3", "Rango de Tiempo:",
+                dateRangeInput("daterange", "Rango de Tiempo:",
                                start  = "2014-01-01",
                                end    = "2018-12-31",
                                min    = "2014-01-01",
@@ -60,9 +66,7 @@ ui <- dashboardPage(
                             c("Choque" = "Choque",
                               "Atropello" = "Atropello",
                               "Caida de Ocupante" = "Caida de Ocupante",
-                              "Incendio" = "Incendio")),
-                #submitButton("Visualizar", icon("car-crash")),
-                
+                              "Incendio" = "Incendio"))
               ),# sidebarPanel
               box(
                 h1("Header 1"),
@@ -113,41 +117,33 @@ ui <- dashboardPage(
       # Second tab content
       tabItem(tabName = "agrupamiento",
               titlePanel("Seleccione el tipo de incidente:"),
-              
-               fluidRow(
-                 box(
-                   actionButton("runif", "Promedio de Colisiones"),
-                   actionButton("rnorm", "Colisiones con peatones"),
-                   actionButton("rnorm", "Heridos"), 
-                 )
-               ),
-                fluidRow(
+                fluidPage(
                   column(width = 12,
                          box(width = NULL, solidHeader = TRUE,
                              leafletOutput("mymap"),
                              p()
                          ),
-                         box(width = NULL,
-                             uiOutput("numVehiclesTable")
-                         )
+                         box(width = 14,
+                           h1('aca la tabla'))
                   )
               )
-      )
+       )
       
     ) # tabItems
   ) # DashboardBody
 ) # dashboardBody
 
 server <- function(input, output) {
+  
   output$txtout <- renderText({
-    paste( input$txt1, input$txt2, sep = " " )
+    paste(weekdays(ymd(input$daterange[1])),ymd(input$daterange[2]), sep = ',')
   })
   
   output$Data <- DT::renderDataTable(
     DT::datatable({
       datos
     },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')),pageLenght = 15),
+    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
     filter = "top",
     selection = "multiple",
     style = "bootstrap"
@@ -159,6 +155,29 @@ server <- function(input, output) {
       addMarkers(lat = datos[1:100, "LATITUD"],
                  lng = datos[1:100, "LONGITUD"], popup = datos[1:100,"FECHA"])
   })
+  
+  # Funcion para obtener todas las predicciones de los modelos
+  # Tambien obtiene los graficos y las tablas
+  control_predictions <- function(fecha_inicio, fecha_fin, tipo = 'comuna'){
+    
+  } 
+  
+  # Funcion de prueba
+  output$plotpred <- renderPlotly({
+    validate(
+      need(input$daterange_pred[1] < input$daterange_pred[2],
+           "Error: la fecha final no puede ser menor que la fecha de inicio")
+    )
+    fecha_inicio <- input$daterange_pred[2]
+    fecha_fin <- input$daterange_pred[1]
+    plot1 <- plot_ly(
+      x = rnorm(10),
+      y = 1:10, 
+      type = 'scatter',
+      mode = 'markers')
+  }
+  )
+  
   
 }
 
