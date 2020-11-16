@@ -27,6 +27,12 @@ library(leaflet)
 library(readr)
 library(plotly)
 
+
+# Cargar valores ajustados
+load('accidentes_dia_barrio.RData')
+load('accidentes_dia_comuna.RData')
+
+
 datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
 datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
 # datos <- datos[sample(1:dim(datos)[1],1000),]
@@ -86,33 +92,61 @@ ui <- dashboardPage(
       
       # Second tab content
       tabItem(tabName = "prediccion",
-              
-              dateRangeInput("daterange_pred", "Rango de Tiempo:",
-                             start  = "2014-01-01",
-                             end    = "2018-12-31",
-                             min    = "2014-01-01",
-                             max    = "2018-12-31",
-                             format = "dd/mm/yyyy",
-                             separator = " - ",
-                             language = "es"),
-              
-                selectInput("tipo_modelo", "Seleccione el tipo de modelo",
+              fluidRow(
+                tags$h3("Entradas:"),
+                box(width = 4,
+                  dateRangeInput("daterange_pred", "Rango de Tiempo:",
+                               start  = "2014-01-01",
+                               end    = "2018-12-31",
+                               min    = "2014-01-01",
+                               max    = "2018-12-31",
+                               format = "dd/mm/yyyy",
+                               separator = " - ",
+                               language = "es")
+                  ),
+                
+                box(width = 4 ,
+                    selectInput("tipo_modelo", "Seleccione el tipo de modelo",
                             c(Comuna = "comuna",
-                              Barrio = "barrio")),
-                
+                              Barrio = "barrio"))
+                    ),
                 # Only show this panel if tipo_modelo is comuna
-                conditionalPanel(
-                  condition = "input.tipo_modelo == 'comuna'",
-                  selectInput("nombre_comuna", "Nombre de la comuna",
-                              list_comunas)
-                ),
                 
-                # Only show this panel if tipo_modelo is barrio
-                conditionalPanel(
-                  condition = "input.tipo_modelo == 'barrio'",
-                  selectInput("nombre_comuna", "Nombre del barrio",
-                              list_barrios)
-                )
+                box(width = 4,
+                    conditionalPanel(
+                      condition = "input.tipo_modelo == 'comuna'",
+                      selectInput("nombre_comuna", "Nombre de la comuna",
+                                  list_comunas)
+                    ),
+                    
+                    # Only show this panel if tipo_modelo is barrio
+                    conditionalPanel(
+                      condition = "input.tipo_modelo == 'barrio'",
+                      selectInput("nombre_barrio", "Nombre del barrio",
+                                  list_barrios)
+                    )
+                 )
+
+              ),
+              
+              fluidRow(
+                  box(width = 12,
+                      tabsetPanel(
+                        # Muestra el grafico de predichos por accidente diarios
+                        tabPanel("Predicción por dia",
+                                 h1(),
+                                 plotlyOutput('plotpred')),
+                        # Muestra el grafico de predichos por accidente semanal
+                        tabPanel("Predicción por semana"),
+                        # Muestra el grafico de predichos por accidente mensual
+                        tabPanel("Predicción por mes")
+                        
+                      )
+                    ),
+              ),
+              fluidRow(
+                box(width = 12)
+              )
       ),
       # Second tab content
       tabItem(tabName = "agrupamiento",
@@ -124,7 +158,7 @@ ui <- dashboardPage(
                              p()
                          ),
                          box(width = 14,
-                           h1('aca la tabla'))
+                           h1('Acá va una tablita linda'))
                   )
               )
        )
@@ -156,27 +190,18 @@ server <- function(input, output) {
                  lng = datos[1:100, "LONGITUD"], popup = datos[1:100,"FECHA"])
   })
   
-  # Funcion para obtener todas las predicciones de los modelos
-  # Tambien obtiene los graficos y las tablas
-  control_predictions <- function(fecha_inicio, fecha_fin, tipo = 'comuna'){
-    
-  } 
-  
   # Funcion de prueba
   output$plotpred <- renderPlotly({
     validate(
       need(input$daterange_pred[1] < input$daterange_pred[2],
            "Error: la fecha final no puede ser menor que la fecha de inicio")
     )
-    fecha_inicio <- input$daterange_pred[2]
-    fecha_fin <- input$daterange_pred[1]
-    plot1 <- plot_ly(
-      x = rnorm(10),
-      y = 1:10, 
-      type = 'scatter',
-      mode = 'markers')
-  }
-  )
+    fecha_inicio <- input$daterange_pred[1]
+    fecha_fin <- input$daterange_pred[2]
+    tipo_modelo <- input$tipo_modelo
+    nombre <- ifelse(input$tipo_modelo == 'comuna', input$nombre_comuna, input$nombre_barrio)
+    control_prediction(fecha_inicio, fecha_fin, tipo_modelo)$dia
+  })
   
   
 }
