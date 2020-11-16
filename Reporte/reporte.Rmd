@@ -190,4 +190,43 @@ Link: https://github.com/vagarciave/Project_x/blob/master/limpieza/Depuracion.Rm
 ## Análisis descriptivo
 
 
+# Clustering
+
+En cuanto al clustering desarrollado para la clasificación de los barrios, se tomó el método de K-Means.Aquí, se tomó la decisión de basarnos en la columna de la gravedad ya que, no solo mostraría los barrios con más accidentalidad, sino el peligro que estos representan en cuanto a la seguridad vial.
+
+Primero, fue necesario extraer las columnas BARRIO y GRAVEDAD de la base de datos, para así solo centrarnos en lo importante durante el proceso. 
+
+![](Parte1.png){#id .class width=50% height=50%}
+
+Posteriormente, fue necesario hacer 2 pasos: primero se crearon 3 columnas correspondientes a los tipos de gravedad, asignando un valor de un en la fila correspondiente al mismo tipo y un valor de cero para las demás; despues, fue necesario agrupar las columnas por barrio, para obtener la suma total de accidentes por barrio.
+
+![](Parte2.png){#id .class width=50% height=50%}
+![](Parte3.png){#id .class width=50% height=50%}
+
+Más adelante y ahora con sólo los datos necesarios, se realizó el método del codo para encontrar el número de clusters, al mismo tiempos que se escogía la mejor división utilizando el método k-means++ que posee python. Todo esto arrojó que lo mejor sería dividir los datos en 4 clusters.
+
+![](Parte4.png){#id .class width=50% height=50%}
+
+Al realizar la respectiva clasificación se arrojó la siguiente gráfica, donde se puede observar la distribución de los barrios y se acepta la siguiente premisa: los 3 tipos de gravedad se relacionan entre sí, evidenciandose que a mayor numero de heridos, tambien hay mayor muneros de solo daños y muertos.
+
+![](Parte5.png){#id .class width=50% height=50%}
+![](Parte6.png){#id .class width=50% height=50%}
+![](Parte7.png){#id .class width=50% height=50%}
+![](Parte8.png){#id .class width=50% height=50%}
+
+Para finalizar esta sección, se agregó la tabla que clasifica el riesgo del barrio en la base de datos pricipal, para proximamente mostrar esta distribución en el mapa de Medellín asignando colores a los clusters. La columna quedó con el nombre SEGURIDAD_BARRIO.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
