@@ -22,6 +22,8 @@ library(readr)
 library(leaflet)
 library(readr)
 library(plotly)
+
+# 
 datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
 datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
 # datos <- datos[sample(1:dim(datos)[1],1000),]
@@ -138,7 +140,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
 server <- function(input, output) {
     
     output$txtout <- renderText({
-        paste(input$daterange3)
+        paste(input$daterange[1,])
     })
     
     output$Data <- DT::renderDataTable(
