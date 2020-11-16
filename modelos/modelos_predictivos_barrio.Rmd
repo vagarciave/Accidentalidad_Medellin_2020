@@ -159,7 +159,7 @@ summary(y_est_train_dia_barrio)
 
 
 ```{r}
-data.frame(observado = train_dia_barrio$ACCIDENTALIDAD, predicho = y_est1_train_dia_barrio)[sample(1:length(y_est1_train_dia_barrio), 500),]
+data.frame(observado = train_dia_barrio$ACCIDENTALIDAD, predicho = y_est_train_dia_barrio)[sample(1:length(y_est_train_dia_barrio), 500),]
 ```
 
 
@@ -202,7 +202,7 @@ MSE(test_semana_barrio$ACCIDENTALIDAD, y_est_test_semana_barrio)
 ```
 
 ```{r}
-data.frame(observado = train_semana_barrio$ACCIDENTALIDAD, predicho = y_est1_train_semana_barrio)[sample(1:length(y_est1_train_semana_barrio), 500),]
+data.frame(observado = train_semana_barrio$ACCIDENTALIDAD, predicho = y_est_train_semana_barrio)[sample(1:length(y_est_train_semana_barrio), 500),]
 ```
 
 
@@ -250,5 +250,5 @@ MSE(test_mes_barrio$ACCIDENTALIDAD, y_est_test_mes_barrio)
 ```
 
 ```{r}
-data.frame(observado = train_mes_barrio$ACCIDENTALIDAD, predicho = y_est1_train_mes_barrio)[sample(1:length(y_est1_train_mes_barrio), 500),]
+data.frame(observado = train_mes_barrio$ACCIDENTALIDAD, predicho = y_est_train_mes_barrio)[sample(1:length(y_est_train_mes_barrio), 500),]
 ```

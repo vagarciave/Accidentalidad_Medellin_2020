@@ -195,7 +195,7 @@ summary(y_est_train_dia_comuna)
 
 
 ```{r}
-data.frame(observado = train_dia_comuna$ACCIDENTALIDAD, predicho = y_est1_train_dia_comuna)[sample(1:length(y_est1_train_dia_comuna), 500),]
+data.frame(observado = train_dia_comuna$ACCIDENTALIDAD, predicho = y_est_train_dia_comuna)[sample(1:length(y_est_train_dia_comuna), 500),]
 ```
 
 
