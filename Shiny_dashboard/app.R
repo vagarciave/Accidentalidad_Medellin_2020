@@ -29,15 +29,16 @@ library(plotly)
 
 
 # Cargar valores ajustados
-load('accidentes_dia_barrio.RData')
-load('accidentes_dia_comuna.RData')
-
+load(file = 'accidentes_dia_barrio.RData',.GlobalEnv)
+load(file = 'accidentes_dia_comuna.RData',.GlobalEnv)
 
 datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
 datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
 # datos <- datos[sample(1:dim(datos)[1],1000),]
 list_barrios <- sort(unique(datos$BARRIO))
 list_comunas <- sort(unique(datos$COMUNA))
+
+source('source_models.R')
 
 ui <- dashboardPage(
   dashboardHeader(title = "TAE 2020-2"),
@@ -135,11 +136,21 @@ ui <- dashboardPage(
                         # Muestra el grafico de predichos por accidente diarios
                         tabPanel("Predicción por dia",
                                  h1(),
-                                 plotlyOutput('plotpred')),
+                                 plotlyOutput("plotpred_dia") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
+                                 h1(),
+                                 DTOutput("dfpred_dia")),
                         # Muestra el grafico de predichos por accidente semanal
-                        tabPanel("Predicción por semana"),
+                        tabPanel("Predicción por semana",
+                                 h1(),
+                                 plotlyOutput("plotpred_semana") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
+                                 h1(),
+                                 DTOutput("dfpred_semana")),
                         # Muestra el grafico de predichos por accidente mensual
-                        tabPanel("Predicción por mes")
+                        tabPanel("Predicción por mes",
+                                 h1(),
+                                 plotlyOutput("plotpred_mes") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
+                                 h1(),
+                                 DTOutput("dfpred_mes"))
                         
                       )
                     ),
@@ -190,19 +201,76 @@ server <- function(input, output) {
                  lng = datos[1:100, "LONGITUD"], popup = datos[1:100,"FECHA"])
   })
   
-  # Funcion de prueba
-  output$plotpred <- renderPlotly({
-    validate(
-      need(input$daterange_pred[1] < input$daterange_pred[2],
-           "Error: la fecha final no puede ser menor que la fecha de inicio")
-    )
-    fecha_inicio <- input$daterange_pred[1]
-    fecha_fin <- input$daterange_pred[2]
-    tipo_modelo <- input$tipo_modelo
-    nombre <- ifelse(input$tipo_modelo == 'comuna', input$nombre_comuna, input$nombre_barrio)
-    control_prediction(fecha_inicio, fecha_fin, tipo_modelo)$dia
+  # Funcion para cargar todos los resultado
+  control_reactive_pred <- reactive({
+    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
+           "Error: la fecha final no puede ser menor que la fecha de inicio"))
+    
+    control_prediction(fecha_inicio = input$daterange_pred[1],
+    fecha_fin = input$daterange_pred[2],
+    tipo_modelo = input$tipo_modelo,
+    nombre = ifelse(input$tipo_modelo == 'comuna', input$nombre_comuna, input$nombre_barrio))
   })
   
+  # Grafica de dia
+  output$plotpred_dia <- renderPlotly({
+    gp <- control_reactive_pred()
+    gp$fig_dia
+  })
+  
+  # Grafica de semana
+  output$plotpred_semana <- renderPlotly({
+    gp <- control_reactive_pred()
+    gp$fig_semana
+  })
+  
+  # Grafica de mes
+  output$plotpred_mes <- renderPlotly({
+    gp <- control_reactive_pred()
+    gp$fig_mes
+  })
+  
+  # datos de dia
+  output$dfpred_dia <- renderDT({
+    gp <- control_reactive_pred()
+    DT::datatable({
+      gp$df_dia
+    },
+    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
+    filter = "top",
+    selection = "multiple",
+    style = "bootstrap"
+    )
+    
+  })
+  
+  # datos de semana
+  output$dfpred_semana <- renderDT({
+    gp <- control_reactive_pred()
+    DT::datatable({
+      gp$df_semana
+    },
+    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
+    filter = "top",
+    selection = "multiple",
+    style = "bootstrap"
+    )
+    
+  })
+  
+  # datos de mes
+  output$dfpred_mes <- renderDT({
+    gp <- control_reactive_pred()
+    DT::datatable({
+      gp$df_mes
+    },
+    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
+    filter = "top",
+    selection = "multiple",
+    style = "bootstrap"
+    )
+    
+  })
   
 }
 
