@@ -117,6 +117,7 @@ if (TIEMPO_DIA_final <= max(accidentes_dia_comuna$TIEMPO_DIA)) {
 
 ```{r}
 load(file = "mod_dia_barrio.RData") # base de datos
+load(file = "mod_dia_barrio.RData") # Modelo
 ```
 
 
@@ -127,6 +128,8 @@ Base para el modelo semanal
 ```{r}
 accidentes_semana_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
   summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+
+load(file = "mod_semana_barrio.RData") # Modelo
 ```
 
 
@@ -137,6 +140,8 @@ Base para el modelo mensual
 ```{r}
 accidentes_mes_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, MES, TIEMPO_MES) %>%
   summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+
+load(file = "mod_mes_barrio.RData")
 ```
 
 
