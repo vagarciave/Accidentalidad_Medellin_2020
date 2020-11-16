@@ -9,15 +9,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Librerías
-
 ```{r, message=F, warning=F}
 library(plotly)
 library(tidyverse)
 library(magrittr)
 library(lubridate)
 library("zoo")
-
 library(lme4)
 ```
 
@@ -58,6 +55,7 @@ library(lme4)
     '2020-05-25','2020-06-15','2020-06-22','2020-06-29','2020-07-20','2020-08-07',
     '2020-08-17','2020-10-12','2020-11-02','2020-11-16','2020-12-08','2020-12-25'
     ))
+save(festivos, file = "dias_festivos.RData")
 ```
 
 
@@ -138,25 +136,27 @@ summary(base)
 MSE <- function(y, y_est) mean((y-y_est)**2)
 ```
 
-
-## MODELO DIARIO ---------------------------------------------------------------------------------
-
-# base para el modelo
-
 ```{r}
-base_dia <- base
+accidentes_dia_comuna <- base
+save(accidentes_dia_comuna, file = "accidentes_dia_comuna.RData")
 remove(base)
 ```
 
+
+## MODELO DIARIO -------------------------------------------------------------------
+
 ```{r}
-summary(base_dia$ACCIDENTALIDAD)
+load(file = "dias_festivos.RData")
+load(file = "accidentes_dia_comuna.RData")
 ```
+
 
 # Base de entrenamiento y de prueba:
 
 ```{r}
-test_dia <- base_dia[base_dia$PERIODO == 2018, ]
-train_dia <- base_dia[base_dia$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+test_dia_comuna <- accidentes_dia_comuna[accidentes_dia_comuna$PERIODO == 2018, ]
+train_dia_comuna <- accidentes_dia_comuna[accidentes_dia_comuna$PERIODO %in%
+                                            c(2014, 2015, 2016, 2017), ]
 ```
 
 # Modelos Mixtos
@@ -165,28 +165,37 @@ Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 
 
 ```{r, message=FALSE, warning=FALSE}
-mod1_dia <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | COMUNA/CLASE),
-               data = train_dia, family= poisson())
+mod_dia_comuna <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_dia_comuna, family= poisson())
 ```
+
+```{r}
+save(mod_dia_comuna, file = "mod_dia_comuna.RData")
+load(file = "mod_dia_comuna.RData")
+```
+
 
 ```{r, message=FALSE, warning=FALSE}
-summary(mod1_dia)
+summary(mod_dia_comuna)
 ```
 
 ```{r}
-y_est1_train_dia <- round(predict(mod1_dia, newdata = train_dia, type = "response"),0)
-y_est1_test_dia <- round(predict(mod1_dia, newdata = test_dia, type = "response"),0)
-MSE(train_dia$ACCIDENTALIDAD, y_est1_train_dia)
-MSE(test_dia$ACCIDENTALIDAD, y_est1_test_dia)
+y_est_train_dia_comuna <- round(predict(mod_dia_comuna, newdata = train_dia_comuna,
+                                         type = "response"),0)
+y_est_test_dia_comuna <- round(predict(mod_dia_comuna, newdata = test_dia_comuna,
+                                        type = "response"),0)
+MSE(train_dia_comuna$ACCIDENTALIDAD, y_est_train_dia_comuna)
+MSE(test_dia_comuna$ACCIDENTALIDAD, y_est_test_dia_comuna)
 ```
+
 ```{r}
-summary(train_dia$ACCIDENTALIDAD)
-summary(y_est1_train_dia)
+summary(train_dia_comuna$ACCIDENTALIDAD)
+summary(y_est_train_dia_comuna)
 ```
 
 
 ```{r}
-data.frame(observado = train_dia$ACCIDENTALIDAD, predicho = y_est1_train_dia)[sample(1:length(y_est1_train_dia), 500),]
+data.frame(observado = train_dia_comuna$ACCIDENTALIDAD, predicho = y_est_train_dia_comuna)[sample(1:length(y_est_train_dia_comuna), 500),]
 ```
 
 
@@ -217,30 +226,30 @@ TIEMPO_DIA <- TIEMPO_DIA_inicial:TIEMPO_DIA_final
 Salida dependiendo de las fechas ingresadas
 
 ```{r}
-if (TIEMPO_DIA_final <= max(base_dia$TIEMPO_DIA)) {
-  fig <- plot_ly(data = train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Atropello" &
-                              train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+if (TIEMPO_DIA_final <= max(accidentes_dia_comuna$TIEMPO_DIA)) {
+  fig <- plot_ly(data = train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Atropello" &
+                              train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
                x = ~FECHA, y = ~ACCIDENTALIDAD, name = "Atropello",
                type = 'scatter', mode = 'lines+markers') %>%
   
-    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Caida Ocupante" &
-                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Caida Ocupante" &
+                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Caida Ocupante", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Choque" &
-                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Choque" &
+                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Choque", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Incendio" &
-                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Incendio" &
+                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Incendio", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Otro" &
-                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Otro" &
+                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
               y = ~ACCIDENTALIDAD, name = "Otro", mode = 'lines+markers') %>%
     
-    add_trace(data =train_dia[train_dia$COMUNA == comuna & train_dia$CLASE == "Volcamiento" &
-                                train_dia$TIEMPO_DIA %in% TIEMPO_DIA, ],
+    add_trace(data =train_dia_comuna[train_dia_comuna$COMUNA == comuna & train_dia_comuna$CLASE == "Volcamiento" &
+                                train_dia_comuna$TIEMPO_DIA %in% TIEMPO_DIA, ],
              y = ~ACCIDENTALIDAD, name = "Volcamiento", mode = 'lines+markers')
   
   fig <- fig %>% layout(legend=list(title=list(text='<b> Tipo de accidente </b>')))
@@ -253,20 +262,20 @@ if (TIEMPO_DIA_final <= max(base_dia$TIEMPO_DIA)) {
 ```
 
 
-## MODELO SEMANAL ---------------------------------------------------------------------------------
+## MODELO SEMANAL ----------------------------------------------------------
 
 Base para el modelo semanal
 
 ```{r}
-base_semana <- base_dia %>% group_by(COMUNA, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
+accidentes_semana_comuna <- accidentes_dia_comuna %>% group_by(COMUNA, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
   summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
 ```
 
 # Base de entrenamiento y de prueba:
 
 ```{r}
-test_semana <- base_semana[base_semana$PERIODO == 2018, ]
-train_semana <- base_semana[base_semana$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+test_semana_comuna <- accidentes_semana_comuna[accidentes_semana_comuna$PERIODO == 2018, ]
+train_semana_comuna <- accidentes_semana_comuna[accidentes_semana_comuna$PERIODO %in% c(2014, 2015, 2016, 2017), ]
 ```
 
 # Modelos Mixtos
@@ -274,23 +283,25 @@ train_semana <- base_semana[base_semana$PERIODO %in% c(2014, 2015, 2016, 2017), 
 Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 
 ```{r, message=FALSE, warning=FALSE}
-mod1_semana <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
-               data = train_semana, family= poisson())
+mod_semana_comuna <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_semana_comuna, family= poisson())
+save(mod_semana_comuna, file = "mod_semana_comuna.RData")
+load(file = "mod_semana_comuna.RData")
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-summary(mod1_semana)
+summary(mod_semana_comuna)
 ```
 
 ```{r}
-y_est1_train_semana <- round(predict(mod1_semana, newdata = train_semana, type = "response"),0)
-y_est1_test_semana <- round(predict(mod1_semana, newdata = test_semana, type = "response"),0)
-MSE(train_semana$ACCIDENTALIDAD, y_est1_train_semana)
-MSE(test_semana$ACCIDENTALIDAD, y_est1_test_semana)
+y_est_train_semana_comuna <- round(predict(mod_semana_comuna, newdata = train_semana_comuna, type = "response"),0)
+y_est_test_semana_comuna <- round(predict(mod_semana_comuna, newdata = test_semana_comuna, type = "response"),0)
+MSE(train_semana_comuna$ACCIDENTALIDAD, y_est_train_semana_comuna)
+MSE(test_semana_comuna$ACCIDENTALIDAD, y_est_test_semana_comuna)
 ```
 
 ```{r}
-data.frame(observado = train_semana$ACCIDENTALIDAD, predicho = y_est1_train_semana)[sample(1:length(y_est1_train_semana), 500),]
+data.frame(observado = train_semana_comuna$ACCIDENTALIDAD, predicho = y_est1_train_semana_comuna)[sample(1:length(y_est1_train_semana_comuna), 500),]
 ```
 
 
@@ -299,13 +310,12 @@ data.frame(observado = train_semana$ACCIDENTALIDAD, predicho = y_est1_train_sema
 Base para el modelo mensual
 
 ```{r}
-base_mes <- base_dia %>% group_by(COMUNA, CLASE, PERIODO, MES, TIEMPO_MES) %>%
+accidentes_mes_comuna <- accidentes_dia_comuna %>% group_by(COMUNA, CLASE, PERIODO, MES, TIEMPO_MES) %>%
   summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
 ```
 
-
 ```{r}
-summary(base_mes)
+summary(accidentes_mes_comuna)
 ```
 
 
@@ -314,8 +324,8 @@ summary(base_mes)
 # Base de entrenamiento y de prueba:
 
 ```{r}
-test_mes <- base_mes[base_mes$PERIODO == 2018, ]
-train_mes <- base_mes[base_mes$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+test_mes_comuna <- accidentes_mes_comuna[accidentes_mes_comuna$PERIODO == 2018, ]
+train_mes_comuna <- accidentes_mes_comuna[accidentes_mes_comuna$PERIODO %in% c(2014, 2015, 2016, 2017), ]
 ```
 
 # Modelos Mixtos
@@ -323,23 +333,25 @@ train_mes <- base_mes[base_mes$PERIODO %in% c(2014, 2015, 2016, 2017), ]
 Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 
 ```{r, message=FALSE, warning=FALSE}
-mod1_mes <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
-               data = train_mes, family= poisson())
+mod_mes_comuna <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_mes_comuna, family= poisson())
+save(mod_mes_comuna, file = "mod_mes_comuna.RData")
+load(file = "mod_mes_comuna.RData")
 ```
 
 ```{r, message=FALSE, warning=FALSE}
-summary(mod1_mes)
+summary(mod_mes_comuna)
 ```
 
 ```{r}
-y_est1_train_mes <- round(predict(mod1_mes, newdata = train_mes, type = "response"),0)
-y_est1_test_mes <- round(predict(mod1_mes, newdata = test_mes, type = "response"),0)
-MSE(train_mes$ACCIDENTALIDAD, y_est1_train_mes)
-MSE(test_mes$ACCIDENTALIDAD, y_est1_test_mes)
+y_est_train_mes_comuna <- round(predict(mod_mes_comuna, newdata = train_mes_comuna, type = "response"),0)
+y_est_test_mes_comuna <- round(predict(mod_mes_comuna, newdata = test_mes_comuna, type = "response"),0)
+MSE(train_mes_comuna$ACCIDENTALIDAD, y_est_train_mes_comuna)
+MSE(test_mes_comuna$ACCIDENTALIDAD, y_est_test_mes_comuna)
 ```
 
 ```{r}
-data.frame(observado = train_mes$ACCIDENTALIDAD, predicho = y_est1_train_mes)[sample(1:length(y_est1_train_mes), 500),]
+data.frame(observado = train_mes_comuna$ACCIDENTALIDAD, predicho = y_est1_train_mes_comuna)[sample(1:length(y_est1_train_mes_comuna), 500),]
 ```
 
 # Creación de base de datos con predicciones:
@@ -349,4 +361,48 @@ data.frame(observado = train_mes$ACCIDENTALIDAD, predicho = y_est1_train_mes)[sa
 Crear una base de datos a partir de los inputs que permita graficar los resultados predichos.
 
 
+```{r}
+# Selecciona una comuna para enseñar sus accidentalidad por tipo de accidente
+comuna <- readline(prompt = "Introduzca una comuna sin ningún acento: ")
+
+# Fecha inicial considerada, DEBE SER MAYOR A 2014-01-01
+fecha_inicial <- as.Date(readline(prompt = "Introduzca una fecha inicial: "))
+TIEMPO_DIA_inicial <- as.numeric(as.Date(fecha_inicial)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Fecha final considerada
+fecha_final <- as.Date(readline(prompt = "Introduzca la fecha final: "))
+TIEMPO_DIA_final <- as.numeric(as.Date(fecha_final)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Unidades de TIEMPO_DIA. Si TIEMPO_DIA = 1, entonces FECHA = "2014-01-01"
+TIEMPO_DIA <- TIEMPO_DIA_inicial:TIEMPO_DIA_final
+```
+
+```{r}
+fecha_vector <- as.Date(as.Date("2014-01-01"):fecha_final)
+base <- expand.grid(COMUNA = levels(accidentes_dia_comuna$COMUNA), CLASE = levels(accidentes_dia_comuna$CLASE),
+                             FECHA = fecha_vector)
+base <- base %>% mutate(TIEMPO_DIA = as.numeric(FECHA) -
+                                            as.numeric(as.Date("2014-01-01")) + 1)
+
+# PERIODO
+base <- base %>% mutate(PERIODO = as.numeric(format(FECHA,'%Y')))
+
+# Se crea la variable SEMANA
+base <- base %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
+                          TIEMPO_SEMANA = match(SEMANA, sort(unique(SEMANA))))
+
+# Se crea la variable MES
+base <- base %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
+                          TIEMPO_MES = match(MES, sort(unique(MES))))
+
+# días festivos
+base <- base %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
+```
+
+```{r}
+base <- left_join(base, accidentes_dia_comuna, by = c("COMUNA", "CLASE", "FECHA", "TIEMPO_DIA",
+                                       "PERIODO", "SEMANA", "TIEMPO_SEMANA", "MES",
+                                       "TIEMPO_MES", "DIA_FESTIVO"))
+base[is.na(base)] <- 0
+```
 

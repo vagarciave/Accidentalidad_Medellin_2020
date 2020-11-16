@@ -1,0 +1,254 @@
+---
+title: "Modelos"
+author: "Jaime Andres Molina Correa"
+date: "8/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Librerías
+
+```{r, message=F, warning=F}
+library(plotly)
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library("zoo")
+library(lme4)
+```
+
+```{r}
+load(file = "dias_festivos.RData")
+```
+
+Se carga la base de datos
+
+```{r}
+datos <- read.csv("Base_definitiva.csv", header = T, stringsAsFactors = T,
+                  encoding = "UTF-8")
+
+datos <- datos %>% select(BARRIO, CLASE, FECHA, PERIODO, MES)
+
+datos$FECHA <- as.Date(datos$FECHA)
+
+# Se agrega la variable TIEMPO y MES_NOMBRE
+datos$MES_NOMBRE <- paste(datos$PERIODO, datos$MES, sep="-") %>% as.yearmon("%Y-%m")
+
+# Para obtener la inversa se usaría: zoo::as.Date(datos$FECHA, origin="2014-01-01")
+datos$TIEMPO_DIA <- as.numeric(as.Date(datos$FECHA)) - as.numeric(as.Date("2014-01-01")) + 1
+
+# Se crea la variable SEMANA
+datos <- datos %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
+                          TIEMPO_SEMANA = match(SEMANA, sort(unique(SEMANA))))
+
+# Se crea la variable MES
+datos <- datos %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
+                          TIEMPO_MES = match(MES, sort(unique(MES))))
+
+# días festivos
+datos <- datos %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
+
+# accidentalidad
+datos <- datos %>% mutate(ACCIDENTALIDAD = 1)
+```
+
+```{r}
+datos <- datos %>% group_by(BARRIO, CLASE, PERIODO, FECHA, MES, TIEMPO_DIA, SEMANA,
+                            TIEMPO_SEMANA, TIEMPO_MES, DIA_FESTIVO) %>%
+  summarise(ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+
+```{r}
+fecha_vector <- as.Date(as.Date("2014-01-01"):as.Date("2018-12-31"))
+base <- expand.grid(BARRIO = levels(datos$BARRIO), CLASE = levels(datos$CLASE),
+                             FECHA = fecha_vector)
+base <- base %>% mutate(TIEMPO_DIA = as.numeric(FECHA) -
+                                            as.numeric(as.Date("2014-01-01")) + 1)
+
+# PERIODO
+base <- base %>% mutate(PERIODO = as.numeric(format(FECHA,'%Y')))
+
+# Se crea la variable SEMANA
+base <- base %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
+                          TIEMPO_SEMANA = match(SEMANA, sort(unique(SEMANA))))
+
+# Se crea la variable MES
+base <- base %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
+                          TIEMPO_MES = match(MES, sort(unique(MES))))
+
+# días festivos
+base <- base %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
+```
+
+```{r}
+base <- left_join(base, datos, by = c("BARRIO", "CLASE", "FECHA", "TIEMPO_DIA",
+                                       "PERIODO", "SEMANA", "TIEMPO_SEMANA", "MES",
+                                       "TIEMPO_MES", "DIA_FESTIVO"))
+base[is.na(base)] <- 0
+```
+
+```{r}
+summary(base)
+```
+
+
+# Funcion MSE
+```{r}
+MSE <- function(y, y_est) mean((y-y_est)**2)
+```
+
+```{r}
+accidentes_dia_barrio <- base
+save(accidentes_dia_barrio, file = "accidentes_dia_barrio.RData")
+remove(base)
+```
+
+
+## MODELO DIARIO -------------------------------------------------------------------
+
+```{r}
+load(file = "accidentes_dia_barrio.RData")
+```
+
+
+# Base de entrenamiento y de prueba:
+
+```{r}
+test_dia_barrio <- accidentes_dia_barrio[accidentes_dia_barrio$PERIODO == 2018, ]
+train_dia_barrio <- accidentes_dia_barrio[accidentes_dia_barrio$PERIODO %in%
+                                            c(2014, 2015, 2016, 2017), ]
+```
+
+# Modelos Mixtos
+
+Modelo con efectos aleatorios en BARRIO y CLASE, CLASE dentro de BARRIO.
+
+
+```{r, message=FALSE, warning=FALSE}
+mod_dia_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
+               data = train_dia_barrio, family= poisson())
+```
+
+```{r}
+save(mod_dia_barrio, file = "mod_dia_barrio.RData")
+load(file = "mod_dia_barrio.RData")
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod_dia_barrio)
+```
+
+```{r}
+y_est_train_dia_barrio <- round(predict(mod_dia_barrio, newdata = train_dia_barrio,
+                                         type = "response"),0)
+y_est_test_dia_barrio <- round(predict(mod_dia_barrio, newdata = test_dia_barrio,
+                                        type = "response"),0)
+MSE(train_dia_barrio$ACCIDENTALIDAD, y_est_train_dia_barrio)
+MSE(test_dia_barrio$ACCIDENTALIDAD, y_est_test_dia_barrio)
+```
+
+```{r}
+summary(train_dia_barrio$ACCIDENTALIDAD)
+summary(y_est_train_dia_barrio)
+```
+
+
+```{r}
+data.frame(observado = train_dia_barrio$ACCIDENTALIDAD, predicho = y_est_train_dia_barrio)[sample(1:length(y_est_train_dia_barrio), 500),]
+```
+
+
+## MODELO SEMANAL ----------------------------------------------------------
+
+Base para el modelo semanal
+
+```{r}
+accidentes_semana_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+# Base de entrenamiento y de prueba:
+
+```{r}
+test_semana_barrio <- accidentes_semana_barrio[accidentes_semana_barrio$PERIODO == 2018, ]
+train_semana_barrio <- accidentes_semana_barrio[accidentes_semana_barrio$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+# Modelos Mixtos
+
+Modelo con efectos aleatorios en BARRIO y CLASE, CLASE dentro de BARRIO.
+
+```{r, message=FALSE, warning=FALSE}
+mod_semana_barrio <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | BARRIO/CLASE),
+               data = train_semana_barrio, family= poisson())
+save(mod_semana_barrio, file = "mod_semana_barrio.RData")
+load(file = "mod_semana_barrio.RData")
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod_semana_barrio)
+```
+
+```{r}
+y_est_train_semana_barrio <- round(predict(mod_semana_barrio, newdata = train_semana_barrio, type = "response"),0)
+y_est_test_semana_barrio <- round(predict(mod_semana_barrio, newdata = test_semana_barrio, type = "response"),0)
+MSE(train_semana_barrio$ACCIDENTALIDAD, y_est_train_semana_barrio)
+MSE(test_semana_barrio$ACCIDENTALIDAD, y_est_test_semana_barrio)
+```
+
+```{r}
+data.frame(observado = train_semana_barrio$ACCIDENTALIDAD, predicho = y_est_train_semana_barrio)[sample(1:length(y_est_train_semana_barrio), 500),]
+```
+
+
+## MODELO MENSUAL ---------------------------------------------------------------------------------
+
+Base para el modelo mensual
+
+```{r}
+accidentes_mes_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, MES, TIEMPO_MES) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+```{r}
+summary(accidentes_mes_barrio)
+```
+
+
+# Base de entrenamiento y de prueba:
+
+```{r}
+test_mes_barrio <- accidentes_mes_barrio[accidentes_mes_barrio$PERIODO == 2018, ]
+train_mes_barrio <- accidentes_mes_barrio[accidentes_mes_barrio$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+# Modelos Mixtos
+
+Modelo con efectos aleatorios en BARRIO y CLASE, CLASE dentro de BARRIO.
+
+```{r, message=FALSE, warning=FALSE}
+mod_mes_barrio <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | BARRIO/CLASE),
+               data = train_mes_barrio, family= poisson())
+save(mod_mes_barrio, file = "mod_mes_barrio.RData")
+load(file = "mod_mes_barrio.RData")
+```
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod_mes_barrio)
+```
+
+```{r}
+y_est_train_mes_barrio <- round(predict(mod_mes_barrio, newdata = train_mes_barrio, type = "response"),0)
+y_est_test_mes_barrio <- round(predict(mod_mes_barrio, newdata = test_mes_barrio, type = "response"),0)
+MSE(train_mes_barrio$ACCIDENTALIDAD, y_est_train_mes_barrio)
+MSE(test_mes_barrio$ACCIDENTALIDAD, y_est_test_mes_barrio)
+```
+
+```{r}
+data.frame(observado = train_mes_barrio$ACCIDENTALIDAD, predicho = y_est_train_mes_barrio)[sample(1:length(y_est_train_mes_barrio), 500),]
+```
