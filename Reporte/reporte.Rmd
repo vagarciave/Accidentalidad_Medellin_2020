@@ -196,12 +196,24 @@ En cuanto al clustering desarrollado para la clasificación de los barrios, se t
 
 Primero, fue necesario extraer las columnas BARRIO y GRAVEDAD de la base de datos, para así solo centrarnos en lo importante durante el proceso. 
 
-![](Parte1.png){#id .class width=50% height=50%}
+```{r, echo=FALSE, rows.print = 5}
+df <- read.csv(file = "Analisis1.csv", header = T, nrows = 50,
+               stringsAsFactors = T)
+df; remove(df)
+```
 
 Posteriormente, fue necesario hacer 2 pasos: primero se crearon 3 columnas correspondientes a los tipos de gravedad, asignando un valor de un en la fila correspondiente al mismo tipo y un valor de cero para las demás; despues, fue necesario agrupar las columnas por barrio, para obtener la suma total de accidentes por barrio.
 
-![](Parte2.png){#id .class width=50% height=50%}
-![](Parte3.png){#id .class width=50% height=50%}
+```{r, echo=FALSE, rows.print = 5}
+df <- read.csv(file = "Analisis2.csv", header = T, nrows = 50,
+               stringsAsFactors = T)
+df; remove(df)
+```
+```{r, echo=FALSE, rows.print = 5}
+df <- read.csv(file = "Analisis3.csv", header = T, nrows = 50,
+               stringsAsFactors = T)
+df; remove(df)
+```
 
 Más adelante y ahora con sólo los datos necesarios, se realizó el método del codo para encontrar el número de clusters, al mismo tiempos que se escogía la mejor división utilizando el método k-means++ que posee python. Todo esto arrojó que lo mejor sería dividir los datos en 4 clusters.
 
