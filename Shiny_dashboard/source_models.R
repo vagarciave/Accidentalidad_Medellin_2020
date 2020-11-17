@@ -72,11 +72,3 @@ control_prediction <- function(fecha_inicio, fecha_fin, tipo_modelo, nombre){
 }
 
 
-# source ui tables and 
-
-# 1=Peligroso, 2=Medio, 3=Moderado, 4=Bajo
-# para el mapa 
-
-
-
-# Tabla linda para mostrar los daticos

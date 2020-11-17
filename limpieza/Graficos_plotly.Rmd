@@ -107,8 +107,10 @@ fig
 
 ```{r}
 datos %>% group_by(CLASE) %>% 
-  summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) %>%
-  plot_ly(x = ~ CLASE, y = ~ TOTAL,color = ~CLASE, type = 'bar')   %>%
+  summarise(TOTAL = n())  %>% 
+  mutate(TOTAL = TOTAL / sum(TOTAL))%>%
+  arrange(desc(TOTAL)) %>%
+  plot_ly(x = ~ CLASE, y = ~ TOTAL,color = ~CLASE, type = 'pie')   %>%
   layout(
      title = "Total de accidentes por Clase",
      xaxis = list(title = "",
@@ -118,6 +120,18 @@ datos %>% group_by(CLASE) %>%
     )
 
 ```
+```{r}
+datos %>% group_by(CLASE) %>% 
+  summarise(TOTAL = n()) %>%
+  arrange(desc(TOTAL)) %>% 
+  plot_ly(labels = ~CLASE, values = ~TOTAL, COLOR  = ~CLASE,type = 'pie') %>% 
+  layout(title = 'United States Personal Expenditures by Categories in 1960',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+```
+
+
 
 Boxplot para total de accidentes diarios por CLASE
 ```{r}
@@ -135,6 +149,10 @@ fig_clase <- datos_clase %>% plot_ly(y = ~ TOTAL, color = ~CLASE, type = "box") 
     )
 #fig_clase <- fig_clase %>% layout(boxmode = "group")
 fig_clase
+```
+
+```{r}
+
 ```
 
 
@@ -170,6 +188,36 @@ datos %>% group_by(COMUNA) %>%
 ```
 ### BARRIO
 ### DISENO
+
+```{r}
+df_diseno <- datos %>% group_by(DISENO) %>% 
+      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) 
+
+```
+
+```{r}
+
+
+fig <- plot_ly(
+  type = 'table',
+  header = list(
+    values = c('<b>DISEÑO</b>', '<b>Total</b>'),
+    line = list(color = '#506784'),
+    fill = list(color = '#119DFF'),
+    align = c('left','center'),
+    font = list(color = 'white', size = 12)
+  ),
+  cells = list(
+    values = t(df_diseno),
+    line = list(color = '#506784'),
+    fill = list(color = c('#d0eeec', 'white')),
+    align = c('left', 'center'),
+    font = list(color = c('black'), size = 12)
+    ))
+
+fig
+```
+
 ### DIA_NOMBRE
 #### DIA_FESTIVO
 ## PERIODO

@@ -26,7 +26,10 @@ library(readr)
 library(leaflet)
 library(readr)
 library(plotly)
+library(raster)
+library(dashboardthemes)
 
+youtube_video <- '<iframe width="560" height="315" src="https://www.youtube.com/watch?v=iX-QaNzd-0Y" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
 
 # Cargar valores ajustados
 load(file = 'accidentes_dia_barrio.RData',.GlobalEnv)
@@ -42,8 +45,18 @@ list_comunas <- sort(unique(datos$COMUNA))
 source('source_models.R')
 source('source_map.R')
 
+
 ui <- dashboardPage(
-  dashboardHeader(title = "TAE 2020-2"),
+                    
+  dashboardHeader(  ### changing logo
+    title = shinyDashboardLogo(
+      theme = "poor_mans_flatly",
+      boldText = "Accidentalidad" ,
+      mainText = "Medellin",
+      badgeText = "2014-2018"
+    ),
+    titleWidth = 350
+    ),
   ## Sidebar content
   dashboardSidebar(
     sidebarMenu(
@@ -51,24 +64,41 @@ ui <- dashboardPage(
       menuItem("Tabla de datos históricos", tabName = "datos", icon = icon("table")),
       menuItem("Visualizacion", tabName = "visualizacion", icon = icon("chart-bar")),
       menuItem("Prediccion", tabName = "prediccion", icon = icon("car-crash")),
-      menuItem("Agrupamiento", tabName = "agrupamiento", icon = icon("map-marked-alt"))
+      menuItem("Agrupamiento", tabName = "agrupamiento", icon = icon("map-marked-alt")),
+      menuItem("Equipo", tabName = "equipo", icon = icon("users"))
     )
   ),
   ## Body content
   dashboardBody(
+    ### changing theme
+    shinyDashboardThemes(
+      theme = "poor_mans_flatly"
+    ),
     tabItems(
       # First tab content
       # First tab content
       tabItem(tabName = "inicio",
               # En esta parte de inicio se pone el video
               # la descripcion de la app
-              h1("Bienvenidos")
+              h1("¡Bienvenidos!",
+                 style = "font-family: 'Montserrat';
+                  font-weight: 500; line-height: 1.1; 
+                  color: #000000",
+                 align = "center"),
+              h3("En esta aplicación web encontrarás información histórica de accidentes de tránsito en Medellín 
+                 desde el año 2014 a 2018. Aquí podrás visualizar los datos históricos de accidentalidad, un mapa
+                 donde se encuentran los barrios de Medellín agrupados de acuerdo al número de accidentes, además
+                 nuestra herramienta te permitirá realizar predicciones de accidentes, por barrio, comuna y clase 
+                 de accidente."),
+              br(),
+              h3("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
+                 aplicación web"),
+              tags$div(class = "col-md-10  col-md-offset-1 videoWrapper",HTML(youtube_video))
       ),
 
      tabItem(tabName = "datos",
-             titlePanel("Incidentes Georreferenciados"),
+             h1("Incidentes Georreferenciados", align = "center"),
              box(width = 14,
-                 tags$h3("Entradas:"),
                  dateRangeInput("daterange", "Rango de Tiempo:",
                                 start  = "2014-01-01",
                                 end    = "2018-12-31",
@@ -84,13 +114,45 @@ ui <- dashboardPage(
       ),
      
      tabItem(tabName = "visualizacion",
-             # En esta parte los graficos descriptivos
+             h1("Visulización de datos",align = "center"),
+             fluidRow(
+               box(width = 12,
+                   dateRangeInput("daterange2", "Rango de Tiempo:",
+                                  start  = "2014-01-01",
+                                  end    = "2018-12-31",
+                                  min    = "2014-01-01",
+                                  max    = "2018-12-31",
+                                  format = "dd/mm/yyyy",
+                                  separator = " - ",
+                                  language = "es")
+               )
+             ),
+             
+             fluidRow(
+               box(width = 4,
+                   plotlyOutput("chart_clase")),
+               box(width = 4,
+                   plotlyOutput("chart_gravedad")),
+               box(width = 4,
+                   plotlyOutput("chart_diseno"))
+               
+             ),
+             fluidRow(
+               box(width = 6,
+                   plotlyOutput("chart_comuna")),
+               box(width = 6,
+                   plotlyOutput("chart_barrio"))
+             )
+
      ),
      
       # Second tab content
       tabItem(tabName = "prediccion",
+              h1("Predicción de accidentes de tránsito", align = 'center'),
+              h4("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
+                 por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2018 se
+                 realizan predicciones"),
               fluidRow(
-                tags$h3("Entradas:"),
                 box(width = 4,
                   dateRangeInput("daterange_pred", "Rango de Tiempo:",
                                start  = "2014-01-01",
@@ -154,6 +216,12 @@ ui <- dashboardPage(
       ),
       # Second tab content
       tabItem(tabName = "agrupamiento",
+              h1("Agrupamiento de barrios en Medellín"),
+              h4("El siguiente mapa muestra los barrios de Medellín divididos en clusters,
+                 cada cluster tiene carácteristicas diferentes de acuerdo al número de accidentes
+                 que se presentaron de 2014 a 2018."),
+              h4("Puede seleccionar un barrio en el mapa y obtener la información histórica del mismo,
+                 además se presenta una tabla con la información de cada cluster"),
                 fluidPage(
                   column(width = 12,
                          box(width = NULL, solidHeader = TRUE,
@@ -164,7 +232,24 @@ ui <- dashboardPage(
                           uiOutput("clusters_table"))
                   )
               )
-       )
+       ),
+     tabItem(tabName = "equipo",
+             h2("Daniel Chanci Restrepo", align = "center"),
+             h4('Ingeniería de sistemas', align = "center"),
+             br(),
+             h2("Valentina Garcia Velásquez", align = "center"),
+             h4('Estadística', align = "center"),
+             br(),
+             h2("Jaime Andrés Molina Correa", align = "center"),
+             h4('Estadística', align = "center"),
+             br(),
+             h2("Ricardo Peñaloza Velásquez", align = "center"),
+             h4('Ingeniería de sistemas', align = "center"),
+             br(),
+             h2("Felipe Villarreal Piedrahita", align = "center"),
+             h4('Ingeniería de sistemas', align = "center"),
+             br()
+             )
       
     ) # tabItems
   ) # DashboardBody
@@ -248,7 +333,9 @@ server <- function(input, output) {
   #Datos de visualizacion
   output$Data <- DT::renderDataTable(
     DT::datatable({
-      datos %>% filter(ymd(FECHA) >= input$daterange[1], ymd(FECHA) <= input$daterange[2])
+      datos %>% filter(ymd(FECHA) >= input$daterange[1], ymd(FECHA) <= input$daterange[2]) %>%
+        group_by(FECHA,CLASE,GRAVEDAD,COMUNA,BARRIO) %>%
+        summarise("TOTAL ACCIDENTES" = n())
     },
     options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
     filter = "top",
@@ -319,7 +406,89 @@ server <- function(input, output) {
           )
      )
   })
+  # Para gráficos del dash
+  output$chart_clase <- renderPlotly({
+    datos %>% filter(ymd(FECHA) >= input$daterange2[1],
+                     ymd(FECHA) <= input$daterange2[2]) %>%
+      group_by(CLASE) %>% 
+      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) %>%
+      plot_ly(x = ~ CLASE, y = ~ TOTAL,color = ~CLASE, type = 'bar')   %>%
+      layout(
+        title = "Total de accidentes por Clase",
+        xaxis = list(title = "",
+                     categoryorder = "array",
+                     categoryarray = ~CLASE),
+        yaxis = list(title = "Total")
+      )
+  })
+  # Grafico gravedad
+  output$chart_gravedad<- renderPlotly({
+      datos %>% filter(ymd(FECHA) >= input$daterange2[1],
+                       ymd(FECHA) <= input$daterange2[2]) %>%
+      group_by(GRAVEDAD) %>% 
+      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) %>%
+      plot_ly(labels = ~GRAVEDAD, values = ~TOTAL, type = 'pie') %>% 
+      layout(title = "Total de accidentes por gravedad",
+                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+  })
+  #Grafico comuna
+  output$chart_comuna <- renderPlotly({
+    datos %>% filter(ymd(FECHA) >= input$daterange2[1],
+                     ymd(FECHA) <= input$daterange2[2]) %>%
+      group_by(COMUNA) %>% 
+      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) %>%
+      plot_ly(x = ~ COMUNA, y = ~ TOTAL,color = ~COMUNA, type = 'bar')  %>%
+      layout(
+        title = "Total de accidentes por Comuna",
+        xaxis = list(title = "",
+                     categoryorder = "array",
+                     categoryarray = ~COMUNA),
+        yaxis = list(title = "Total")
+      )
+  })
   
+  #Grafico comuna
+  output$chart_barrio <- renderPlotly({
+    datos %>% filter(ymd(FECHA) >= input$daterange2[1],
+                     ymd(FECHA) <= input$daterange2[2]) %>%
+      group_by(BARRIO) %>% 
+      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) %>%
+      top_n(10) %>%
+      plot_ly(x = ~ BARRIO, y = ~ TOTAL,color = ~BARRIO, type = 'bar')  %>%
+      layout(
+        title = "Total de accidentes \n Top 5 barrios con más accidentes",
+        xaxis = list(title = "",
+                     categoryorder = "array",
+                     categoryarray = ~BARRIO),
+        yaxis = list(title = "Total")
+      )
+  })
+
+  # Grafico diseño
+  output$chart_diseno <- renderPlotly(({
+    df_diseno <- datos %>% filter(ymd(FECHA) >= input$daterange2[1],
+                                  ymd(FECHA) <= input$daterange2[2]) %>%
+      group_by(DISENO) %>% 
+      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) 
+    fig <- plot_ly(
+      type = 'table',
+      header = list(
+        values = c('<b>DISEÑO</b>', '<b>Total</b>'),
+        line = list(color = '#506784'),
+        fill = list(color = '#119DFF'),
+        align = c('left','center'),
+        font = list(color = 'white', size = 12)
+      ),
+      cells = list(
+        values = t(df_diseno),
+        line = list(color = '#506784'),
+        fill = list(color = c('#d0eeec', 'white')),
+        align = c('left', 'center'),
+        font = list(color = c('black'), size = 12)
+      ))
+    fig
+  }))
   
 }
 
