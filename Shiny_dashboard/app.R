@@ -82,10 +82,10 @@ ui <- dashboardPage(
               # la descripcion de la app
               h1("¡Bienvenidos!",
                  align = "center"),
-              h5("En esta aplicación web encontrarás información histórica de accidentes de tránsito en Medellín 
-                 desde el año 2014 a 2018. Aquí podrás visualizar los datos históricos de accidentalidad, un mapa
-                 donde se encuentran los barrios de Medellín agrupados de acuerdo al número de accidentes, además
-                 nuestra herramienta te permitirá realizar predicciones de accidentes, por barrio, comuna y clase 
+              h5("En esta aplicación web encontrarás información sobre los accidentes de tránsito en Medellín 
+                 desde el año 2014 al 2018. Aquí podrás visualizar los datos de accidentalidad, un mapa
+                 donde se encuentran los barrios de Medellín agrupados de acuerdo al número de accidentes y, además,
+                 nuestra herramienta te permitirá realizar predicciones de accidentes por barrio, comuna y clase 
                  de accidente."),
               br(),
               h5("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
