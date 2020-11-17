@@ -34,6 +34,25 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', size="footnotesize",
 
 # Objetivos
 
+El análisis y los modelos que se pretenden construir sólo abarcan el área urbana de Medellín correspondiente a sus 16 comunas y sus respectivos barrios.
+
+## General
+
+Construir un sistema que le permita a la Secretaría de Movilidad de Medellín tomar decisiones en la creación de estrategias que ayuden a reducir la accidentalidad en zona específicas de Medellín, observando cuales son los tipos de accidentes más frecuentes en las diferentes comunas y sus barrios.
+
+También se busca que el sistema les permita a todos los ciudadanos que se movilizan en un vehículo tomar precauciones respecto a los accidentes más frecuentes que suceden en lugares específicos.
+
+Lo anterior creando una interfaz amigable para los usuarios y fácil de utilizar.
+
+## Específicos
+
+- Construir modelos que predigan el número de accidentes de cada tipo, tomando como entradas una ventana y una resolución temporal específicas, además de una zona espacial que puede ser un barrio o comuna de Medellín.
+
+- Elaborar un sistema que agrupe barrios con características similares por los tipos de accidentes (clase) y que tienen lugar en estos.
+
+- Crear una interfaz gráfica que le permita al usuario visualizar con mayor comodidad la accidentalidad que hay en Medellín y las predicciones de esta a futuro.
+
+
 
 # Descripción y Limpieza de los datos
 
