@@ -65,7 +65,7 @@ Se carga la base de datos
 datos <- read.csv("Base_definitiva.csv", header = T, stringsAsFactors = T,
                   encoding = "UTF-8")
 
-datos <- datos %>% select(COMUNA, CLASE, FECHA, PERIODO, MES)
+datos <- datos %>% select(COMUNA, CLASE, FECHA, PERIODO, MES, DIA_NOMBRE)
 
 datos$FECHA <- as.Date(datos$FECHA)
 
@@ -91,7 +91,7 @@ datos <- datos %>% mutate(ACCIDENTALIDAD = 1)
 ```
 
 ```{r}
-datos <- datos %>% group_by(COMUNA, CLASE, PERIODO, FECHA, MES, TIEMPO_DIA, SEMANA,
+datos <- datos %>% group_by(COMUNA, CLASE, PERIODO, FECHA, DIA_NOMBRE, TIEMPO_DIA, SEMANA,
                             TIEMPO_SEMANA, TIEMPO_MES, DIA_FESTIVO) %>%
   summarise(ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
 ```
@@ -120,11 +120,15 @@ base <- base %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
 ```
 
 ```{r}
-base <- left_join(base, datos, by = c("COMUNA", "CLASE", "FECHA", "TIEMPO_DIA",
-                                       "PERIODO", "SEMANA", "TIEMPO_SEMANA", "MES",
+base <- left_join(base, subset(datos, select = -DIA_NOMBRE),
+                  by = c("COMUNA", "CLASE", "FECHA", "TIEMPO_DIA",
+                                       "PERIODO", "SEMANA", "TIEMPO_SEMANA",
                                        "TIEMPO_MES", "DIA_FESTIVO"))
 base[is.na(base)] <- 0
+
+base <- left_join(base, distinct(datos[, c("FECHA", "DIA_NOMBRE")]), by = "FECHA")
 ```
+
 
 ```{r}
 summary(base)
@@ -165,9 +169,43 @@ Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 
 
 ```{r, message=FALSE, warning=FALSE}
-mod_dia_comuna <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | COMUNA/CLASE),
-               data = train_dia_comuna, family= poisson())
+mod_dia_comuna0 <- glmer(ACCIDENTALIDAD ~ 1 + (1 | COMUNA/CLASE),
+                         data = train_dia_comuna, family= poisson())
+mod_dia_comuna1 <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | COMUNA/CLASE),
+                         data = train_dia_comuna, family= poisson())
+mod_dia_comuna2 <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + TIEMPO_DIA + (1 | COMUNA/CLASE),
+                         data = train_dia_comuna, family= poisson())
+mod_dia_comuna3 <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + DIA_NOMBRE + (1 | COMUNA/CLASE),
+                         data = train_dia_comuna, family= poisson())
+mod_dia_comuna4 <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + DIA_NOMBRE +
+                           (1 + DIA_FESTIVO| COMUNA/CLASE),
+                         data = train_dia_comuna, family= poisson())
+
+save(mod_dia_comuna0, file = "mod_dia_comuna0.RData")
+save(mod_dia_comuna1, file = "mod_dia_comuna1.RData")
+save(mod_dia_comuna2, file = "mod_dia_comuna2.RData")
+save(mod_dia_comuna3, file = "mod_dia_comuna3.RData")
+save(mod_dia_comuna4, file = "mod_dia_comuna4.RData")
 ```
+
+```{r}
+load(file = "mod_dia_comuna0.RData")
+load(file = "mod_dia_comuna1.RData")
+load(file = "mod_dia_comuna2.RData")
+load(file = "mod_dia_comuna3.RData")
+load(file = "mod_dia_comuna4.RData")
+```
+
+
+```{r}
+summary(mod_dia_comuna1)
+summary(mod_dia_comuna2)
+summary(mod_dia_comuna3)
+summary(mod_dia_comuna4)
+anova(mod_dia_comuna1, mod_dia_comuna2, mod_dia_comuna3, mod_dia_comuna4)
+```
+
+
 
 ```{r}
 save(mod_dia_comuna, file = "mod_dia_comuna.RData")
@@ -180,12 +218,12 @@ summary(mod_dia_comuna)
 ```
 
 ```{r}
-y_est_train_dia_comuna <- round(predict(mod_dia_comuna, newdata = train_dia_comuna,
+y_est_train_dia_comuna <- round(predict(mod_dia_comuna0, newdata = train_dia_comuna,
                                          type = "response"),0)
-y_est_test_dia_comuna <- round(predict(mod_dia_comuna, newdata = test_dia_comuna,
+y_est_test_dia_comuna <- round(predict(mod_dia_comuna0, newdata = test_dia_comuna,
                                         type = "response"),0)
-MSE(train_dia_comuna$ACCIDENTALIDAD, y_est_train_dia_comuna)
-MSE(test_dia_comuna$ACCIDENTALIDAD, y_est_test_dia_comuna)
+round(MSE(train_dia_comuna$ACCIDENTALIDAD, y_est_train_dia_comuna), 4)
+round(MSE(test_dia_comuna$ACCIDENTALIDAD, y_est_test_dia_comuna), 4)
 ```
 
 ```{r}
@@ -283,19 +321,45 @@ train_semana_comuna <- accidentes_semana_comuna[accidentes_semana_comuna$PERIODO
 Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 
 ```{r, message=FALSE, warning=FALSE}
-mod_semana_comuna <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+mod_semana_comuna0 <- glmer(ACCIDENTALIDAD ~  1 + (1 | COMUNA/CLASE),
                data = train_semana_comuna, family= poisson())
-save(mod_semana_comuna, file = "mod_semana_comuna.RData")
-load(file = "mod_semana_comuna.RData")
-```
-
-```{r, message=FALSE, warning=FALSE}
-summary(mod_semana_comuna)
+mod_semana_comuna1 <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_semana_comuna, family= poisson())
+mod_semana_comuna2 <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + TIEMPO_SEMANA +
+                              (1 | COMUNA/CLASE),
+               data = train_semana_comuna, family= poisson())
+mod_semana_comuna3 <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO +
+                              (1 + DIA_FESTIVO | COMUNA/CLASE),
+               data = train_semana_comuna, family= poisson())
 ```
 
 ```{r}
-y_est_train_semana_comuna <- round(predict(mod_semana_comuna, newdata = train_semana_comuna, type = "response"),0)
-y_est_test_semana_comuna <- round(predict(mod_semana_comuna, newdata = test_semana_comuna, type = "response"),0)
+save(mod_semana_comuna0, file = "mod_semana_comuna0.RData")
+save(mod_semana_comuna1, file = "mod_semana_comuna1.RData")
+save(mod_semana_comuna2, file = "mod_semana_comuna2.RData")
+save(mod_semana_comuna3, file = "mod_semana_comuna3.RData")
+```
+
+```{r}
+load(file = "mod_semana_comuna0.RData")
+load(file = "mod_semana_comuna1.RData")
+load(file = "mod_semana_comuna2.RData")
+load(file = "mod_semana_comuna3.RData")
+```
+
+
+```{r}
+anova(mod_semana_comuna0, mod_semana_comuna1, mod_semana_comuna2, mod_semana_comuna3)
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+summary(mod_semana_comuna3)
+```
+
+```{r}
+y_est_train_semana_comuna <- round(predict(mod_semana_comuna4, newdata = train_semana_comuna, type = "response"),0)
+y_est_test_semana_comuna <- round(predict(mod_semana_comuna4, newdata = test_semana_comuna, type = "response"),0)
 MSE(train_semana_comuna$ACCIDENTALIDAD, y_est_train_semana_comuna)
 MSE(test_semana_comuna$ACCIDENTALIDAD, y_est_test_semana_comuna)
 ```
@@ -333,19 +397,37 @@ train_mes_comuna <- accidentes_mes_comuna[accidentes_mes_comuna$PERIODO %in% c(2
 Modelo con efectos aleatorios en COMUNA y CLASE, CLASE dentro de COMUNA.
 
 ```{r, message=FALSE, warning=FALSE}
-mod_mes_comuna <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+mod_mes_comuna0 <- glmer(ACCIDENTALIDAD ~  1 + (1 | COMUNA/CLASE),
                data = train_mes_comuna, family= poisson())
-save(mod_mes_comuna, file = "mod_mes_comuna.RData")
-load(file = "mod_mes_comuna.RData")
-```
-
-```{r, message=FALSE, warning=FALSE}
-summary(mod_mes_comuna)
+mod_mes_comuna1 <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 | COMUNA/CLASE),
+               data = train_mes_comuna, family= poisson())
+mod_mes_comuna2 <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 + DIA_FESTIVO | COMUNA/CLASE),
+               data = train_mes_comuna, family= poisson())
 ```
 
 ```{r}
-y_est_train_mes_comuna <- round(predict(mod_mes_comuna, newdata = train_mes_comuna, type = "response"),0)
-y_est_test_mes_comuna <- round(predict(mod_mes_comuna, newdata = test_mes_comuna, type = "response"),0)
+save(mod_mes_comuna0, file = "mod_mes_comuna0.RData")
+save(mod_mes_comuna1, file = "mod_mes_comuna1.RData")
+save(mod_mes_comuna2, file = "mod_mes_comuna2.RData")
+```
+
+```{r}
+load(file = "mod_mes_comuna0.RData")
+load(file = "mod_mes_comuna1.RData")
+load(file = "mod_mes_comuna2.RData")
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+anova(mod_mes_comuna0, mod_mes_comuna1, mod_mes_comuna2)
+```
+
+
+
+
+```{r}
+y_est_train_mes_comuna <- round(predict(mod_mes_comuna2, newdata = train_mes_comuna, type = "response"),0)
+y_est_test_mes_comuna <- round(predict(mod_mes_comuna2, newdata = test_mes_comuna, type = "response"),0)
 MSE(train_mes_comuna$ACCIDENTALIDAD, y_est_train_mes_comuna)
 MSE(test_mes_comuna$ACCIDENTALIDAD, y_est_test_mes_comuna)
 ```
