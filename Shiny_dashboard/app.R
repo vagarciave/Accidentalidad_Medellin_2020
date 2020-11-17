@@ -81,9 +81,6 @@ ui <- dashboardPage(
               # En esta parte de inicio se pone el video
               # la descripcion de la app
               h1("¡Bienvenidos!",
-                 style = "font-family: 'Montserrat';
-                  font-weight: 500; line-height: 1.1; 
-                  color: #000000",
                  align = "center"),
               h3("En esta aplicación web encontrarás información histórica de accidentes de tránsito en Medellín 
                  desde el año 2014 a 2018. Aquí podrás visualizar los datos históricos de accidentalidad, un mapa
@@ -114,7 +111,7 @@ ui <- dashboardPage(
       ),
      
      tabItem(tabName = "visualizacion",
-             h1("Visulización de datos",align = "center"),
+             h1("Visualización de datos",align = "center"),
              fluidRow(
                box(width = 12,
                    dateRangeInput("daterange2", "Rango de Tiempo:",
