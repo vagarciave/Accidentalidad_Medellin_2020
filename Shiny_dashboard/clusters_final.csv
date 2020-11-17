@@ -1,269 +1,269 @@
-"","BARRIO","HERIDOS","MUERTOS","SOLO_DAÑOS","NRO_CLUSTER","NOMBRE_CLUSTER"
-"1","Aldea Pablo VI",64,2,17,3,"Accidentalidad Baja"
-"2","Alejandria",132,1,366,3,"Accidentalidad Baja"
-"3","Alejandro Echavarria",595,3,243,0,"Accidentalidad moderada"
-"4","Alfonso Lopez",772,7,369,0,"Accidentalidad moderada"
-"5","Altamira",504,2,270,0,"Accidentalidad moderada"
-"6","Altavista",214,3,137,3,"Accidentalidad Baja"
-"7","Altos del Poblado",128,1,146,3,"Accidentalidad Baja"
-"8","Andalucia",159,6,78,3,"Accidentalidad Baja"
-"9","Antonio Narino",190,1,50,3,"Accidentalidad Baja"
-"10","Aranjuez",263,2,108,3,"Accidentalidad Baja"
-"11","Asomadera No.1",167,2,247,3,"Accidentalidad Baja"
-"12","Asomadera No.2",181,1,307,3,"Accidentalidad Baja"
-"13","Asomadera No.3",64,1,79,3,"Accidentalidad Baja"
-"14","Astorga",104,0,197,3,"Accidentalidad Baja"
-"15","Aures No.1",386,3,97,3,"Accidentalidad Baja"
-"16","Aures No.2",470,2,111,0,"Accidentalidad moderada"
-"17","Ecoparque Cerro El Volador",99,2,68,3,"Accidentalidad Baja"
-"18","Barrio Caicedo",573,7,328,0,"Accidentalidad moderada"
-"19","Barrio Colombia",513,7,670,0,"Accidentalidad moderada"
-"20","Barrio Colon",1402,17,2212,2,"Accidentalidad Alta"
-"21","Barrio Cristobal",90,1,63,3,"Accidentalidad Baja"
-"22","Barrio de Jesus",176,4,87,3,"Accidentalidad Baja"
-"23","Batallon Girardot",9,0,2,3,"Accidentalidad Baja"
-"24","Belalcazar",306,4,246,3,"Accidentalidad Baja"
-"25","Belen",1047,6,1387,1,"Accidentalidad Media"
-"26","Belencito",114,2,43,3,"Accidentalidad Baja"
-"27","Bello Horizonte",227,1,107,3,"Accidentalidad Baja"
-"28","Berlin",543,5,262,0,"Accidentalidad moderada"
-"29","Bermejal-Los Alamos",161,2,69,3,"Accidentalidad Baja"
-"30","Betania",81,2,27,3,"Accidentalidad Baja"
-"31","Blanquizal",62,1,25,3,"Accidentalidad Baja"
-"32","Bolivariana",457,3,477,0,"Accidentalidad moderada"
-"33","Bombona No.1",560,7,666,0,"Accidentalidad moderada"
-"34","Bombona No.2",202,2,129,3,"Accidentalidad Baja"
-"35","Bosques de San Pablo",189,1,178,3,"Accidentalidad Baja"
-"36","Boston",1186,11,1098,1,"Accidentalidad Media"
-"37","Boyaca",378,2,205,3,"Accidentalidad Baja"
-"38","Brasilia",359,5,136,3,"Accidentalidad Baja"
-"39","Buenos Aires",608,0,384,0,"Accidentalidad moderada"
-"40","Calasanz",382,4,425,0,"Accidentalidad moderada"
-"41","Calasanz Parte Alta",237,1,196,3,"Accidentalidad Baja"
-"42","Calle Nueva",610,5,1005,1,"Accidentalidad Media"
-"43","Campo Alegre",365,3,175,3,"Accidentalidad Baja"
-"44","Campo Amor",1944,24,2180,2,"Accidentalidad Alta"
-"45","Campo Valdes No.1",901,7,303,0,"Accidentalidad moderada"
-"46","Campo Valdes No.2",770,9,165,0,"Accidentalidad moderada"
-"47","Caribe",2257,24,2156,2,"Accidentalidad Alta"
-"48","Carlos E. Restrepo",1361,7,1619,1,"Accidentalidad Media"
-"49","Carpinelo",83,1,21,3,"Accidentalidad Baja"
-"50","Castilla",1907,17,666,1,"Accidentalidad Media"
-"51","Castropol",455,2,594,0,"Accidentalidad moderada"
-"52","Cataluna",158,1,117,3,"Accidentalidad Baja"
-"53","Cementerio Universal",106,0,105,3,"Accidentalidad Baja"
-"54","Centro Administrativo",144,2,152,3,"Accidentalidad Baja"
-"55","Cerro Nutibara",434,9,379,0,"Accidentalidad moderada"
-"56","Corazon de Jesus",971,26,1455,1,"Accidentalidad Media"
-"57","Cordoba",351,2,157,3,"Accidentalidad Baja"
-"58","Cristo Rey",975,19,931,1,"Accidentalidad Media"
-"59","Cuarta Brigada",614,5,563,0,"Accidentalidad moderada"
-"60","Cucaracho",739,1,264,0,"Accidentalidad moderada"
-"61","Diego Echavarria",196,1,216,3,"Accidentalidad Baja"
-"62","Doce de Octubre No.1",418,5,104,3,"Accidentalidad Baja"
-"63","Doce de Octubre No.2",492,5,127,0,"Accidentalidad moderada"
-"64","Eduardo Santos",30,0,12,3,"Accidentalidad Baja"
-"65","El Castillo",86,1,195,3,"Accidentalidad Baja"
-"66","El Chagualo",1054,19,985,1,"Accidentalidad Media"
-"67","El Compromiso",78,0,30,3,"Accidentalidad Baja"
-"68","El Corazon",83,2,26,3,"Accidentalidad Baja"
-"69","El Danubio",250,3,136,3,"Accidentalidad Baja"
-"70","El Diamante",760,1,242,0,"Accidentalidad moderada"
-"71","El Diamante No.2",93,1,165,3,"Accidentalidad Baja"
-"72","El Estadio",727,3,652,0,"Accidentalidad moderada"
-"73","El Nogal-Los Almendros",197,5,232,3,"Accidentalidad Baja"
-"74","El Pesebre",128,0,60,3,"Accidentalidad Baja"
-"75","El Pinal",340,4,188,3,"Accidentalidad Baja"
-"76","El Poblado",423,3,910,0,"Accidentalidad moderada"
-"77","El Pomar",263,1,78,3,"Accidentalidad Baja"
-"78","El Progreso",927,2,851,1,"Accidentalidad Media"
-"79","El Progreso No.2",103,3,39,3,"Accidentalidad Baja"
-"80","El Raizal",352,3,124,3,"Accidentalidad Baja"
-"81","El Rincon",514,1,331,0,"Accidentalidad moderada"
-"82","El Rodeo",96,1,64,3,"Accidentalidad Baja"
-"83","El Salado",134,0,47,3,"Accidentalidad Baja"
-"84","El Salvador",355,3,210,3,"Accidentalidad Baja"
-"85","El Socorro",49,1,15,3,"Accidentalidad Baja"
-"86","El Tesoro",212,1,402,3,"Accidentalidad Baja"
-"87","El Triunfo",41,0,8,3,"Accidentalidad Baja"
-"88","El Velodromo",366,2,312,0,"Accidentalidad moderada"
-"89","Enciso",468,10,178,0,"Accidentalidad moderada"
-"90","Estacion Villa",617,13,576,0,"Accidentalidad moderada"
-"91","Facultad Veterinaria y Zootecnia U.de.A.",134,0,98,3,"Accidentalidad Baja"
-"92","Facultad de Minas U. Nacional",691,3,471,0,"Accidentalidad moderada"
-"93","Fatima",589,3,529,0,"Accidentalidad moderada"
-"94","Ferrini",136,0,123,3,"Accidentalidad Baja"
-"95","Florencia",246,1,110,3,"Accidentalidad Baja"
-"96","Florida Nueva",401,7,390,0,"Accidentalidad moderada"
-"97","Francisco Antonio Zea",403,0,189,0,"Accidentalidad moderada"
-"98","Fuente Clara",82,2,16,3,"Accidentalidad Baja"
-"99","Gerona",311,0,135,3,"Accidentalidad Baja"
-"100","Girardot",690,7,330,0,"Accidentalidad moderada"
-"101","Granada",227,2,235,3,"Accidentalidad Baja"
-"102","Granizal",198,7,135,3,"Accidentalidad Baja"
-"103","Guayabal",1085,8,1226,1,"Accidentalidad Media"
-"104","Guayaquil",1415,34,2066,2,"Accidentalidad Alta"
-"105","Hector Abad Gomez",530,11,370,0,"Accidentalidad moderada"
-"106","Hospital San Vicente de Paul",64,0,71,3,"Accidentalidad Baja"
-"107","Jardin Botanico",105,3,95,3,"Accidentalidad Baja"
-"108","Jesus Nazareno",1096,27,869,1,"Accidentalidad Media"
-"109","Juan Pablo II",52,1,17,3,"Accidentalidad Baja"
-"110","Juan XXIII La Quiebra",110,2,49,3,"Accidentalidad Baja"
-"111","Kennedy",668,2,253,0,"Accidentalidad moderada"
-"112","La Aguacatala",741,9,1088,1,"Accidentalidad Media"
-"113","La Alpujarra",512,5,807,0,"Accidentalidad moderada"
-"114","La America",578,8,517,0,"Accidentalidad moderada"
-"115","La Avanzada",114,1,50,3,"Accidentalidad Baja"
-"116","La Candelaria",2123,28,2935,2,"Accidentalidad Alta"
-"117","La Castellana",348,2,365,0,"Accidentalidad moderada"
-"118","La Colina",298,4,208,3,"Accidentalidad Baja"
-"119","La Cruz",71,1,25,3,"Accidentalidad Baja"
-"120","La Esperanza",552,5,116,0,"Accidentalidad moderada"
-"121","La Esperanza No.2",94,0,24,3,"Accidentalidad Baja"
-"122","La Floresta",405,4,316,0,"Accidentalidad moderada"
-"123","La Florida",268,1,568,0,"Accidentalidad moderada"
-"124","La Francia",174,0,83,3,"Accidentalidad Baja"
-"125","La Frontera",158,0,74,3,"Accidentalidad Baja"
-"126","La Gloria",543,1,409,0,"Accidentalidad moderada"
-"127","La Hondonada",99,0,77,3,"Accidentalidad Baja"
-"128","La Isla",139,2,55,3,"Accidentalidad Baja"
-"129","La Ladera",51,0,30,3,"Accidentalidad Baja"
-"130","La Libertad",214,1,105,3,"Accidentalidad Baja"
-"131","La Loma de Los Bernal",11,0,21,3,"Accidentalidad Baja"
-"132","La Mansion",197,0,90,3,"Accidentalidad Baja"
-"133","La Milagrosa",310,7,178,3,"Accidentalidad Baja"
-"134","La Mota",214,3,167,3,"Accidentalidad Baja"
-"135","La Palma",353,2,275,0,"Accidentalidad moderada"
-"136","La Pilarica",264,1,203,3,"Accidentalidad Baja"
-"137","La Pinuela",245,3,86,3,"Accidentalidad Baja"
-"138","La Pradera",286,2,101,3,"Accidentalidad Baja"
-"139","La Rosa",174,3,55,3,"Accidentalidad Baja"
-"140","La Salle",420,3,137,3,"Accidentalidad Baja"
-"141","La Sierra",15,0,2,3,"Accidentalidad Baja"
-"142","Lalinde",55,0,95,3,"Accidentalidad Baja"
-"143","Las Acacias",654,6,871,1,"Accidentalidad Media"
-"144","Las Brisas",603,8,384,0,"Accidentalidad moderada"
-"145","Las Esmeraldas",241,7,142,3,"Accidentalidad Baja"
-"146","Las Estancias",205,0,54,3,"Accidentalidad Baja"
-"147","Las Granjas",828,15,272,0,"Accidentalidad moderada"
-"148","Las Independencias",60,0,12,3,"Accidentalidad Baja"
-"149","Las Lomas No.1",195,0,348,3,"Accidentalidad Baja"
-"150","Las Lomas No.2",126,0,165,3,"Accidentalidad Baja"
-"151","Las Mercedes",207,0,141,3,"Accidentalidad Baja"
-"152","Las Palmas",187,2,167,3,"Accidentalidad Baja"
-"153","Las Playas",317,2,231,3,"Accidentalidad Baja"
-"154","Las Violetas",239,4,134,3,"Accidentalidad Baja"
-"155","Laureles",684,11,821,0,"Accidentalidad moderada"
-"156","Llanaditas",48,0,13,3,"Accidentalidad Baja"
-"157","Loma de los Bernal",183,2,208,3,"Accidentalidad Baja"
-"158","Lopez de Mesa",695,3,235,0,"Accidentalidad moderada"
-"159","Lorena",462,8,458,0,"Accidentalidad moderada"
-"160","Loreto",464,3,217,0,"Accidentalidad moderada"
-"161","Los Alcazares",287,5,160,3,"Accidentalidad Baja"
-"162","Los Alpes",265,1,169,3,"Accidentalidad Baja"
-"163","Los Angeles",667,2,491,0,"Accidentalidad moderada"
-"164","Los Balsos No.1",111,3,234,3,"Accidentalidad Baja"
-"165","Los Balsos No.2",162,0,574,0,"Accidentalidad moderada"
-"166","Los Cerros El Vergel",152,3,77,3,"Accidentalidad Baja"
-"167","Los Colores",1231,9,726,1,"Accidentalidad Media"
-"168","Los Conquistadores",1639,20,2098,2,"Accidentalidad Alta"
-"169","Los Mangos",362,4,144,3,"Accidentalidad Baja"
-"170","Los Naranjos",154,0,311,3,"Accidentalidad Baja"
-"171","Los Pinos",574,5,549,0,"Accidentalidad moderada"
-"172","Manila",610,4,1178,1,"Accidentalidad Media"
-"173","Manrique Central No.1",755,11,384,0,"Accidentalidad moderada"
-"174","Manrique Central No.2",481,2,186,0,"Accidentalidad moderada"
-"175","Manrique Oriental",633,7,237,0,"Accidentalidad moderada"
-"176","Maria Cano Carambolas",111,2,71,3,"Accidentalidad Baja"
-"177","Metropolitano",28,0,11,3,"Accidentalidad Baja"
-"178","Mirador del Doce",35,1,5,3,"Accidentalidad Baja"
-"179","Miraflores",393,2,223,0,"Accidentalidad moderada"
-"180","Miranda",630,3,417,0,"Accidentalidad moderada"
-"181","Miravalle",42,0,41,3,"Accidentalidad Baja"
-"182","Monteclaro",75,0,23,3,"Accidentalidad Baja"
-"183","Moravia",833,21,491,0,"Accidentalidad moderada"
-"184","Moscu No.1",226,0,116,3,"Accidentalidad Baja"
-"185","Moscu No.2",248,1,66,3,"Accidentalidad Baja"
-"186","Naranjal",1165,13,1531,1,"Accidentalidad Media"
-"187","Nueva Villa de Aburra",88,1,84,3,"Accidentalidad Baja"
-"188","Nueva Villa de la Iguana",266,2,161,3,"Accidentalidad Baja"
-"189","Nuevos Conquistadores",72,1,25,3,"Accidentalidad Baja"
-"190","Ocho de Marzo",31,2,15,3,"Accidentalidad Baja"
-"191","Olaya Herrera",139,1,44,3,"Accidentalidad Baja"
-"192","Oleoducto",291,8,181,3,"Accidentalidad Baja"
-"193","Oriente",72,4,14,3,"Accidentalidad Baja"
-"194","Pablo VI",60,2,30,3,"Accidentalidad Baja"
-"195","Pajarito",77,0,26,3,"Accidentalidad Baja"
-"196","Palenque",246,1,152,3,"Accidentalidad Baja"
-"197","Palermo",231,3,124,3,"Accidentalidad Baja"
-"198","Parque Juan Pablo II",418,9,279,0,"Accidentalidad moderada"
-"199","Parque Norte",200,1,165,3,"Accidentalidad Baja"
-"200","Patio Bonito",367,3,591,0,"Accidentalidad moderada"
-"201","Pedregal",721,7,173,0,"Accidentalidad moderada"
-"202","Perpetuo Socorro",1896,15,2212,2,"Accidentalidad Alta"
-"203","Picachito",68,0,8,3,"Accidentalidad Baja"
-"204","Picacho",600,1,171,0,"Accidentalidad moderada"
-"205","Playon de Los Comuneros",215,3,102,3,"Accidentalidad Baja"
-"206","Plaza de Ferias",78,1,50,3,"Accidentalidad Baja"
-"207","Popular",328,1,135,3,"Accidentalidad Baja"
-"208","Prado",1147,14,866,1,"Accidentalidad Media"
-"209","Robledo",718,5,308,0,"Accidentalidad moderada"
-"210","Rosales",797,8,700,0,"Accidentalidad moderada"
-"211","San Antonio",18,0,5,3,"Accidentalidad Baja"
-"212","San Benito",1471,28,1938,2,"Accidentalidad Alta"
-"213","San Bernardo",596,9,404,0,"Accidentalidad moderada"
-"214","San Diego",1149,12,1698,1,"Accidentalidad Media"
-"215","San German",355,5,291,0,"Accidentalidad moderada"
-"216","San Isidro",726,5,277,0,"Accidentalidad moderada"
-"217","San Javier No.1",509,4,213,0,"Accidentalidad moderada"
-"218","San Javier No.2",187,1,103,3,"Accidentalidad Baja"
-"219","San Joaquin",321,7,336,0,"Accidentalidad moderada"
-"220","San Jose la Cima No.1",28,1,7,3,"Accidentalidad Baja"
-"221","San Jose la Cima No.2",19,0,1,3,"Accidentalidad Baja"
-"222","San Lucas",47,1,140,3,"Accidentalidad Baja"
-"223","San Martin de Porres",455,1,158,0,"Accidentalidad moderada"
-"224","San Miguel",567,4,240,0,"Accidentalidad moderada"
-"225","San Pablo",268,0,70,3,"Accidentalidad Baja"
-"226","San Pedro",499,7,446,0,"Accidentalidad moderada"
-"227","Santa Cruz",236,4,73,3,"Accidentalidad Baja"
-"228","Santa Fe",1811,21,1545,2,"Accidentalidad Alta"
-"229","Santa Ines",394,4,151,3,"Accidentalidad Baja"
-"230","Santa Lucia",163,1,91,3,"Accidentalidad Baja"
-"231","Santa Margarita",161,1,54,3,"Accidentalidad Baja"
-"232","Santa Maria de los Angeles",372,8,595,0,"Accidentalidad moderada"
-"233","Santa Monica",259,2,139,3,"Accidentalidad Baja"
-"234","Santa Rosa de Lima",19,1,6,3,"Accidentalidad Baja"
-"235","Santa Teresita",149,0,131,3,"Accidentalidad Baja"
-"236","Santander",429,8,98,3,"Accidentalidad Baja"
-"237","Santo Domingo Savio No.1",394,5,107,3,"Accidentalidad Baja"
-"238","Santo Domingo Savio No.2",136,2,37,3,"Accidentalidad Baja"
-"239","Sevilla",668,10,584,0,"Accidentalidad moderada"
-"240","Simon Bolivar",223,2,188,3,"Accidentalidad Baja"
-"241","Sin Nombre",4,0,1,3,"Accidentalidad Baja"
-"242","Suburbano El Llano",77,0,147,3,"Accidentalidad Baja"
-"243","Sucre",456,4,219,0,"Accidentalidad moderada"
-"244","Suramericana",697,9,953,1,"Accidentalidad Media"
-"245","Tejelo",544,5,174,0,"Accidentalidad moderada"
-"246","Tenche",489,7,508,0,"Accidentalidad moderada"
-"247","Terminal de Transporte",1332,19,1555,1,"Accidentalidad Media"
-"248","Toscana",473,13,330,0,"Accidentalidad moderada"
-"249","Trece de Noviembre",24,0,32,3,"Accidentalidad Baja"
-"250","Tricentenario",548,5,419,0,"Accidentalidad moderada"
-"251","Trinidad",620,6,448,0,"Accidentalidad moderada"
-"252","U.D. Atanasio Girardot",161,0,141,3,"Accidentalidad Baja"
-"253","U.P.B.",47,1,80,3,"Accidentalidad Baja"
-"254","Universidad Nacional",941,12,892,1,"Accidentalidad Media"
-"255","Universidad de Antioquia",487,6,397,0,"Accidentalidad moderada"
-"256","Veinte de Julio",273,7,80,3,"Accidentalidad Baja"
-"257","Versalles No.1",354,3,155,3,"Accidentalidad Baja"
-"258","Versalles No.2",34,0,23,3,"Accidentalidad Baja"
-"259","Villa Carlota",885,11,1334,1,"Accidentalidad Media"
-"260","Villa Flora",519,0,301,0,"Accidentalidad moderada"
-"261","Villa Guadalupe",270,3,90,3,"Accidentalidad Baja"
-"262","Villa Hermosa",406,1,148,3,"Accidentalidad Baja"
-"263","Villa Liliam",99,0,21,3,"Accidentalidad Baja"
-"264","Villa Niza",118,2,53,3,"Accidentalidad Baja"
-"265","Villa Nueva",1387,19,1502,1,"Accidentalidad Media"
-"266","Villa Turbay",35,0,8,3,"Accidentalidad Baja"
-"267","Villa del Socorro",282,3,144,3,"Accidentalidad Baja"
-"268","Villatina",340,2,129,3,"Accidentalidad Baja"
+,Unnamed: 0,BARRIO,HERIDOS,MUERTOS,SOLO_DAÑOS,NRO_CLUSTER,NOMBRE_CLUSTER
+0,1,Aldea Pablo VI,64,2,17,3,Accidentalidad Baja
+1,2,Alejandría,132,1,366,3,Accidentalidad Baja
+2,3,Alejandro Echavarría,595,3,243,0,Accidentalidad moderada
+3,4,Alfonso López,772,7,369,0,Accidentalidad moderada
+4,5,Altamira,504,2,270,0,Accidentalidad moderada
+5,6,Altavista,214,3,137,3,Accidentalidad Baja
+6,7,Altos del Poblado,128,1,146,3,Accidentalidad Baja
+7,8,Andalucía,159,6,78,3,Accidentalidad Baja
+8,9,Antonio Nariño,190,1,50,3,Accidentalidad Baja
+9,10,Aranjuez,263,2,108,3,Accidentalidad Baja
+10,11,Asomadera No.1,167,2,247,3,Accidentalidad Baja
+11,12,Asomadera No.2,181,1,307,3,Accidentalidad Baja
+12,13,Asomadera No.3,64,1,79,3,Accidentalidad Baja
+13,14,Astorga,104,0,197,3,Accidentalidad Baja
+14,15,Aures No.1,386,3,97,3,Accidentalidad Baja
+15,16,Aures No.2,470,2,111,0,Accidentalidad moderada
+16,17,Ecoparque Cerro El Volador,99,2,68,3,Accidentalidad Baja
+17,18,Barrio Caicedo,573,7,328,0,Accidentalidad moderada
+18,19,Barrio Colombia,513,7,670,0,Accidentalidad moderada
+19,20,Barrio Colón,1402,17,2212,2,Accidentalidad Alta
+20,21,Barrio Cristóbal,90,1,63,3,Accidentalidad Baja
+21,22,Barrios de Jesús,176,4,87,3,Accidentalidad Baja
+22,23,Batallón Girardot,9,0,2,3,Accidentalidad Baja
+23,24,Belalcázar,306,4,246,3,Accidentalidad Baja
+24,25,Belén,1047,6,1387,1,Accidentalidad Media
+25,26,Belencito,114,2,43,3,Accidentalidad Baja
+26,27,Bello Horizonte,227,1,107,3,Accidentalidad Baja
+27,28,Berlín,543,5,262,0,Accidentalidad moderada
+28,29,Bermejal-Los Álamos,161,2,69,3,Accidentalidad Baja
+29,30,Betania,81,2,27,3,Accidentalidad Baja
+30,31,Blanquizal,62,1,25,3,Accidentalidad Baja
+31,32,Bolivariana,457,3,477,0,Accidentalidad moderada
+32,33,Bomboná No.1,560,7,666,0,Accidentalidad moderada
+33,34,Bomboná No.2,202,2,129,3,Accidentalidad Baja
+34,35,Bosques de San Pablo,189,1,178,3,Accidentalidad Baja
+35,36,Boston,1186,11,1098,1,Accidentalidad Media
+36,37,Boyacá,378,2,205,3,Accidentalidad Baja
+37,38,Brasilia,359,5,136,3,Accidentalidad Baja
+38,39,Buenos Aires,608,0,384,0,Accidentalidad moderada
+39,40,Calasanz,382,4,425,0,Accidentalidad moderada
+40,41,Calasanz Parte Alta,237,1,196,3,Accidentalidad Baja
+41,42,Calle Nueva,610,5,1005,1,Accidentalidad Media
+42,43,Campo Alegre,365,3,175,3,Accidentalidad Baja
+43,44,Campo Amor,1944,24,2180,2,Accidentalidad Alta
+44,45,Campo Valdés No.1,901,7,303,0,Accidentalidad moderada
+45,46,Campo Valdés No.2,770,9,165,0,Accidentalidad moderada
+46,47,Caribe,2257,24,2156,2,Accidentalidad Alta
+47,48,Carlos E. Restrepo,1361,7,1619,1,Accidentalidad Media
+48,49,Carpinelo,83,1,21,3,Accidentalidad Baja
+49,50,Castilla,1907,17,666,1,Accidentalidad Media
+50,51,Castropol,455,2,594,0,Accidentalidad moderada
+51,52,Cataluña,158,1,117,3,Accidentalidad Baja
+52,53,Cementerio Universal,106,0,105,3,Accidentalidad Baja
+53,54,Centro Administrativo,144,2,152,3,Accidentalidad Baja
+54,55,Cerro Nutibara,434,9,379,0,Accidentalidad moderada
+55,56,Corazón de Jesús,971,26,1455,1,Accidentalidad Media
+56,57,Córdoba,351,2,157,3,Accidentalidad Baja
+57,58,Cristo Rey,975,19,931,1,Accidentalidad Media
+58,59,Cuarta Brigada,614,5,563,0,Accidentalidad moderada
+59,60,Cucaracho,739,1,264,0,Accidentalidad moderada
+60,61,Diego Echavarría,196,1,216,3,Accidentalidad Baja
+61,62,Doce de Octubre No.1,418,5,104,3,Accidentalidad Baja
+62,63,Doce de Octubre No.2,492,5,127,0,Accidentalidad moderada
+63,64,Eduardo Santos,30,0,12,3,Accidentalidad Baja
+64,65,El Castillo,86,1,195,3,Accidentalidad Baja
+65,66,El Chagualo,1054,19,985,1,Accidentalidad Media
+66,67,El Compromiso,78,0,30,3,Accidentalidad Baja
+67,68,El Corazón,83,2,26,3,Accidentalidad Baja
+68,69,El Danubio,250,3,136,3,Accidentalidad Baja
+69,70,El Diamante,760,1,242,0,Accidentalidad moderada
+70,71,El Diamante No.2,93,1,165,3,Accidentalidad Baja
+71,72,Estadio,727,3,652,0,Accidentalidad moderada
+72,73,El Nogal-Los Almendros,197,5,232,3,Accidentalidad Baja
+73,74,El Pesebre,128,0,60,3,Accidentalidad Baja
+74,75,El Pinal,340,4,188,3,Accidentalidad Baja
+75,76,El Poblado,423,3,910,0,Accidentalidad moderada
+76,77,El Pomar,263,1,78,3,Accidentalidad Baja
+77,78,El Progreso,927,2,851,1,Accidentalidad Media
+78,79,Progreso No.2,103,3,39,3,Accidentalidad Baja
+79,80,El Raizal,352,3,124,3,Accidentalidad Baja
+80,81,El Rincón,514,1,331,0,Accidentalidad moderada
+81,82,El Rodeo,96,1,64,3,Accidentalidad Baja
+82,83,El Salado,134,0,47,3,Accidentalidad Baja
+83,84,El Salvador,355,3,210,3,Accidentalidad Baja
+84,85,El Socorro,49,1,15,3,Accidentalidad Baja
+85,86,El Tesoro,212,1,402,3,Accidentalidad Baja
+86,87,El Triunfo,41,0,8,3,Accidentalidad Baja
+87,88,El Velódromo,366,2,312,0,Accidentalidad moderada
+88,89,Enciso,468,10,178,0,Accidentalidad moderada
+89,90,Estación Villa,617,13,576,0,Accidentalidad moderada
+90,91,Facultad Veterinaria y Zootecnia U.de.A.,134,0,98,3,Accidentalidad Baja
+91,92,Facultad de Minas U. Nacional,691,3,471,0,Accidentalidad moderada
+92,93,Fátima,589,3,529,0,Accidentalidad moderada
+93,94,Ferrini,136,0,123,3,Accidentalidad Baja
+94,95,Florencia,246,1,110,3,Accidentalidad Baja
+95,96,Florida Nueva,401,7,390,0,Accidentalidad moderada
+96,97,Francisco Antonio Zea,403,0,189,0,Accidentalidad moderada
+97,98,Fuente Clara,82,2,16,3,Accidentalidad Baja
+98,99,Gerona,311,0,135,3,Accidentalidad Baja
+99,100,Girardot,690,7,330,0,Accidentalidad moderada
+100,101,Granada,227,2,235,3,Accidentalidad Baja
+101,102,Granizal,198,7,135,3,Accidentalidad Baja
+102,103,Guayabal,1085,8,1226,1,Accidentalidad Media
+103,104,Guayaquil,1415,34,2066,2,Accidentalidad Alta
+104,105,Héctor Abad Gómez,530,11,370,0,Accidentalidad moderada
+105,106,Hospital San Vicente de Paúl,64,0,71,3,Accidentalidad Baja
+106,107,Jardín Botánico,105,3,95,3,Accidentalidad Baja
+107,108,Jesús Nazareno,1096,27,869,1,Accidentalidad Media
+108,109,Juan Pablo II,52,1,17,3,Accidentalidad Baja
+109,110,Juan XXIII La Quiebra,110,2,49,3,Accidentalidad Baja
+110,111,Kennedy,668,2,253,0,Accidentalidad moderada
+111,112,La Aguacatala,741,9,1088,1,Accidentalidad Media
+112,113,La Alpujarra,512,5,807,0,Accidentalidad moderada
+113,114,La América,578,8,517,0,Accidentalidad moderada
+114,115,La Avanzada,114,1,50,3,Accidentalidad Baja
+115,116,La Candelaria,2123,28,2935,2,Accidentalidad Alta
+116,117,La Castellana,348,2,365,0,Accidentalidad moderada
+117,118,La Colina,298,4,208,3,Accidentalidad Baja
+118,119,La Cruz,71,1,25,3,Accidentalidad Baja
+119,120,La Esperanza,552,5,116,0,Accidentalidad moderada
+120,121,La Esperanza No.2,94,0,24,3,Accidentalidad Baja
+121,122,La Floresta,405,4,316,0,Accidentalidad moderada
+122,123,La Florida,268,1,568,0,Accidentalidad moderada
+123,124,La Francia,174,0,83,3,Accidentalidad Baja
+124,125,La Frontera,158,0,74,3,Accidentalidad Baja
+125,126,La Gloria,543,1,409,0,Accidentalidad moderada
+126,127,La Hondonada,99,0,77,3,Accidentalidad Baja
+127,128,La Isla,139,2,55,3,Accidentalidad Baja
+128,129,La Ladera,51,0,30,3,Accidentalidad Baja
+129,130,La Libertad,214,1,105,3,Accidentalidad Baja
+130,131,La Loma de Los Bernal,11,0,21,3,Accidentalidad Baja
+131,132,La Mansión,197,0,90,3,Accidentalidad Baja
+132,133,La Milagrosa,310,7,178,3,Accidentalidad Baja
+133,134,La Mota,214,3,167,3,Accidentalidad Baja
+134,135,La Palma,353,2,275,0,Accidentalidad moderada
+135,136,La Pilarica,264,1,203,3,Accidentalidad Baja
+136,137,La Piñuela,245,3,86,3,Accidentalidad Baja
+137,138,La Pradera,286,2,101,3,Accidentalidad Baja
+138,139,La Rosa,174,3,55,3,Accidentalidad Baja
+139,140,La Salle,420,3,137,3,Accidentalidad Baja
+140,141,La Sierra,15,0,2,3,Accidentalidad Baja
+141,142,Lalinde,55,0,95,3,Accidentalidad Baja
+142,143,Las Acacias,654,6,871,1,Accidentalidad Media
+143,144,Las Brisas,603,8,384,0,Accidentalidad moderada
+144,145,Las Esmeraldas,241,7,142,3,Accidentalidad Baja
+145,146,Las Estancias,205,0,54,3,Accidentalidad Baja
+146,147,Las Granjas,828,15,272,0,Accidentalidad moderada
+147,148,Las Independencias,60,0,12,3,Accidentalidad Baja
+148,149,Las Lomas No.1,195,0,348,3,Accidentalidad Baja
+149,150,Las Lomas No.2,126,0,165,3,Accidentalidad Baja
+150,151,Las Mercedes,207,0,141,3,Accidentalidad Baja
+151,152,Las Palmas,187,2,167,3,Accidentalidad Baja
+152,153,Las Playas,317,2,231,3,Accidentalidad Baja
+153,154,Las Violetas,239,4,134,3,Accidentalidad Baja
+154,155,Laureles,684,11,821,0,Accidentalidad moderada
+155,156,Llanaditas,48,0,13,3,Accidentalidad Baja
+156,157,La Loma de Los Bernal,183,2,208,3,Accidentalidad Baja
+157,158,López de  Mesa,695,3,235,0,Accidentalidad moderada
+158,159,Lorena,462,8,458,0,Accidentalidad moderada
+159,160,Loreto,464,3,217,0,Accidentalidad moderada
+160,161,Los Alcázares,287,5,160,3,Accidentalidad Baja
+161,162,Los Alpes,265,1,169,3,Accidentalidad Baja
+162,163,Los Ángeles,667,2,491,0,Accidentalidad moderada
+163,164,Los Balsos No.1,111,3,234,3,Accidentalidad Baja
+164,165,Los Balsos No.2,162,0,574,0,Accidentalidad moderada
+165,166,Los Cerros El Vergel,152,3,77,3,Accidentalidad Baja
+166,167,Los Colores,1231,9,726,1,Accidentalidad Media
+167,168,Los Conquistadores,1639,20,2098,2,Accidentalidad Alta
+168,169,Los Mangos,362,4,144,3,Accidentalidad Baja
+169,170,Los Naranjos,154,0,311,3,Accidentalidad Baja
+170,171,Los Pinos,574,5,549,0,Accidentalidad moderada
+171,172,Manila,610,4,1178,1,Accidentalidad Media
+172,173,Manrique Central No.1,755,11,384,0,Accidentalidad moderada
+173,174,Manrique Central No.2,481,2,186,0,Accidentalidad moderada
+174,175,Manrique Oriental,633,7,237,0,Accidentalidad moderada
+175,176,María Cano-Carambolas,111,2,71,3,Accidentalidad Baja
+176,177,Metropolitano,28,0,11,3,Accidentalidad Baja
+177,178,Mirador del Doce,35,1,5,3,Accidentalidad Baja
+178,179,Miraflores,393,2,223,0,Accidentalidad moderada
+179,180,Miranda,630,3,417,0,Accidentalidad moderada
+180,181,Miravalle,42,0,41,3,Accidentalidad Baja
+181,182,Monteclaro,75,0,23,3,Accidentalidad Baja
+182,183,Moravia,833,21,491,0,Accidentalidad moderada
+183,184,Moscú No.1,226,0,116,3,Accidentalidad Baja
+184,185,Moscú No.2,248,1,66,3,Accidentalidad Baja
+185,186,Naranjal,1165,13,1531,1,Accidentalidad Media
+186,187,Nueva Villa del Aburrá,88,1,84,3,Accidentalidad Baja
+187,188,Nueva Villa de La Iguaná,266,2,161,3,Accidentalidad Baja
+188,189,Nuevos Conquistadores,72,1,25,3,Accidentalidad Baja
+189,190,Ocho de Marzo,31,2,15,3,Accidentalidad Baja
+190,191,Olaya Herrera,139,1,44,3,Accidentalidad Baja
+191,192,Oleoducto,291,8,181,3,Accidentalidad Baja
+192,193,Oriente,72,4,14,3,Accidentalidad Baja
+193,194,Pablo VI,60,2,30,3,Accidentalidad Baja
+194,195,Pajarito,77,0,26,3,Accidentalidad Baja
+195,196,Palenque,246,1,152,3,Accidentalidad Baja
+196,197,Palermo,231,3,124,3,Accidentalidad Baja
+197,198,Parque Juan Pablo II,418,9,279,0,Accidentalidad moderada
+198,199,Parque Norte,200,1,165,3,Accidentalidad Baja
+199,200,Patio Bonito,367,3,591,0,Accidentalidad moderada
+200,201,Pedregal,721,7,173,0,Accidentalidad moderada
+201,202,Perpetuo Socorro,1896,15,2212,2,Accidentalidad Alta
+202,203,Picachito,68,0,8,3,Accidentalidad Baja
+203,204,Picacho,600,1,171,0,Accidentalidad moderada
+204,205,Playón de Los Comuneros,215,3,102,3,Accidentalidad Baja
+205,206,Plaza de Ferias,78,1,50,3,Accidentalidad Baja
+206,207,Popular,328,1,135,3,Accidentalidad Baja
+207,208,Prado,1147,14,866,1,Accidentalidad Media
+208,209,Robledo,718,5,308,0,Accidentalidad moderada
+209,210,Rosales,797,8,700,0,Accidentalidad moderada
+210,211,San Antonio,18,0,5,3,Accidentalidad Baja
+211,212,San Benito,1471,28,1938,2,Accidentalidad Alta
+212,213,San Bernardo,596,9,404,0,Accidentalidad moderada
+213,214,San Diego,1149,12,1698,1,Accidentalidad Media
+214,215,San Germán,355,5,291,0,Accidentalidad moderada
+215,216,San Isidro,726,5,277,0,Accidentalidad moderada
+216,217,San Javier No.1,509,4,213,0,Accidentalidad moderada
+217,218,San Javier No.2,187,1,103,3,Accidentalidad Baja
+218,219,San Joaquín,321,7,336,0,Accidentalidad moderada
+219,220,San José La Cima No.1,28,1,7,3,Accidentalidad Baja
+220,221,San José La Cima No.2,19,0,1,3,Accidentalidad Baja
+221,222,San Lucas,47,1,140,3,Accidentalidad Baja
+222,223,San Martín de Porres,455,1,158,0,Accidentalidad moderada
+223,224,San Miguel,567,4,240,0,Accidentalidad moderada
+224,225,San Pablo,268,0,70,3,Accidentalidad Baja
+225,226,San Pedro,499,7,446,0,Accidentalidad moderada
+226,227,Santa Cruz,236,4,73,3,Accidentalidad Baja
+227,228,Santa Fé,1811,21,1545,2,Accidentalidad Alta
+228,229,Santa Inés,394,4,151,3,Accidentalidad Baja
+229,230,Santa Lucía,163,1,91,3,Accidentalidad Baja
+230,231,Santa Margarita,161,1,54,3,Accidentalidad Baja
+231,232,Santa María de Los Ángeles,372,8,595,0,Accidentalidad moderada
+232,233,Santa Mónica,259,2,139,3,Accidentalidad Baja
+233,234,Santa Rosa de Lima,19,1,6,3,Accidentalidad Baja
+234,235,Santa Teresita,149,0,131,3,Accidentalidad Baja
+235,236,Santander,429,8,98,3,Accidentalidad Baja
+236,237,Santo Domingo Savio No.1,394,5,107,3,Accidentalidad Baja
+237,238,Santo Domingo Savio No.2,136,2,37,3,Accidentalidad Baja
+238,239,Sevilla,668,10,584,0,Accidentalidad moderada
+239,240,Simón Bolívar,223,2,188,3,Accidentalidad Baja
+240,241,Sin Nombre,4,0,1,3,Accidentalidad Baja
+241,242,Suburbano El Llano,77,0,147,3,Accidentalidad Baja
+242,243,Sucre,456,4,219,0,Accidentalidad moderada
+243,244,Suramericana,697,9,953,1,Accidentalidad Media
+244,245,Tejelo,544,5,174,0,Accidentalidad moderada
+245,246,Tenche,489,7,508,0,Accidentalidad moderada
+246,247,Terminal de Transporte,1332,19,1555,1,Accidentalidad Media
+247,248,Toscana,473,13,330,0,Accidentalidad moderada
+248,249,Trece de Noviembre,24,0,32,3,Accidentalidad Baja
+249,250,Tricentenario,548,5,419,0,Accidentalidad moderada
+250,251,Trinidad,620,6,448,0,Accidentalidad moderada
+251,252,U.D. Atanasio Girardot,161,0,141,3,Accidentalidad Baja
+252,253,U.P.B,47,1,80,3,Accidentalidad Baja
+253,254,Universidad Nacional,941,12,892,1,Accidentalidad Media
+254,255,Universidad de Antioquia,487,6,397,0,Accidentalidad moderada
+255,256,Veinte de Julio,273,7,80,3,Accidentalidad Baja
+256,257,Versalles No.1,354,3,155,3,Accidentalidad Baja
+257,258,Versalles No.2,34,0,23,3,Accidentalidad Baja
+258,259,Villa Carlota,885,11,1334,1,Accidentalidad Media
+259,260,Villa Flora,519,0,301,0,Accidentalidad moderada
+260,261,Villa Guadalupe,270,3,90,3,Accidentalidad Baja
+261,262,Villa Hermosa,406,1,148,3,Accidentalidad Baja
+262,263,Villa Lilliam,99,0,21,3,Accidentalidad Baja
+263,264,Villa Niza,118,2,53,3,Accidentalidad Baja
+264,265,Villa Nueva,1387,19,1502,1,Accidentalidad Media
+265,266,Villa Turbay,35,0,8,3,Accidentalidad Baja
+266,267,Villa del Socorro,282,3,144,3,Accidentalidad Baja
+267,268,Villatina,340,2,129,3,Accidentalidad Baja
