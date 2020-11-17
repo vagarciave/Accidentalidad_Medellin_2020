@@ -31,7 +31,7 @@ control_prediction <- function(fecha_inicio, fecha_fin, tipo_modelo, nombre){
       summarise(Total = sum(ACCIDENTALIDAD))
     
     filter_data_mes <- filter_data %>% 
-      group_by(COMUNA,CLASE,MES) %>% 
+      group_by(BARRIO,CLASE,MES) %>% 
       summarise(Total = sum(ACCIDENTALIDAD))
   }
   pron <- ifelse(tipo_modelo=='comuna','la','el')

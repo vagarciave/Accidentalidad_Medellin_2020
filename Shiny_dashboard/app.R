@@ -29,8 +29,7 @@ library(plotly)
 library(raster)
 library(dashboardthemes)
 
-youtube_video <- '<iframe width="560" height="315" src="https://www.youtube.com/watch?v=iX-QaNzd-0Y" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
-
+youtube_video <- 
 # Cargar valores ajustados
 load(file = 'accidentes_dia_barrio.RData',.GlobalEnv)
 load(file = 'accidentes_dia_comuna.RData',.GlobalEnv)
@@ -82,15 +81,16 @@ ui <- dashboardPage(
               # la descripcion de la app
               h1("¡Bienvenidos!",
                  align = "center"),
-              h3("En esta aplicación web encontrarás información histórica de accidentes de tránsito en Medellín 
+              h5("En esta aplicación web encontrarás información histórica de accidentes de tránsito en Medellín 
                  desde el año 2014 a 2018. Aquí podrás visualizar los datos históricos de accidentalidad, un mapa
                  donde se encuentran los barrios de Medellín agrupados de acuerdo al número de accidentes, además
                  nuestra herramienta te permitirá realizar predicciones de accidentes, por barrio, comuna y clase 
                  de accidente."),
               br(),
-              h3("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
+              h5("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
                  aplicación web"),
-              tags$div(class = "col-md-10  col-md-offset-1 videoWrapper",HTML(youtube_video))
+              HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/iX-QaNzd-0Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+      
       ),
 
      tabItem(tabName = "datos",
@@ -146,7 +146,7 @@ ui <- dashboardPage(
       # Second tab content
       tabItem(tabName = "prediccion",
               h1("Predicción de accidentes de tránsito", align = 'center'),
-              h4("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
+              h5("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
                  por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2018 se
                  realizan predicciones"),
               fluidRow(
@@ -214,10 +214,10 @@ ui <- dashboardPage(
       # Second tab content
       tabItem(tabName = "agrupamiento",
               h1("Agrupamiento de barrios en Medellín"),
-              h4("El siguiente mapa muestra los barrios de Medellín divididos en clusters,
+              h5("El siguiente mapa muestra los barrios de Medellín divididos en clusters,
                  cada cluster tiene carácteristicas diferentes de acuerdo al número de accidentes
                  que se presentaron de 2014 a 2018."),
-              h4("Puede seleccionar un barrio en el mapa y obtener la información histórica del mismo,
+              h5("Puede seleccionar un barrio en el mapa y obtener la información histórica del mismo,
                  además se presenta una tabla con la información de cada cluster"),
                 fluidPage(
                   column(width = 12,
@@ -234,7 +234,7 @@ ui <- dashboardPage(
              h2("Daniel Chanci Restrepo", align = "center"),
              h4('Ingeniería de sistemas', align = "center"),
              br(),
-             h2("Valentina Garcia Velásquez", align = "center"),
+             h2("Valentina García Velásquez", align = "center"),
              h4('Estadística', align = "center"),
              br(),
              h2("Jaime Andrés Molina Correa", align = "center"),
@@ -454,7 +454,7 @@ server <- function(input, output) {
       top_n(10) %>%
       plot_ly(x = ~ BARRIO, y = ~ TOTAL,color = ~BARRIO, type = 'bar')  %>%
       layout(
-        title = "Total de accidentes \n Top 5 barrios con más accidentes",
+        title = "Top 10 barrios con más accidentes",
         xaxis = list(title = "",
                      categoryorder = "array",
                      categoryarray = ~BARRIO),
