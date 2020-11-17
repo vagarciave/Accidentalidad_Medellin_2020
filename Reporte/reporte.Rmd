@@ -758,5 +758,12 @@ accidentes_dia_barrio # Base de datos diaria
 
 Se encontró que el modelo que mejor explica esta accidentalidad es:
 
+```{r, include=F}
+load(file = "mod_dia_barrio.RData")
+```
 
+```{r, eval=FALSE}
+mod_dia_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
+               data = train_dia_barrio, family= poisson())
+```
 
