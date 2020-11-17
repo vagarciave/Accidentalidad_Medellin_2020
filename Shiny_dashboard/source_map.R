@@ -1,4 +1,3 @@
-
 create_map <- function(){
   # Leer datos
   medellin_map_location <-"Barrio_Vereda.shp"
@@ -7,7 +6,7 @@ create_map <- function(){
   barrios_med <- shapefile(medellin_map_location,
                          encoding="UTF-8",
                          use_iconv=TRUE)
-  #nombres_barrios <- iconv(barrios_med@data$NOMBRE,"UTF-8","ISO_8859-1")
+  
   colnames(df_coloring)[1] <- "NOMBRE"
   id_x <- match(barrios_med@data$NOMBRE,df_coloring$NOMBRE)
   # Agregar seguridad 
