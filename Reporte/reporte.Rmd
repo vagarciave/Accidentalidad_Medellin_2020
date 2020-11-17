@@ -755,6 +755,13 @@ Base de datos agrupada para la accidentalidad (número de accidentes) diaria.
 accidentes_dia_barrio # Base de datos diaria
 ```
 
+Conjunto de prueba y conjunto de validación:
+
+```{r}
+test_dia_barrio <- accidentes_dia_barrio[accidentes_dia_barrio$PERIODO == 2018, ]
+train_dia_barrio <- accidentes_dia_barrio[accidentes_dia_barrio$PERIODO %in%
+                                            c(2014, 2015, 2016, 2017), ]
+```
 
 Se encontró que el modelo que mejor explica esta accidentalidad es:
 
@@ -766,4 +773,184 @@ load(file = "mod_dia_barrio.RData")
 mod_dia_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
                data = train_dia_barrio, family= poisson())
 ```
+
+```{r}
+summary(mod_dia_barrio)
+```
+Con los siguientes *Train_MSE* y *Test_MSE*
+
+```{r}
+# Modelo
+y_est_train_dia_barrio <- round(predict(mod_dia_barrio, newdata = train_dia_barrio,
+                                         type = "response"),0)
+y_est_test_dia_barrio <- round(predict(mod_dia_barrio, newdata = test_dia_barrio,
+                                        type = "response"),0)
+mse_train_dia_barrio <- round(MSE(train_dia_barrio$ACCIDENTALIDAD,
+                                   y_est_train_dia_barrio),4)
+mse_test_dia_barrio <- round(MSE(test_dia_barrio$ACCIDENTALIDAD,
+                                 y_est_test_dia_barrio),4)
+```
+
+```{r, include=F}
+datos_mse <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE)"),
+                        Train_MSE = c(mse_train_dia_barrio),
+                        Test_MSE = c(mse_test_dia_barrio))
+datos_mse <- datos_mse %>%
+  mutate(Porcentaje_Variacion = round(100*abs(Train_MSE-Test_MSE)/(Train_MSE+Test_MSE), 2))
+```
+
+```{r, echo = FALSE}
+knitr::kable(datos_mse)
+```
+
+Modelo:
+
+$$\widehat{\text{ACCIDENTALIDAD}} = \text{DIA_FESTIVO} + (1 ~|~ \text{COMUNA/CLASE})$$
+
+A continuación se enseña la comparación entre la accidentalidad observada y la accidentalidad predicha diariamente para la base de prueba (columna final).
+
+```{r, rows.print = 5}
+data.frame(test_dia_barrio, A.PREDICHA = y_est_test_dia_barrio)
+```
+
+
+### Modelo - unidad de tiempo Semana
+
+Base para el modelo semanal
+
+```{r}
+accidentes_semana_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+```{r, rows.print = 5}
+accidentes_semana_barrio # Base de datos semanaria
+```
+
+Conjunto de prueba y conjunto de validación:
+
+```{r}
+test_semana_barrio <- accidentes_semana_barrio[accidentes_semana_barrio$PERIODO == 2018, ]
+train_semana_barrio <- accidentes_semana_barrio[accidentes_semana_barrio$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+Se encontró que el modelo que mejor explica esta accidentalidad es:
+
+```{r, include=F}
+load(file = "mod_semana_barrio.RData")
+```
+
+```{r, eval=FALSE}
+mod_semana_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
+               data = train_semana_barrio, family= poisson())
+```
+
+```{r}
+summary(mod_semana_barrio)
+```
+
+```{r}
+# Modelo
+y_est_train_semana_barrio <- round(predict(mod_semana_barrio, newdata = train_semana_barrio,
+                                         type = "response"),0)
+y_est_test_semana_barrio <- round(predict(mod_semana_barrio, newdata = test_semana_barrio,
+                                        type = "response"),0)
+mse_train_semana_barrio <- round(MSE(train_semana_barrio$ACCIDENTALIDAD,
+                                   y_est_train_semana_barrio),4)
+mse_test_semana_barrio <- round(MSE(test_semana_barrio$ACCIDENTALIDAD,
+                                 y_est_test_semana_barrio),4)
+```
+
+```{r, include=F}
+datos_mse <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE)"),
+                        Train_MSE = c(mse_train_semana_barrio),
+                        Test_MSE = c(mse_test_semana_barrio))
+datos_mse <- datos_mse %>%
+  mutate(Porcentaje_Variacion = round(100*abs(Train_MSE-Test_MSE)/(Train_MSE+Test_MSE), 2))
+```
+
+```{r, echo = FALSE}
+knitr::kable(datos_mse)
+```
+
+Modelo:
+
+$$\widehat{\text{ACCIDENTALIDAD}} = \text{DIA_FESTIVO} + (1 ~|~ \text{COMUNA/CLASE})$$
+
+A continuación se enseña la comparación entre la accidentalidad observada y la accidentalidad predicha semanalmente para la base de prueba (columna final).
+
+```{r, rows.print = 5}
+data.frame(test_semana_barrio, A.PREDICHA = y_est_test_semana_barrio)
+```
+
+### Modelo - unidad de tiempo Mes
+
+Base para el modelo mensual
+
+```{r}
+accidentes_mes_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIODO, MES, TIEMPO_MES) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+```{r, rows.print = 5}
+accidentes_mes_barrio # Base de datos mesria
+```
+
+Conjunto de prueba y conjunto de validación:
+
+```{r}
+test_mes_barrio <- accidentes_mes_barrio[accidentes_mes_barrio$PERIODO == 2018, ]
+train_mes_barrio <- accidentes_mes_barrio[accidentes_mes_barrio$PERIODO %in% c(2014, 2015, 2016, 2017), ]
+```
+
+Se encontró que el modelo que mejor explica esta accidentalidad es:
+
+```{r, include=F}
+load(file = "mod_mes_barrio.RData")
+```
+
+```{r, eval=FALSE}
+mod_mes_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
+               data = train_mes_barrio, family= poisson())
+```
+
+```{r}
+summary(mod_mes_barrio)
+```
+
+```{r}
+# Modelo
+y_est_train_mes_barrio <- round(predict(mod_mes_barrio, newdata = train_mes_barrio,
+                                         type = "response"),0)
+y_est_test_mes_barrio <- round(predict(mod_mes_barrio, newdata = test_mes_barrio,
+                                        type = "response"),0)
+mse_train_mes_barrio <- round(MSE(train_mes_barrio$ACCIDENTALIDAD,
+                                   y_est_train_mes_barrio),4)
+mse_test_mes_barrio <- round(MSE(test_mes_barrio$ACCIDENTALIDAD,
+                                 y_est_test_mes_barrio),4)
+```
+
+```{r, include=F}
+datos_mse <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE)"),
+                        Train_MSE = c(mse_train_mes_barrio),
+                        Test_MSE = c(mse_test_mes_barrio))
+datos_mse <- datos_mse %>%
+  mutate(Porcentaje_Variacion = round(100*abs(Train_MSE-Test_MSE)/(Train_MSE+Test_MSE), 2))
+```
+
+```{r, echo = FALSE}
+knitr::kable(datos_mse)
+```
+
+Modelo:
+
+$$\widehat{\text{ACCIDENTALIDAD}} = \text{DIA_FESTIVO} + (1 ~|~ \text{COMUNA/CLASE})$$
+
+A continuación se enseña la comparación entre la accidentalidad observada y la accidentalidad predicha mensualmente para la base de prueba (columna final).
+
+```{r, rows.print = 5}
+data.frame(test_mes_barrio, A.PREDICHA = y_est_test_mes_barrio)
+```
+
+
 
