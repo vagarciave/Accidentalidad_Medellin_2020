@@ -34,19 +34,22 @@ load(file = 'accidentes_dia_comuna.RData',.GlobalEnv)
 
 datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
 datos <- subset( datos, select = -c(DIA, MES, PERIODO, DIA_FESTIVO, SEMANA_MES ) )
-# datos <- datos[sample(1:dim(datos)[1],1000),]
+
+# listas para nombre de barrios y comunas
 list_barrios <- sort(unique(datos$BARRIO))
 list_comunas <- sort(unique(datos$COMUNA))
 
 source('source_models.R')
+source('source_map.R')
 
 ui <- dashboardPage(
   dashboardHeader(title = "TAE 2020-2"),
   ## Sidebar content
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Inicio", tabName = "inicio", icon = icon("chart-bar")),
-      menuItem("Visualizacion", tabName = "visualizacion", icon = icon("table")),
+      menuItem("Inicio", tabName = "inicio", icon = icon("home")),
+      menuItem("Tabla de datos históricos", tabName = "datos", icon = icon("table")),
+      menuItem("Visualizacion", tabName = "visualizacion", icon = icon("chart-bar")),
       menuItem("Prediccion", tabName = "prediccion", icon = icon("car-crash")),
       menuItem("Agrupamiento", tabName = "agrupamiento", icon = icon("map-marked-alt"))
     )
@@ -59,38 +62,31 @@ ui <- dashboardPage(
       tabItem(tabName = "inicio",
               # En esta parte de inicio se pone el video
               # la descripcion de la app
-              box(
-                tags$h3("Entradas:"),
-                dateRangeInput("daterange", "Rango de Tiempo:",
-                               start  = "2014-01-01",
-                               end    = "2018-12-31",
-                               min    = "2014-01-01",
-                               max    = "2018-12-31",
-                               format = "dd/mm/yyyy",
-                               separator = " - ",
-                               language = "es"),
-                selectInput("tipo", "Tipo:",
-                            c("Choque" = "Choque",
-                              "Atropello" = "Atropello",
-                              "Caida de Ocupante" = "Caida de Ocupante",
-                              "Incendio" = "Incendio"))
-              ),# sidebarPanel
-              box(
-                h1("Header 1"),
-                h4("Output 1"),
-                verbatimTextOutput("txtout"),
-                
-              ) # mainPanel
+              h1("Bienvenidos")
       ),
 
-     tabItem(tabName = "visualizacion",
-             "Visualizacion",
-              titlePanel("Incidentes Georreferenciados"),
-             fluidRow(column(DT::dataTableOutput("Data"), 
+     tabItem(tabName = "datos",
+             titlePanel("Incidentes Georreferenciados"),
+             box(width = 14,
+                 tags$h3("Entradas:"),
+                 dateRangeInput("daterange", "Rango de Tiempo:",
+                                start  = "2014-01-01",
+                                end    = "2018-12-31",
+                                min    = "2014-01-01",
+                                max    = "2018-12-31",
+                                format = "dd/mm/yyyy",
+                                separator = " - ",
+                                language = "es")
+             ),
+             fluidRow(box(DT::dataTableOutput("Data")  %>% shinycssloaders::withSpinner(color="#0dc5c1"), 
                              style = "height:500px; overflow-y: scroll;overflow-x: scroll;",
                              width=12))
       ),
-      
+     
+     tabItem(tabName = "visualizacion",
+             # En esta parte los graficos descriptivos
+     ),
+     
       # Second tab content
       tabItem(tabName = "prediccion",
               fluidRow(
@@ -154,22 +150,18 @@ ui <- dashboardPage(
                         
                       )
                     ),
-              ),
-              fluidRow(
-                box(width = 12)
               )
       ),
       # Second tab content
       tabItem(tabName = "agrupamiento",
-              titlePanel("Seleccione el tipo de incidente:"),
                 fluidPage(
                   column(width = 12,
                          box(width = NULL, solidHeader = TRUE,
                              leafletOutput("mymap"),
                              p()
                          ),
-                         box(width = 14,
-                           h1('Acá va una tablita linda'))
+                         box(width = NULL,
+                          uiOutput("clusters_table"))
                   )
               )
        )
@@ -179,28 +171,6 @@ ui <- dashboardPage(
 ) # dashboardBody
 
 server <- function(input, output) {
-  
-  output$txtout <- renderText({
-    paste(weekdays(ymd(input$daterange[1])),ymd(input$daterange[2]), sep = ',')
-  })
-  
-  output$Data <- DT::renderDataTable(
-    DT::datatable({
-      datos
-    },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
-    filter = "top",
-    selection = "multiple",
-    style = "bootstrap"
-    ))
-  
-  output$mymap <- renderLeaflet({
-    leaflet() %>%
-      addTiles() %>%
-      addMarkers(lat = datos[1:100, "LATITUD"],
-                 lng = datos[1:100, "LONGITUD"], popup = datos[1:100,"FECHA"])
-  })
-  
   # Funcion para cargar todos los resultado
   control_reactive_pred <- reactive({
     validate(need(input$daterange_pred[1] < input$daterange_pred[2],
@@ -271,6 +241,85 @@ server <- function(input, output) {
     )
     
   })
+  
+  output$txtout <- renderText({
+    paste(weekdays(ymd(input$daterange[1])),ymd(input$daterange[2]), sep = ',')
+  })
+  #Datos de visualizacion
+  output$Data <- DT::renderDataTable(
+    DT::datatable({
+      datos %>% filter(ymd(FECHA) >= input$daterange[1], ymd(FECHA) <= input$daterange[2])
+    },
+    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
+    filter = "top",
+    selection = "multiple",
+    style = "bootstrap"
+    ))
+  
+  # Mapa
+  output$mymap <- renderLeaflet({
+    create_map()
+  })
+  
+  #Tabla para el mapa
+  output$clusters_table <- renderUI({
+    dirColors <-c("1"="#EE3E32", "2"="#F68838", "3"="#FBB021", "4"="#1B8A5A")
+    
+    # Create a Bootstrap-styled table
+    tags$table(class = "table",
+               tags$thead(tags$tr(
+                 tags$th("Color"),
+                 tags$th("Nombre"),
+                 tags$th("Promedio de muertos"),
+                 tags$th("Promedio de heridos"),
+                 tags$th("Promedio de solo daños")
+
+               )),
+               tags$tbody(
+                 tags$tr(
+                   tags$td(span(style = sprintf(
+                     "width:1.1em; height:1.1em; background-color:%s; display:inline-block;",
+                     dirColors[1]
+                   ))),
+                   tags$td("Accidentalidad alta"),
+                   tags$td('23.44'),
+                   tags$td('1773.11'),
+                   tags$td('2149.11')
+                 ),
+                 tags$tr(
+                   tags$td(span(style = sprintf(
+                     "width:1.1em; height:1.1em; background-color:%s; display:inline-block;",
+                     dirColors[2]
+                   ))),
+                   tags$td("Accidentalidad media"),
+                   tags$td('12.35'),
+                   tags$td('1050.35'),
+                   tags$td('1142.87')
+                 ),
+                 tags$tr(
+                   tags$td(span(style = sprintf(
+                     "width:1.1em; height:1.1em; background-color:%s; display:inline-block;",
+                     dirColors[3]
+                   ))),
+                   tags$td("Accidentalidad moderada"),
+                   tags$td('5.3'),
+                   tags$td('550.34'),
+                   tags$td('382.37')
+                 ),
+                 tags$tr(
+                   tags$td(span(style = sprintf(
+                     "width:1.1em; height:1.1em; background-color:%s; display:inline-block;",
+                     dirColors[4]
+                   ))),
+                   tags$td("Accidentalidad baja"),
+                   tags$td('1.71'),
+                   tags$td('171.6'),
+                   tags$td('104.78')
+                 )
+          )
+     )
+  })
+  
   
 }
 
