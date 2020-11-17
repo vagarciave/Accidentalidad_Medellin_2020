@@ -17,8 +17,10 @@ init_pkgs <- function()
 {
   pkgs <- c("mvtnorm", "ggplot2", "MBESS", "Matrix", "ks", 
             "caret", "rgdal", "leaflet", "knitr","rmarkdown", 
-            "PKI", "packrat", "raster", "tidyverse")
+            "PKI", "packrat", "raster", "tidyverse","plotly",
+            "reader","shiny","DT","RMySQL","lubridate", "dashboardthemes")
   lapply(pkgs, pkg_test_and_load)
 }
 
 init_pkgs()
+

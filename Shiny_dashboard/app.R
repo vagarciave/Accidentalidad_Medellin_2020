@@ -28,6 +28,7 @@ library(readr)
 library(plotly)
 library(raster)
 library(dashboardthemes)
+library(rgdal)
 
 youtube_video <- 
 # Cargar valores ajustados
@@ -94,7 +95,7 @@ ui <- dashboardPage(
       ),
 
      tabItem(tabName = "datos",
-             h1("Incidentes Georreferenciados", align = "center"),
+             h1("Datos históricos de accidentes", align = "center"),
              box(width = 14,
                  dateRangeInput("daterange", "Rango de Tiempo:",
                                 start  = "2014-01-01",
