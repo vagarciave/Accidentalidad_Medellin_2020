@@ -46,17 +46,22 @@ source('source_models.R')
 source('source_map.R')
 
 
-ui <- dashboardPage(
-                    
-  dashboardHeader(  ### changing logo
-    title = shinyDashboardLogo(
-      theme = "poor_mans_flatly",
-      boldText = "Accidentalidad" ,
-      mainText = "Medellin",
-      badgeText = "2014-2018"
-    ),
-    titleWidth = 350
-    ),
+header <-   dashboardHeader(  ### changing logo
+  title = shinyDashboardLogo(
+    theme = "poor_mans_flatly",
+    boldText = "Accidentalidad" ,
+    mainText = "Medellin",
+    badgeText = "2014-2018"
+  ),
+  titleWidth = 300
+)
+
+
+header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
+header$children[[2]]$children[[1]] <- tags$a(tags$img(src='transitapp.png',width = "50%", height = "50%"),
+                                             target = '_blank') 
+ui <- dashboardPage(header,
+                    #,height='67',width='228.6', align = 'left #,height='67',width='228.6', align = 'left'
   ## Sidebar content
   dashboardSidebar(
     sidebarMenu(
@@ -82,12 +87,13 @@ ui <- dashboardPage(
               # la descripcion de la app
               h1("¡Bienvenidos!",
                  align = "center"),
+              fluidRow(HTML('<center><img src="home.png" width="30%" height="30%"></center>')),
               h5("En esta aplicación web encontrarás información histórica de accidentes de tránsito en Medellín 
                  desde el año 2014 a 2018. Aquí podrás visualizar los datos históricos de accidentalidad, un mapa
                  donde se encuentran los barrios de Medellín agrupados de acuerdo al número de accidentes, además
                  nuestra herramienta te permitirá realizar predicciones de accidentes, por barrio, comuna y clase 
                  de accidente."),
-              br(),
+              h4(),
               h5("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
                  aplicación web"),
               HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/iX-QaNzd-0Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
