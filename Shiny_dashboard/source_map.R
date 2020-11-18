@@ -15,7 +15,7 @@ create_map <- function(){
   barrios_med@data$MUERTOS <- df_coloring$MUERTOS[id_x]
   barrios_med@data$SOLO_DANOS <- df_coloring$SOLO_DANOS[id_x]
   
-  pal <- colorFactor(c("red","#ED683C","yellow","green","#D0C7C7"), 
+  pal <- colorFactor(c("red","#F68838","yellow","green","#D0C7C7"), 
                      levels = c("Accidentalidad Alta",
                                 "Accidentalidad Media",
                                 "Accidentalidad moderada",
