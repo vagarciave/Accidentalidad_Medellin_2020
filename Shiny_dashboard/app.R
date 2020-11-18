@@ -31,8 +31,8 @@ library(dashboardthemes)
 library(rgdal)
 
 youtube_video <- 
-# Cargar valores ajustados
-load(file = 'accidentes_dia_barrio.RData',.GlobalEnv)
+  # Cargar valores ajustados
+  load(file = 'accidentes_dia_barrio.RData',.GlobalEnv)
 load(file = 'accidentes_dia_comuna.RData',.GlobalEnv)
 
 datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=T)
@@ -62,213 +62,213 @@ header$children[[2]]$children[[1]] <- tags$a(tags$img(src='transitapp.png',width
                                              target = '_blank') 
 ui <- dashboardPage(header,
                     #,height='67',width='228.6', align = 'left #,height='67',width='228.6', align = 'left'
-  ## Sidebar content
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Inicio", tabName = "inicio", icon = icon("home")),
-      menuItem("Tabla de datos históricos", tabName = "datos", icon = icon("table")),
-      menuItem("Visualizacion", tabName = "visualizacion", icon = icon("chart-bar")),
-      menuItem("Prediccion", tabName = "prediccion", icon = icon("car-crash")),
-      menuItem("Agrupamiento", tabName = "agrupamiento", icon = icon("map-marked-alt")),
-      menuItem("Equipo", tabName = "equipo", icon = icon("users"))
-    )
-  ),
-  ## Body content
-  dashboardBody(
-    ### changing theme
-    shinyDashboardThemes(
-      theme = "poor_mans_flatly"
-    ),
-    tabItems(
-      # First tab content
-      # First tab content
-      tabItem(tabName = "inicio",
-              # En esta parte de inicio se pone el video
-              # la descripcion de la app
-              h1("¡Bienvenidos!",
-                 align = "center"),
-              fluidRow(HTML('<center><img src="home.png" width="30%" height="30%"></center>')),
-              h5("En esta aplicación web encontrarás información histórica de accidentes de tránsito en Medellín 
-                 desde el año 2014 a 2018. Aquí podrás visualizar los datos históricos de accidentalidad, un mapa
-                 donde se encuentran los barrios de Medellín agrupados de acuerdo al número de accidentes, además
-                 nuestra herramienta te permitirá realizar predicciones de accidentes, por barrio, comuna y clase 
-                 de accidente."),
-              h4(),
-              h5("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
-                 aplicación web"),
-              HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/iX-QaNzd-0Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
-      
-      ),
-
-     tabItem(tabName = "datos",
-             h1("Datos históricos de accidentes", align = "center"),
-             box(width = 14,
-                 dateRangeInput("daterange", "Rango de Tiempo:",
-                                start  = "2014-01-01",
-                                end    = "2018-12-31",
-                                min    = "2014-01-01",
-                                max    = "2018-12-31",
-                                format = "dd/mm/yyyy",
-                                separator = " - ",
-                                language = "es")
-             ),
-             fluidRow(box(DT::dataTableOutput("Data")  %>% shinycssloaders::withSpinner(color="#0dc5c1"), 
-                             style = "height:500px; overflow-y: scroll;overflow-x: scroll;",
-                             width=12))
-      ),
-     
-     tabItem(tabName = "visualizacion",
-             h1("Visualización de datos",align = "center"),
-             fluidRow(
-               box(width = 12,
-                   dateRangeInput("daterange2", "Rango de Tiempo:",
-                                  start  = "2014-01-01",
-                                  end    = "2018-12-31",
-                                  min    = "2014-01-01",
-                                  max    = "2018-12-31",
-                                  format = "dd/mm/yyyy",
-                                  separator = " - ",
-                                  language = "es")
-               )
-             ),
-             
-             fluidRow(
-               box(width = 4,
-                   plotlyOutput("chart_clase")),
-               box(width = 4,
-                   plotlyOutput("chart_gravedad")),
-               box(width = 4,
-                   plotlyOutput("chart_diseno"))
-               
-             ),
-             fluidRow(
-               box(width = 6,
-                   plotlyOutput("chart_comuna")),
-               box(width = 6,
-                   plotlyOutput("chart_barrio"))
-             )
-
-     ),
-     
-      # Second tab content
-      tabItem(tabName = "prediccion",
-              h1("Predicción de accidentes de tránsito", align = 'center'),
-              h5("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
-                 por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2018 se
-                 realizan predicciones"),
-              fluidRow(
-                box(width = 4,
-                  dateRangeInput("daterange_pred", "Rango de Tiempo:",
-                               start  = "2014-01-01",
-                               end    = "2018-12-31",
-                               min    = "2014-01-01",
-                               max    = "2018-12-31",
-                               format = "dd/mm/yyyy",
-                               separator = " - ",
-                               language = "es")
-                  ),
-                
-                box(width = 4 ,
-                    selectInput("tipo_modelo", "Seleccione el tipo de modelo",
-                            c(Comuna = "comuna",
-                              Barrio = "barrio"))
-                    ),
-                # Only show this panel if tipo_modelo is comuna
-                
-                box(width = 4,
-                    conditionalPanel(
-                      condition = "input.tipo_modelo == 'comuna'",
-                      selectInput("nombre_comuna", "Nombre de la comuna",
-                                  list_comunas)
-                    ),
-                    
-                    # Only show this panel if tipo_modelo is barrio
-                    conditionalPanel(
-                      condition = "input.tipo_modelo == 'barrio'",
-                      selectInput("nombre_barrio", "Nombre del barrio",
-                                  list_barrios)
-                    )
-                 )
-
-              ),
-              
-              fluidRow(
-                  box(width = 12,
-                      tabsetPanel(
-                        # Muestra el grafico de predichos por accidente diarios
-                        tabPanel("Predicción por dia",
-                                 h1(),
-                                 plotlyOutput("plotpred_dia") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
-                                 h1(),
-                                 DTOutput("dfpred_dia")),
-                        # Muestra el grafico de predichos por accidente semanal
-                        tabPanel("Predicción por semana",
-                                 h1(),
-                                 plotlyOutput("plotpred_semana") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
-                                 h1(),
-                                 DTOutput("dfpred_semana")),
-                        # Muestra el grafico de predichos por accidente mensual
-                        tabPanel("Predicción por mes",
-                                 h1(),
-                                 plotlyOutput("plotpred_mes") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
-                                 h1(),
-                                 DTOutput("dfpred_mes"))
-                        
+                    ## Sidebar content
+                    dashboardSidebar(
+                      sidebarMenu(
+                        menuItem("Inicio", tabName = "inicio", icon = icon("home")),
+                        menuItem("Tabla de datos históricos", tabName = "datos", icon = icon("table")),
+                        menuItem("Visualizacion", tabName = "visualizacion", icon = icon("chart-bar")),
+                        menuItem("Prediccion", tabName = "prediccion", icon = icon("car-crash")),
+                        menuItem("Agrupamiento", tabName = "agrupamiento", icon = icon("map-marked-alt")),
+                        menuItem("Equipo", tabName = "equipo", icon = icon("users"))
                       )
                     ),
-              )
-      ),
-      # Second tab content
-      tabItem(tabName = "agrupamiento",
-              h1("Agrupamiento de barrios en Medellín"),
-              h5("El siguiente mapa muestra los barrios de Medellín divididos en clusters,
+                    ## Body content
+                    dashboardBody(
+                      ### changing theme
+                      shinyDashboardThemes(
+                        theme = "poor_mans_flatly"
+                      ),
+                      tabItems(
+                        # First tab content
+                        # First tab content
+                        tabItem(tabName = "inicio",
+                                # En esta parte de inicio se pone el video
+                                # la descripcion de la app
+                                h1("¡Bienvenidos!",
+                                   align = "center"),
+                                fluidRow(HTML('<center><img src="home.png" width="30%" height="30%"></center>')),
+                                h5("En esta aplicación web encontrarás información sobre los accidentes de tránsito en Medellín 
+                 desde el año 2014 a 2018. Aquí podrás visualizar los datos históricos de accidentalidad, un mapa
+                 donde se encuentran los barrios de Medellín agrupados de acuerdo al número de accidentes y, además,
+                 nuestra herramienta te permitirá realizar predicciones de accidentes, por barrio, comuna y clase 
+                 de accidente."),
+                                h4(),
+                                h5("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
+                 aplicación web"),
+                                HTML('<iframe width="560" height="315" src="https://www.youtube.com/embed/iX-QaNzd-0Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>')
+                                
+                        ),
+                        
+                        tabItem(tabName = "datos",
+                                h1("Datos históricos de accidentes", align = "center"),
+                                box(width = 14,
+                                    dateRangeInput("daterange", "Rango de Tiempo:",
+                                                   start  = "2014-01-01",
+                                                   end    = "2018-12-31",
+                                                   min    = "2014-01-01",
+                                                   max    = "2018-12-31",
+                                                   format = "dd/mm/yyyy",
+                                                   separator = " - ",
+                                                   language = "es")
+                                ),
+                                fluidRow(box(DT::dataTableOutput("Data")  %>% shinycssloaders::withSpinner(color="#0dc5c1"), 
+                                             style = "height:500px; overflow-y: scroll;overflow-x: scroll;",
+                                             width=12))
+                        ),
+                        
+                        tabItem(tabName = "visualizacion",
+                                h1("Visualización de datos",align = "center"),
+                                fluidRow(
+                                  box(width = 12,
+                                      dateRangeInput("daterange2", "Rango de Tiempo:",
+                                                     start  = "2014-01-01",
+                                                     end    = "2018-12-31",
+                                                     min    = "2014-01-01",
+                                                     max    = "2018-12-31",
+                                                     format = "dd/mm/yyyy",
+                                                     separator = " - ",
+                                                     language = "es")
+                                  )
+                                ),
+                                
+                                fluidRow(
+                                  box(width = 4,
+                                      plotlyOutput("chart_clase")),
+                                  box(width = 4,
+                                      plotlyOutput("chart_gravedad")),
+                                  box(width = 4,
+                                      plotlyOutput("chart_diseno"))
+                                  
+                                ),
+                                fluidRow(
+                                  box(width = 6,
+                                      plotlyOutput("chart_comuna")),
+                                  box(width = 6,
+                                      plotlyOutput("chart_barrio"))
+                                )
+                                
+                        ),
+                        
+                        # Second tab content
+                        tabItem(tabName = "prediccion",
+                                h1("Predicción de accidentes de tránsito", align = 'center'),
+                                h5("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
+                 por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2018 se
+                 realizan predicciones"),
+                                fluidRow(
+                                  box(width = 4,
+                                      dateRangeInput("daterange_pred", "Rango de Tiempo:",
+                                                     start  = "2014-01-01",
+                                                     end    = "2018-12-31",
+                                                     min    = "2014-01-01",
+                                                     max    = "2018-12-31",
+                                                     format = "dd/mm/yyyy",
+                                                     separator = " - ",
+                                                     language = "es")
+                                  ),
+                                  
+                                  box(width = 4 ,
+                                      selectInput("tipo_modelo", "Seleccione el tipo de modelo",
+                                                  c(Comuna = "comuna",
+                                                    Barrio = "barrio"))
+                                  ),
+                                  # Only show this panel if tipo_modelo is comuna
+                                  
+                                  box(width = 4,
+                                      conditionalPanel(
+                                        condition = "input.tipo_modelo == 'comuna'",
+                                        selectInput("nombre_comuna", "Nombre de la comuna",
+                                                    list_comunas)
+                                      ),
+                                      
+                                      # Only show this panel if tipo_modelo is barrio
+                                      conditionalPanel(
+                                        condition = "input.tipo_modelo == 'barrio'",
+                                        selectInput("nombre_barrio", "Nombre del barrio",
+                                                    list_barrios)
+                                      )
+                                  )
+                                  
+                                ),
+                                
+                                fluidRow(
+                                  box(width = 12,
+                                      tabsetPanel(
+                                        # Muestra el grafico de predichos por accidente diarios
+                                        tabPanel("Predicción por dia",
+                                                 h1(),
+                                                 plotlyOutput("plotpred_dia") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
+                                                 h1(),
+                                                 DTOutput("dfpred_dia")),
+                                        # Muestra el grafico de predichos por accidente semanal
+                                        tabPanel("Predicción por semana",
+                                                 h1(),
+                                                 plotlyOutput("plotpred_semana") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
+                                                 h1(),
+                                                 DTOutput("dfpred_semana")),
+                                        # Muestra el grafico de predichos por accidente mensual
+                                        tabPanel("Predicción por mes",
+                                                 h1(),
+                                                 plotlyOutput("plotpred_mes") %>% shinycssloaders::withSpinner(color="#0dc5c1"),
+                                                 h1(),
+                                                 DTOutput("dfpred_mes"))
+                                        
+                                      )
+                                  ),
+                                )
+                        ),
+                        # Second tab content
+                        tabItem(tabName = "agrupamiento",
+                                h1("Agrupamiento de barrios en Medellín"),
+                                h5("El siguiente mapa muestra los barrios de Medellín divididos en clusters,
                  cada cluster tiene carácteristicas diferentes de acuerdo al número de accidentes
                  que se presentaron de 2014 a 2018."),
-              h5("Puede seleccionar un barrio en el mapa y obtener la información histórica del mismo,
+                                h5("Puede seleccionar un barrio en el mapa y obtener la información histórica del mismo,
                  además se presenta una tabla con la información de cada cluster"),
-                fluidPage(
-                  column(width = 12,
-                         box(width = NULL, solidHeader = TRUE,
-                             leafletOutput("mymap"),
-                             p()
-                         ),
-                         box(width = NULL,
-                          uiOutput("clusters_table"))
-                  )
-              )
-       ),
-     tabItem(tabName = "equipo",
-             h2("Daniel Chanci Restrepo", align = "center"),
-             h4('Ingeniería de sistemas', align = "center"),
-             br(),
-             h2("Valentina García Velásquez", align = "center"),
-             h4('Estadística', align = "center"),
-             br(),
-             h2("Jaime Andrés Molina Correa", align = "center"),
-             h4('Estadística', align = "center"),
-             br(),
-             h2("Ricardo Peñaloza Velásquez", align = "center"),
-             h4('Ingeniería de sistemas', align = "center"),
-             br(),
-             h2("Felipe Villarreal Piedrahita", align = "center"),
-             h4('Ingeniería de sistemas', align = "center"),
-             br()
-             )
-      
-    ) # tabItems
-  ) # DashboardBody
+                                fluidPage(
+                                  column(width = 12,
+                                         box(width = NULL, solidHeader = TRUE,
+                                             leafletOutput("mymap"),
+                                             p()
+                                         ),
+                                         box(width = NULL,
+                                             uiOutput("clusters_table"))
+                                  )
+                                )
+                        ),
+                        tabItem(tabName = "equipo",
+                                h2("Daniel Chanci Restrepo", align = "center"),
+                                h4('Ingeniería de sistemas', align = "center"),
+                                br(),
+                                h2("Valentina García Velásquez", align = "center"),
+                                h4('Estadística', align = "center"),
+                                br(),
+                                h2("Jaime Andrés Molina Correa", align = "center"),
+                                h4('Estadística', align = "center"),
+                                br(),
+                                h2("Ricardo Peñaloza Velásquez", align = "center"),
+                                h4('Ingeniería de sistemas', align = "center"),
+                                br(),
+                                h2("Felipe Villarreal Piedrahita", align = "center"),
+                                h4('Ingeniería de sistemas', align = "center"),
+                                br()
+                        )
+                        
+                      ) # tabItems
+                    ) # DashboardBody
 ) # dashboardBody
 
 server <- function(input, output) {
   # Funcion para cargar todos los resultado
   control_reactive_pred <- reactive({
     validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-           "Error: la fecha final no puede ser menor que la fecha de inicio"))
+                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
     
     control_prediction(fecha_inicio = input$daterange_pred[1],
-    fecha_fin = input$daterange_pred[2],
-    tipo_modelo = input$tipo_modelo,
-    nombre = ifelse(input$tipo_modelo == 'comuna', input$nombre_comuna, input$nombre_barrio))
+                       fecha_fin = input$daterange_pred[2],
+                       tipo_modelo = input$tipo_modelo,
+                       nombre = ifelse(input$tipo_modelo == 'comuna', input$nombre_comuna, input$nombre_barrio))
   })
   
   # Grafica de dia
@@ -354,7 +354,7 @@ server <- function(input, output) {
   
   #Tabla para el mapa
   output$clusters_table <- renderUI({
-    dirColors <-c("1"="#EE3E32", "2"="#F68838", "3"="#FBB021", "4"="#1B8A5A")
+    dirColors <-c("1"="#EE3E32", "2"="#F68838", "3"="#FBB021", "4"="#1B8A5A", "5"="#D0C7C7")
     
     # Create a Bootstrap-styled table
     tags$table(class = "table",
@@ -364,7 +364,7 @@ server <- function(input, output) {
                  tags$th("Promedio de muertos"),
                  tags$th("Promedio de heridos"),
                  tags$th("Promedio de solo daños")
-
+                 
                )),
                tags$tbody(
                  tags$tr(
@@ -406,9 +406,19 @@ server <- function(input, output) {
                    tags$td('1.71'),
                    tags$td('171.6'),
                    tags$td('104.78')
+                 ),
+                 tags$tr(
+                   tags$td(span(style = sprintf(
+                     "width:1.1em; height:1.1em; background-color:%s; display:inline-block;",
+                     dirColors[5]
+                   ))),
+                   tags$td("Sin información"),
+                   tags$td("Sin información"),
+                   tags$td("Sin información"),
+                   tags$td("Sin información")
                  )
-          )
-     )
+               )
+    )
   })
   # Para gráficos del dash
   output$chart_clase <- renderPlotly({
@@ -427,14 +437,14 @@ server <- function(input, output) {
   })
   # Grafico gravedad
   output$chart_gravedad<- renderPlotly({
-      datos %>% filter(ymd(FECHA) >= input$daterange2[1],
-                       ymd(FECHA) <= input$daterange2[2]) %>%
+    datos %>% filter(ymd(FECHA) >= input$daterange2[1],
+                     ymd(FECHA) <= input$daterange2[2]) %>%
       group_by(GRAVEDAD) %>% 
       summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) %>%
       plot_ly(labels = ~GRAVEDAD, values = ~TOTAL, type = 'pie') %>% 
       layout(title = "Total de accidentes por gravedad",
-                          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+             xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+             yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
   })
   #Grafico comuna
   output$chart_comuna <- renderPlotly({
@@ -468,7 +478,7 @@ server <- function(input, output) {
         yaxis = list(title = "Total")
       )
   })
-
+  
   # Grafico diseño
   output$chart_diseno <- renderPlotly(({
     df_diseno <- datos %>% filter(ymd(FECHA) >= input$daterange2[1],

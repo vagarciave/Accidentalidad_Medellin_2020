@@ -31,6 +31,9 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', size="footnotesize",
 
 # Introducción
 
+Durante el periodo entre 2014 y 2018 se logró tomar una cantidad significativa de datos sobre la accidentalidad en Medellín y algunas de sus zonas aledañas, para evidenciar así, el problema de movilidad que presenta el área. Estos datos se encuentran en el portal geomed, donde cada uno de estos incidentes se encuentra georreferenciado, dividido por barrio y comuna. Cuenta, además, con la información sobre la vía donde el accidente ocurrió y también sobre el tipo de accidente que se dio, la fecha de éste e incluso los daños perjudiciales causados a los ciudadanos -muertos, heridos o solo daños materiales-.
+
+Ahora bien, al tener más de 200.000 datos durante este intervalo, el equipo se planteó el objetivo de darle un buen uso a estos, no sólo para analizar lo que sucedió en este lapso, sino también para ayudar a predecir accidentes a futuro y así poder esgrimir una función prevencionista. En ese orden de ideas, para acceder a la información recolectada y al presente análisis se habilitará el siguiente enlace XXXX. En donde la información a la que se accede estará presentada de una forma muy innovadora pues está desarrollada y pensada de forma interactiva e intuitiva, para obtener un mejor entendimiento del usuario.
 
 # Objetivos
 
