@@ -442,49 +442,45 @@ data.frame(observado = train_mes_comuna$ACCIDENTALIDAD, predicho = y_est1_train_
 
 Crear una base de datos a partir de los inputs que permita graficar los resultados predichos.
 
+creación de base de datos para comunas hasta 2019
 
 ```{r}
-# Selecciona una comuna para enseñar sus accidentalidad por tipo de accidente
-comuna <- readline(prompt = "Introduzca una comuna sin ningún acento: ")
-
-# Fecha inicial considerada, DEBE SER MAYOR A 2014-01-01
-fecha_inicial <- as.Date(readline(prompt = "Introduzca una fecha inicial: "))
-TIEMPO_DIA_inicial <- as.numeric(as.Date(fecha_inicial)) - as.numeric(as.Date("2014-01-01")) + 1
-
-# Fecha final considerada
-fecha_final <- as.Date(readline(prompt = "Introduzca la fecha final: "))
-TIEMPO_DIA_final <- as.numeric(as.Date(fecha_final)) - as.numeric(as.Date("2014-01-01")) + 1
-
-# Unidades de TIEMPO_DIA. Si TIEMPO_DIA = 1, entonces FECHA = "2014-01-01"
-TIEMPO_DIA <- TIEMPO_DIA_inicial:TIEMPO_DIA_final
-```
-
-```{r}
-fecha_vector <- as.Date(as.Date("2014-01-01"):fecha_final)
-base <- expand.grid(COMUNA = levels(accidentes_dia_comuna$COMUNA), CLASE = levels(accidentes_dia_comuna$CLASE),
+fecha_vector <- as.Date(as.Date("2014-01-01"):as.Date("2019-12-31"))
+base_2019 <- expand.grid(COMUNA = levels(accidentes_dia_comuna$COMUNA), CLASE = levels(accidentes_dia_comuna$CLASE),
                              FECHA = fecha_vector)
-base <- base %>% mutate(TIEMPO_DIA = as.numeric(FECHA) -
+base_2019 <- base_2019 %>% mutate(TIEMPO_DIA = as.numeric(FECHA) -
                                             as.numeric(as.Date("2014-01-01")) + 1)
 
 # PERIODO
-base <- base %>% mutate(PERIODO = as.numeric(format(FECHA,'%Y')))
+base_2019 <- base_2019 %>% mutate(PERIODO = as.numeric(format(FECHA,'%Y')))
 
 # Se crea la variable SEMANA
-base <- base %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
+base_2019 <- base_2019 %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
                           TIEMPO_SEMANA = match(SEMANA, sort(unique(SEMANA))))
 
 # Se crea la variable MES
-base <- base %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
+base_2019 <- base_2019 %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
                           TIEMPO_MES = match(MES, sort(unique(MES))))
 
 # días festivos
-base <- base %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
-```
+base_2019 <- base_2019 %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
 
-```{r}
-base <- left_join(base, accidentes_dia_comuna, by = c("COMUNA", "CLASE", "FECHA", "TIEMPO_DIA",
+# unión de las base_2019s
+base_2019 <- left_join(base_2019, subset(accidentes_dia_comuna, select = -DIA_NOMBRE),
+                  by = c("COMUNA", "CLASE", "FECHA", "TIEMPO_DIA",
                                        "PERIODO", "SEMANA", "TIEMPO_SEMANA", "MES",
                                        "TIEMPO_MES", "DIA_FESTIVO"))
-base[is.na(base)] <- 0
+
+# Se ponen ceros en los eventos que no e encuentran en la base_2019 original
+base_2019$ACCIDENTALIDAD[is.na(base_2019$ACCIDENTALIDAD)] <- 0 
+
+#DIA_NOMBRE PARA 2019
+fecha_2019 <- as.Date(as.Date("2014-01-01"):as.Date("2019-12-31"))
+dia_2019 <- c(rep(c("MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO",
+                    "LUNES","MARTES"),
+                times = length(fecha_2019)/7))
+fecha_dia_2019 <- data.frame(FECHA = fecha_2019, DIA_NOMBRE = dia_2019, stringsAsFactors = T)
+
+base_2019 <- left_join(base_2019, fecha_dia_2019, by = "FECHA")
 ```
 

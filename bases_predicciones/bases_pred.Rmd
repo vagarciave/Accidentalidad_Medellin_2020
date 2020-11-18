@@ -1,0 +1,292 @@
+---
+title: "bases_predicciones"
+author: "Jaime Andres Molina Correa"
+date: "17/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(lubridate)
+library("zoo")
+```
+
+# Para comuna
+
+```{r}
+load(file = "dias_festivos.RData")
+load(file = "accidentes_dia_comuna.RData")
+```
+
+```{r}
+fecha_vector <- as.Date(as.Date("2014-01-01"):as.Date("2019-12-31"))
+base_2019 <- expand.grid(COMUNA = levels(accidentes_dia_comuna$COMUNA), CLASE = levels(accidentes_dia_comuna$CLASE),
+                             FECHA = fecha_vector)
+base_2019 <- base_2019 %>% mutate(TIEMPO_DIA = as.numeric(FECHA) -
+                                            as.numeric(as.Date("2014-01-01")) + 1)
+
+# PERIODO
+base_2019 <- base_2019 %>% mutate(PERIODO = as.numeric(format(FECHA,'%Y')))
+
+# Se crea la variable SEMANA
+base_2019 <- base_2019 %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
+                          TIEMPO_SEMANA = match(SEMANA, sort(unique(SEMANA))))
+
+# Se crea la variable MES
+base_2019 <- base_2019 %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
+                          TIEMPO_MES = match(MES, sort(unique(MES))))
+
+# días festivos
+base_2019 <- base_2019 %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
+
+# unión de las base_2019s
+base_2019 <- left_join(base_2019, subset(accidentes_dia_comuna, select = -DIA_NOMBRE),
+                  by = c("COMUNA", "CLASE", "FECHA", "TIEMPO_DIA",
+                                       "PERIODO", "SEMANA", "TIEMPO_SEMANA", "MES",
+                                       "TIEMPO_MES", "DIA_FESTIVO"))
+
+# Se ponen ceros en los eventos que no se encuentran en la base original
+base_2019$ACCIDENTALIDAD[is.na(base_2019$ACCIDENTALIDAD) & base_2019$PERIODO != 2019] <- 0 
+
+#DIA_NOMBRE PARA 2019
+fecha_2019 <- as.Date(as.Date("2014-01-01"):as.Date("2019-12-31"))
+dia_2019 <- c(rep(c("MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO",
+                    "LUNES","MARTES"),
+                times = length(fecha_2019)/7))
+fecha_dia_2019 <- data.frame(FECHA = fecha_2019, DIA_NOMBRE = dia_2019, stringsAsFactors = T)
+
+base_2019_comuna <- left_join(base_2019, fecha_dia_2019, by = "FECHA")
+```
+
+```{r}
+remove(base_2019, fecha_dia_2019, fecha_vector, fecha_2019, dia_2019)
+```
+
+
+```{r}
+save(base_2019_comuna, file = "base_2019_comuna.RData")
+```
+
+```{r}
+load(file = "base_2019_comuna.RData")
+```
+
+### Para dia
+
+```{r}
+load(file = "mod_dia_comuna.RData")
+```
+
+
+```{r}
+base_2019_comuna$ACCIDENTALIDAD[base_2019_comuna$PERIODO == 2019] <-
+  round(predict(mod_dia_comuna4,
+                               newdata = base_2019_comuna[base_2019_comuna$PERIODO == 2019,],
+                               type = "response"),0)
+
+comuna_dia_2019pred <- base_2019_comuna
+save(comuna_dia_2019pred, file = "comuna_dia_2019pred.RData")
+load(file = "comuna_dia_2019pred.RData")
+```
+
+### Para semana
+
+```{r}
+load(file = "base_2019_comuna.RData")
+```
+
+```{r}
+comuna_semana_2019pred <- base_2019_comuna %>% group_by(COMUNA, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+Modelo:
+
+```{r}
+load(file = "mod_semana_comuna.RData")
+```
+
+```{r}
+comuna_semana_2019pred$ACCIDENTALIDAD[comuna_semana_2019pred$PERIODO == 2019] <-
+  round(predict(mod_semana_comuna3,
+                               newdata = comuna_semana_2019pred[comuna_semana_2019pred$PERIODO == 2019,],
+                               type = "response"),0)
+
+save(comuna_semana_2019pred, file = "comuna_semana_2019pred.RData")
+load(file = "comuna_semana_2019pred.RData")
+```
+
+### Para mes
+
+```{r}
+load(file = "base_2019_comuna.RData")
+```
+
+```{r}
+comuna_mes_2019pred <- base_2019_comuna %>% group_by(COMUNA, CLASE, PERIODO, MES, TIEMPO_MES) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+Modelo:
+
+```{r}
+load(file = "mod_mes_comuna.RData")
+```
+
+```{r}
+comuna_mes_2019pred$ACCIDENTALIDAD[comuna_mes_2019pred$PERIODO == 2019] <-
+  round(predict(mod_mes_comuna2,
+                               newdata = comuna_mes_2019pred[comuna_mes_2019pred$PERIODO == 2019,],
+                               type = "response"),0)
+
+save(comuna_mes_2019pred, file = "comuna_mes_2019pred.RData")
+load(file = "comuna_mes_2019pred.RData")
+```
+
+
+# Para Barrio
+
+```{r}
+load(file = "dias_festivos.RData")
+load(file = "accidentes_dia_barrio.RData")
+```
+
+```{r}
+fecha_vector <- as.Date(as.Date("2014-01-01"):as.Date("2019-12-31"))
+base_2019 <- expand.grid(BARRIO = levels(accidentes_dia_barrio$BARRIO), CLASE = levels(accidentes_dia_barrio$CLASE),
+                             FECHA = fecha_vector)
+base_2019 <- base_2019 %>% mutate(TIEMPO_DIA = as.numeric(FECHA) -
+                                            as.numeric(as.Date("2014-01-01")) + 1)
+
+# PERIODO
+base_2019 <- base_2019 %>% mutate(PERIODO = as.numeric(format(FECHA,'%Y')))
+
+# Se crea la variable SEMANA
+base_2019 <- base_2019 %>% mutate(SEMANA = strftime(FECHA, format = "%Y-%V"),
+                          TIEMPO_SEMANA = match(SEMANA, sort(unique(SEMANA))))
+
+# Se crea la variable MES
+base_2019 <- base_2019 %>% mutate(MES = strftime(FECHA, format = "%Y-%m"),
+                          TIEMPO_MES = match(MES, sort(unique(MES))))
+
+# días festivos
+base_2019 <- base_2019 %>% mutate(DIA_FESTIVO = ifelse(ymd(FECHA) %in% festivos,1,0))
+
+# unión de las base_2019s
+base_2019 <- left_join(base_2019, subset(accidentes_dia_barrio, select = -DIA_NOMBRE),
+                  by = c("BARRIO", "CLASE", "FECHA", "TIEMPO_DIA",
+                                       "PERIODO", "SEMANA", "TIEMPO_SEMANA", "MES",
+                                       "TIEMPO_MES", "DIA_FESTIVO"))
+
+# Se ponen ceros en los eventos que no se encuentran en la base original
+base_2019$ACCIDENTALIDAD[is.na(base_2019$ACCIDENTALIDAD) & base_2019$PERIODO != 2019] <- 0 
+
+#DIA_NOMBRE PARA 2019
+fecha_2019 <- as.Date(as.Date("2014-01-01"):as.Date("2019-12-31"))
+dia_2019 <- c(rep(c("MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO",
+                    "LUNES","MARTES"),
+                times = length(fecha_2019)/7))
+fecha_dia_2019 <- data.frame(FECHA = fecha_2019, DIA_NOMBRE = dia_2019, stringsAsFactors = T)
+
+base_2019_barrio <- left_join(base_2019, fecha_dia_2019, by = "FECHA")
+```
+
+```{r}
+remove(base_2019, fecha_dia_2019, fecha_vector, fecha_2019, dia_2019)
+```
+
+
+```{r}
+save(base_2019_barrio, file = "base_2019_barrio.RData")
+```
+
+```{r}
+load(file = "base_2019_barrio.RData")
+```
+
+### Para dia
+
+```{r}
+load(file = "mod_dia_barrio.RData")
+```
+
+
+```{r}
+base_2019_barrio$ACCIDENTALIDAD[base_2019_barrio$PERIODO == 2019] <-
+  round(predict(mod_dia_barrio,
+                               newdata = base_2019_barrio[base_2019_barrio$PERIODO == 2019,],
+                               type = "response"),0)
+
+barrio_dia_2019pred <- base_2019_barrio
+save(barrio_dia_2019pred, file = "barrio_dia_2019pred.RData")
+load(file = "barrio_dia_2019pred.RData")
+```
+
+
+### Para semana
+
+```{r}
+load(file = "base_2019_barrio.RData")
+```
+
+```{r}
+barrio_semana_2019pred <- base_2019_barrio %>% group_by(BARRIO, CLASE, PERIODO, SEMANA, TIEMPO_SEMANA) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+Modelo:
+
+```{r}
+load(file = "mod_semana_barrio.RData")
+```
+
+```{r}
+barrio_semana_2019pred$ACCIDENTALIDAD[barrio_semana_2019pred$PERIODO == 2019] <-
+  round(predict(mod_semana_barrio,
+                               newdata = barrio_semana_2019pred[barrio_semana_2019pred$PERIODO == 2019,],
+                               type = "response"),0)
+
+save(barrio_semana_2019pred, file = "barrio_semana_2019pred.RData")
+load(file = "barrio_semana_2019pred.RData")
+```
+
+```{r}
+dim(barrio_dia_2019pred)
+dim(barrio_semana_2019pred)
+```
+
+
+### Para mes
+
+```{r}
+load(file = "base_2019_barrio.RData")
+```
+
+```{r}
+barrio_mes_2019pred <- base_2019_barrio %>% group_by(BARRIO, CLASE, PERIODO, MES, TIEMPO_MES) %>%
+  summarise(DIA_FESTIVO = sum(DIA_FESTIVO), ACCIDENTALIDAD = sum(ACCIDENTALIDAD))
+```
+
+Modelo:
+
+```{r}
+load(file = "mod_mes_barrio.RData")
+```
+
+```{r}
+barrio_mes_2019pred$ACCIDENTALIDAD[barrio_mes_2019pred$PERIODO == 2019] <-
+  round(predict(mod_mes_barrio,
+                               newdata = barrio_mes_2019pred[barrio_mes_2019pred$PERIODO == 2019,],
+                               type = "response"),0)
+
+save(barrio_mes_2019pred, file = "barrio_mes_2019pred.RData")
+load(file = "barrio_mes_2019pred.RData")
+```
+
+
+
