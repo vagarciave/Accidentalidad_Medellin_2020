@@ -1,0 +1,148 @@
+---
+title: "Análisis descriptivo"
+author: "Valentina García - Jaime Molina"
+date: "11/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(stringr)
+library(roperators)
+library(dplyr)
+library(caret)
+library(class)
+library(lubridate)
+```
+
+# Análisis descriptivo
+
+## Sobre la base de datos
+
+```{r}
+# Cargar datos
+datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=FALSE,
+                  header = T)
+
+```
+
+```{r}
+str(datos)
+sum(is.na(datos))
+```
+
+
+La base de datos tiene variables, de las cuales la mayoría de ellas son categóricas, exceptuando la latitud y la longitud que serán utilizadas para la construcción del mapa. Luego de la limpieza de la base de datos se imputan en su totalidad los datos faltantes, además se considera añadir otras dos variables que podrían ser significativas a la hora de modelar el total de accidentes.
+
+Para este análisis no se considerarán las variable FECHA, LATITUD y LONGITUD.
+
+## CLASE
+
+```{r}
+datos %>% group_by(MES,CLASE, PERIODO) %>% 
+  summarise(total = n()) %>% 
+  ggplot(aes(x = MES, y = total , color = factor(CLASE))) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~PERIODO) + 
+  scale_x_discrete("Mes", limits=c(1:12))
+  theme(legend.position="bottom")
+```
+
+Para clase, es claro que para todos los periodos lo que más se presentan son choques,para Enero y Junio hubo menos cantidad de accidentes, de manera análoga es poco común que hayan incendios. Los volcamientos también son poco comunes, para las clases atropello, caída de ocupante y otro parece haber cantidades muy similares, estos comportamientos parecen ser similares en cada periodo pero no son 
+
+
+## GRAVEDAD
+
+```{r}
+datos %>% group_by(MES, GRAVEDAD, PERIODO) %>% 
+  summarise(total = n()) %>% 
+  ggplot(aes(x = MES, y = total , color = factor(GRAVEDAD))) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~PERIODO) + 
+  scale_x_discrete("Mes", limits=c(1:12))
+  theme(legend.position="bottom")
+```
+
+## COMUNA
+
+```{r}
+datos_comuna <- datos %>% 
+  group_by(COMUNA, PERIODO) %>% 
+  summarise(total = n()) %>% arrange(total, COMUNA)
+
+datos_comuna %>% ggplot(aes(COMUNA)) +
+  geom_col(aes(x=COMUNA,y=total,fill=COMUNA)) +
+  theme(axis.text.x = element_text(angle = 90, size = 7),legend.position='none') +
+  facet_wrap(~PERIODO)
+```
+
+
+## BARRIO
+
+```{r}
+
+datos_barrio<- datos %>% 
+  group_by(BARRIO, PERIODO) %>%
+  summarise(total = n()) %>% 
+  arrange(desc(total), BARRIO)  %>%
+  group_by(PERIODO) %>%
+  top_n(n = 10)
+
+datos_barrio %>% ggplot(aes(BARRIO)) +
+  geom_col(aes(x=BARRIO,y=total,fill=BARRIO)) +
+  theme(axis.text.x = element_text(angle = 90, size = 7),legend.position='none') +
+  facet_wrap(~PERIODO)
+
+```
+Para los barrios se tiene el cuenta el top 10 con más accidentes, es evidente que a medida que pasan los años
+
+## DISEÑO
+ 
+```{r}
+datos %>% group_by(MES, DISENO, PERIODO) %>% 
+  summarise(total = n()) %>% 
+  ggplot(aes(x = MES, y = total , color = factor(DISENO))) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~PERIODO) + 
+  scale_x_discrete("Mes", limits=c(1:12))
+  theme(legend.position="bottom")
+```
+
+## DIA
+```{r}
+datos_clase <- datos %>% 
+  group_by(MES,DIA, PERIODO) %>% 
+  summarise(total = n())%>%
+  mutate(MES = as.factor(MES))
+
+datos_clase %>% ggplot(aes(x = MES, y = total)) +
+  geom_point(aes(color=CLASE)) +
+  facet_wrap(~PERIODO) + 
+  theme(legend.position="bottom")
+```
+
+## MES
+
+```{r}
+datos %>% group_by(MES, PERIODO) %>%
+  summarise(total = n()) %>%
+  ggplot(aes(y=total, x = MES,color=factor(PERIODO))) +
+  geom_point() +
+  geom_line() + 
+  theme(legend.position="top") +
+  theme_bw() + 
+  scale_x_discrete("Mes", limits=c(1:12))
+```
+
+
+## DIA_NOMBRE interaccion con dia festivo
+```{r}
+
+```
+
