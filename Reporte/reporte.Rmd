@@ -212,16 +212,35 @@ A continuación se encuentra el acceso al código utilizado en todo este proceso
 Enlace: https://github.com/vagarciave/Project_x/blob/master/limpieza/Depuracion.Rmd
 
 # Análisis descriptivo
-```{r echo=FALSE}
-df <- read.csv(file = "Base_definitiva.csv", header = T,
-               stringsAsFactors = T, fileEncoding="utf-8")
-h <- table(df$PERIODO)
-paste("El promedio de accidentes durante el perido 2014-2018 es:", mean(h))
+
+## Sobre la base de datos
+
+```{r echo=FALSE, warning=F, message=F}
+library(dplyr)
+library(plotly)
+library(ggplot2)
 ```
 
+
+```{r}
+# Cargar datos
+df <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=FALSE,header = T)
+
+```
+
+```{r}
+str(df)
+sum(is.na(df))
+```
+
+
+La base de datos tiene variables, de las cuales la mayoría de ellas son categóricas, exceptuando la latitud y la longitud que serán utilizadas para la construcción del mapa. Luego de la limpieza de la base de datos se imputan en su totalidad los datos faltantes, además se considera añadir otras dos variables que podrían ser significativas a la hora de modelar el total de accidentes.
+
+Para este análisis no se considerarán las variable FECHA, LATITUD y LONGITUD.
+
+## Periodo
+
 ```{r echo=FALSE}
-df <- read.csv(file = "Base_definitiva.csv", header = T,
-               stringsAsFactors = T, fileEncoding="utf-8")
 per <- table(df$PERIODO)
 library(RColorBrewer)
 barxperiodo <- barplot(per, ylim = c(0,50000), xlab = "Año",
@@ -230,15 +249,73 @@ barxperiodo <- barplot(per, ylim = c(0,50000), xlab = "Año",
                col= brewer.pal(5, "Set3"), las = 1)
 text(x=barxperiodo, y=per, pos=3, cex=1, col="black", labels = per)
 ```
-Se Muestra que el promedio de accidentes es de 40800.4 en el periodo de tiempo a analizar, notar que los valores en estos años son muy parecidos, el año que se aleja mas del promedio de accidentes es el 2018.
 
-**Los primeros 5 barrios con mas cantidad de accidentes**
+La cantidad total de accidentes por periodo es bastante simular, se nota una leve reducción para el 2018.
+
+
+## Clase
+
+
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES,CLASE, PERIODO) %>% 
+  summarise(total = n()) %>% 
+  ggplot(aes(x = MES, y = total , color = factor(CLASE))) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~PERIODO) + 
+  scale_x_discrete("Mes", limits=c(1:12))
+  theme(legend.position="bottom")
+```
+
+
+
+Para clase, es claro que en cada periodo lo que más se presentan son choques, de manera análoga es poco común que hayan incendios, de igual forma los volcamientos también son poco comunes.  Para las clases atropello, caída de ocupante y otro parece haber cantidades muy similares, estos comportamientos son parecidos en cada periodo pero hay diferencias que podrían ser significativas en los modelos.
+
+## Gravedad
+
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES, GRAVEDAD, PERIODO) %>% 
+  summarise(total = n()) %>% 
+  ggplot(aes(x = MES, y = total , color = (GRAVEDAD))) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~PERIODO) + 
+  scale_x_discrete("Mes", limits=c(1:12))
+  theme(legend.position="bottom")
+```
+
+En los accidentes de tránsito lo más común es que se presenten heridos, seguido por solo daños, por otra parte el número de muertos para cada periodo es muy bajo, comparado con los otros tipos de gravedad. Para el año 2018 se nota una leve disminución en la cantidad de heridos.
+
+## Comuna
+
+````{r echo=FALSE}
+df_comuna <- table(df$COMUNA)
+accidentesxcomuna <- barplot(df_comuna, ylim = c(0,47000), xlab = " ",
+                ylab = "Número de accidentes", main = "CANTIDAD DE ACCIDENTES EN COMUNAS DE  MEDELLIN
+               (2014-2018)", cex.axis = "0.8",cex.lab = "1.5",
+                col = brewer.pal(16, "Set3"), las=3, cex.names = 0.6)
+text(x=accidentesxcomuna, y=df_comuna, pos=3, cex=0.7, col="black",label=df_comuna)
+```
+
+
+En los accidentes por comuna se evidencia que la comuna "La Candelaria" es la que mas accidentes ha registrado durante los periodos analizados, la de menor cantidad de accidentes es la comuna "Santa Cruz", esto para todos los periodos.
+
+
+```{r, message=F, warning=F, echo=F}
+df_comuna <- df %>% 
+  group_by(COMUNA, PERIODO) %>% 
+  summarise(total = n()) %>% arrange(total, COMUNA)
+
+df_comuna %>% ggplot(aes(COMUNA)) +
+  geom_col(aes(x=COMUNA,y=total,fill=COMUNA)) +
+  theme(axis.text.x = element_text(angle = 90, size = 7),legend.position='none') +
+  facet_wrap(~PERIODO)
+```
+
+
+## Barrio
 
 ```{r echo=FALSE}
-library(dplyr)
-library(plotly)
-df <- read.csv(file = "Base_definitiva.csv", header = T,
-               stringsAsFactors = T, fileEncoding="utf-8")
 completa_gravedad <- df %>%
     dplyr::select(PERIODO, MES,BARRIO,GRAVEDAD)%>%
     group_by(PERIODO, MES,BARRIO,GRAVEDAD)%>%
@@ -249,19 +326,51 @@ completa_barrio <- completa_gravedad %>%
     summarise(TOTAL=sum(CONTEO))
 completa <- left_join(completa_gravedad,completa_barrio, 
                       by = c("PERIODO", "BARRIO", "MES"))
+
 general<- completa[, c("BARRIO", "CONTEO")] %>%
     dplyr::select(BARRIO, CONTEO) %>%
     group_by(BARRIO) %>%
     summarise(TOTAL =sum(CONTEO))
+
 general_gravedad<-df[,c("BARRIO", "GRAVEDAD")]%>%
     dplyr::select(BARRIO,GRAVEDAD)%>%
     group_by(BARRIO, GRAVEDAD)%>%
     summarise(CONTEO=length(BARRIO)) 
+
 ordenamiento<-general[order(-general$TOTAL),]
 ordenamiento<-head(ordenamiento,5)
 ordenamiento$BARRIO<-as.character(ordenamiento$BARRIO)
+
 general_g<-inner_join(general_gravedad,ordenamiento,by="BARRIO")
 general_g<-general_g[order(-general_g$TOTAL),]
+```
+
+
+## Barrio
+
+```{r, message=F, warning=F, echo=F}
+
+df_barrio<- df %>% 
+  group_by(BARRIO, PERIODO) %>%
+  summarise(total = n()) %>% 
+  arrange(desc(total), BARRIO)  %>%
+  group_by(PERIODO) %>%
+  top_n(n = 10)
+
+df_barrio %>% ggplot(aes(BARRIO)) +
+  geom_col(aes(x=BARRIO,y=total,fill=BARRIO)) +
+  theme(axis.text.x = element_text(angle = 90, size = 7),legend.position='none') +
+  facet_wrap(~PERIODO)
+
+```
+
+Para los barrios se tiene el cuenta el top 10 con más accidentes por cada periodo, el barrio que presentó mayor número de accidentes de 2014 a 2017 fue la Candelaria, para 2018 este barrio fue superado por una cantidad no muy grande por el barrio campo amor, se evidencia como a través del tiempo algunos barrios ingresan o salen del top 10, por ejemplo el Carlos E. Restrepo empezó a tener una accidentalidad más alta a partir del 2016, por su parte Guayaquil redujo su accidentalidad para 2018, el barrio Naranjal solo estuvo en el top 10 en el año 2015.
+
+**Los primeros 5 barrios con mas cantidad de accidentes por gravedad**
+
+
+
+```{r echo=FALSE, include = F}
 bar_barrio <- plot_ly(x = general_g$BARRIO, y = general_g$CONTEO, type = 'bar', 
             name = general_g$GRAVEDAD ,color = general_g$GRAVEDAD) %>%
             layout(title="Top 5",yaxis = list(title = 'Cantidad'), 
@@ -269,27 +378,63 @@ bar_barrio <- plot_ly(x = general_g$BARRIO, y = general_g$CONTEO, type = 'bar',
                               categoryarray=general_g$TOTAL),
                    barmode = 'stack',
                    colorway = c('#4c3d66', '#7982ce', '#ff975b', 
-                                '#a262a9', '#6f4d96', '#3d3b72', '#182844')
-            )
+                                '#a262a9', '#6f4d96', '#3d3b72', '#182844'))
 bar_barrio
-xgravedad <- table(df$GRAVEDAD)
-accidetexgravedad <- barplot(xgravedad, ylim = c(0,120000), xlab = "Gravedad",
-               ylab = "Número de accidentes", main = "ACCIDENTES MEDELLIN (2014-2018)",
-               cex.axis = "0.8",cex.lab = "1.5",
-               col = brewer.pal(3, "Set3"), las=1)
-text(x=accidetexgravedad, y=xgravedad, pos=3, cex=0.8, col="black",labels = xgravedad)
 ```
+
+
 Estos son los 5 barrios con mas cantidad de accidentes, los cuales se clasifican por la gravedad, que son:"solo daños","Herido" y "Muerto", se identificaron los primeros barrios con mas accidentalidad por año, notar que la gravedad menos concurrente es "Muerto", aunque la Candelaria es el barrio con mas accidentes por año, tamibien note que Castilla tiene mas accidentes con gravedad de muertes mas alta que la de los demas barrios.
 
-````{r echo=FALSE}
-df_comuna <- table(df$COMUNA)
-accidentesxcomuna <- barplot(df_comuna, ylim = c(0,47000), xlab = "Comunas",
-                ylab = "Número de accidentes", main = "CANTIDAD DE ACCIDENTES EN COMUNAS DE  MEDELLIN
-               (2014-2018)", cex.axis = "0.8",cex.lab = "1.5",
-                col = brewer.pal(16, "Set3"), las=3, cex.names = 0.6)
-text(x=accidentesxcomuna, y=df_comuna, pos=3, cex=0.7, col="black",label=df_comuna)
+
+## Diseño
+ 
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES, DISENO, PERIODO) %>% 
+  summarise(total = n()) %>% 
+  ggplot(aes(x = MES, y = total , color = DISENO)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~PERIODO) + 
+  scale_x_discrete("Mes", limits=c(1:12))
+  theme(legend.position="bottom")
 ```
-En los accidentes por comuna se evidencia que la comuna "La Candelaria" es la que mas accidentes ha registrado durante los periodos analizados, la de menor cantidad de accidentes es la comuna "Santa Cruz".
+
+El diseño que más accidentalidad presenta en el tramo de vía, esto para todos los periodos. De 2014 a 2018 hubo una disminución en este tipo de accidentes, por su lado los accidentes para intersección y Lote o predio aumentaron levemente de 2014 a 2018.
+
+
+## Accidentalidad por mes
+
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES, PERIODO) %>%
+  summarise(total = n()) %>%
+  ggplot(aes(y=total, x = MES,color=factor(PERIODO))) +
+  geom_point() +
+  geom_line() + 
+  theme(legend.position="top") +
+  theme_bw() + 
+  scale_x_discrete("Mes", limits=c(1:12))
+```
+
+Se puede apreciar que la accidentalidad para 2018 es menor comparada con otros años, esto para casi todos los meses, se observa como hay diferencias para cada periodo y cada año, por lo cual una variable temporal en los modelos predictivos podría sr significativa. Para los meses de Enero a Marzo la accidentalidad parece ser más baja, para el mes de Junio los accidentes disminuyen. De Agosto a Octubre la accidentalidad en más alta.
+
+## Día de la semana
+
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(DIA_NOMBRE, DIA_FESTIVO) %>%
+  summarise(total = n()) %>%
+  mutate(DIA_FESTIVO = as.factor(DIA_FESTIVO),
+         DIA_NOMBRE = factor(DIA_NOMBRE, levels = c("LUNES","MARTES","MIERCOLES", "JUEVES","VIERNES","SABADO","DOMINGO"))) %>%
+  ggplot(aes(x=DIA_NOMBRE, y=total, fill = DIA_FESTIVO)) + 
+    geom_bar(stat="identity")
+
+```
+
+Es claro que los días festivos son un factor realmente influyente en el número de accidentes, pues para estos se presentan menor cantidad de accidentes, para el día domingo el total de accidentes es menor, para los demás días no se observa una diferencia significativa.
+
+## Conclusión:
+
+Del análisis descriptivo se concluye que las variables temporales son influyentes en la accidentalidad, para el mes y el periodo hay variaciones significativas en el número total de accidentes, por su parte para la clase de accidente, gravedad y diseño también varía el total de accidentes. Principalmente la variabilidad a nivel de accidentalidad depende en mayor medida de barrio y comuna
+
 
 # Modelos Predictivos
 

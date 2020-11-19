@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, message=F, warning=F}
 library(stringr)
 library(roperators)
 library(dplyr)
@@ -24,14 +24,14 @@ library(lubridate)
 
 ```{r}
 # Cargar datos
-datos <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=FALSE,
+df <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=FALSE,
                   header = T)
 
 ```
 
 ```{r}
-str(datos)
-sum(is.na(datos))
+str(df)
+sum(is.na(df))
 ```
 
 
@@ -39,10 +39,10 @@ La base de datos tiene variables, de las cuales la mayoría de ellas son categó
 
 Para este análisis no se considerarán las variable FECHA, LATITUD y LONGITUD.
 
-## CLASE
+## Clase
 
-```{r}
-datos %>% group_by(MES,CLASE, PERIODO) %>% 
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES,CLASE, PERIODO) %>% 
   summarise(total = n()) %>% 
   ggplot(aes(x = MES, y = total , color = factor(CLASE))) +
   geom_line() +
@@ -52,15 +52,15 @@ datos %>% group_by(MES,CLASE, PERIODO) %>%
   theme(legend.position="bottom")
 ```
 
-Para clase, es claro que para todos los periodos lo que más se presentan son choques,para Enero y Junio hubo menos cantidad de accidentes, de manera análoga es poco común que hayan incendios. Los volcamientos también son poco comunes, para las clases atropello, caída de ocupante y otro parece haber cantidades muy similares, estos comportamientos parecen ser similares en cada periodo pero no son 
+Para clase, es claro que en cada periodo lo que más se presentan son choques, de manera análoga es poco común que hayan incendios, de igual forma los volcamientos también son poco comunes.  Para las clases atropello, caída de ocupante y otro parece haber cantidades muy similares, estos comportamientos son parecidos en cada periodo pero hay diferencias que podrían ser significativas en los modelos.
 
 
-## GRAVEDAD
+## Gravedad
 
-```{r}
-datos %>% group_by(MES, GRAVEDAD, PERIODO) %>% 
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES, GRAVEDAD, PERIODO) %>% 
   summarise(total = n()) %>% 
-  ggplot(aes(x = MES, y = total , color = factor(GRAVEDAD))) +
+  ggplot(aes(x = MES, y = total , color = (GRAVEDAD))) +
   geom_line() +
   geom_point() +
   facet_wrap(~PERIODO) + 
@@ -68,45 +68,51 @@ datos %>% group_by(MES, GRAVEDAD, PERIODO) %>%
   theme(legend.position="bottom")
 ```
 
-## COMUNA
+En los accidentes de tránsito lo más común es que se presenten heridos, seguido por solo daños, por otra parte el número de muertos para cada periodo es muy bajo, comparado con los otros tipos de gravedad. Para el año 2018 se nota una leve disminución en la cantidad de heridos.
 
-```{r}
-datos_comuna <- datos %>% 
+
+## Comuna
+
+```{r, message=F, warning=F, echo=F}
+df_comuna <- df %>% 
   group_by(COMUNA, PERIODO) %>% 
   summarise(total = n()) %>% arrange(total, COMUNA)
 
-datos_comuna %>% ggplot(aes(COMUNA)) +
+df_comuna %>% ggplot(aes(COMUNA)) +
   geom_col(aes(x=COMUNA,y=total,fill=COMUNA)) +
   theme(axis.text.x = element_text(angle = 90, size = 7),legend.position='none') +
   facet_wrap(~PERIODO)
 ```
 
+En general, para todos los periodos las comunas con la mayor cantidad de accidentes fueron La Candelaria, Laureles Estadio y Castilla, aquellas que presentan menor cantidad de accidentes con Popular, Santa Cruz y San Javier,las demás comunas presentan variaciones a través de los años, a pesar de esto las que tienen mayor y menor accidentalidad siempre son las mismas.
 
-## BARRIO
 
-```{r}
+## Barrio
 
-datos_barrio<- datos %>% 
+```{r, message=F, warning=F, echo=F}
+
+df_barrio<- df %>% 
   group_by(BARRIO, PERIODO) %>%
   summarise(total = n()) %>% 
   arrange(desc(total), BARRIO)  %>%
   group_by(PERIODO) %>%
   top_n(n = 10)
 
-datos_barrio %>% ggplot(aes(BARRIO)) +
+df_barrio %>% ggplot(aes(BARRIO)) +
   geom_col(aes(x=BARRIO,y=total,fill=BARRIO)) +
   theme(axis.text.x = element_text(angle = 90, size = 7),legend.position='none') +
   facet_wrap(~PERIODO)
 
 ```
-Para los barrios se tiene el cuenta el top 10 con más accidentes, es evidente que a medida que pasan los años
+Para los barrios se tiene el cuenta el top 10 con más accidentes por cada periodo, el barrio que presentó mayor número de accidentes de 2014 a 2017 fue la Candelaria, para 2018 este barrio fue superado por una cantidad no muy grande por el barrio campo amor, se evidencia como a través del tiempo algunos barrios ingresan o salen del top 10, por ejemplo el Carlos E. Restrepo empezó a tener una accidentalidad más alta a partir del 2016, por su parte Guayaquil redujo su accidentalidad para 2018, el barrio Naranjal solo estuvo en el top 10 en el año 2015.
 
-## DISEÑO
+
+## Diseño
  
-```{r}
-datos %>% group_by(MES, DISENO, PERIODO) %>% 
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES, DISENO, PERIODO) %>% 
   summarise(total = n()) %>% 
-  ggplot(aes(x = MES, y = total , color = factor(DISENO))) +
+  ggplot(aes(x = MES, y = total , color = DISENO)) +
   geom_line() +
   geom_point() +
   facet_wrap(~PERIODO) + 
@@ -114,23 +120,13 @@ datos %>% group_by(MES, DISENO, PERIODO) %>%
   theme(legend.position="bottom")
 ```
 
-## DIA
-```{r}
-datos_clase <- datos %>% 
-  group_by(MES,DIA, PERIODO) %>% 
-  summarise(total = n())%>%
-  mutate(MES = as.factor(MES))
+El diseño que más accidentalidad presenta en el tramo de vía, esto para todos los periodos. De 2014 a 2018 hubo una disminución en este tipo de accidentes, por su lado los accidentes para intersección y Lote o predio aumentaron levemente de 2014 a 2018.
 
-datos_clase %>% ggplot(aes(x = MES, y = total)) +
-  geom_point(aes(color=CLASE)) +
-  facet_wrap(~PERIODO) + 
-  theme(legend.position="bottom")
-```
 
-## MES
+## Accidentalidad por mes
 
-```{r}
-datos %>% group_by(MES, PERIODO) %>%
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(MES, PERIODO) %>%
   summarise(total = n()) %>%
   ggplot(aes(y=total, x = MES,color=factor(PERIODO))) +
   geom_point() +
@@ -141,8 +137,13 @@ datos %>% group_by(MES, PERIODO) %>%
 ```
 
 
-## DIA_NOMBRE interaccion con dia festivo
-```{r}
+## Día de la semana
+```{r, message=F, warning=F, echo=F}
+df %>% group_by(DIA_NOMBRE, DIA_FESTIVO) %>%
+  summarise(total = n()) %>%
+  mutate(DIA_FESTIVO = as.factor(DIA_FESTIVO)) %>%
+  ggplot(aes(x=DIA_NOMBRE, y=total, fill = DIA_FESTIVO)) + 
+    geom_bar(position="fill", stat="identity")
 
 ```
 
