@@ -40,7 +40,7 @@ source('source/source_models.R')
 
 header <-   dashboardHeader(  ### changing logo
     title = HTML("Predicciòn ccidentalidad"),
-    titleWidth = 300
+    titleWidth = 450
 )
 
 
