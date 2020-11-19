@@ -146,7 +146,7 @@ ui <- dashboardPage(header,
                         tabItem(tabName = "acc",
                                 h1("Total de accidentes de tránsito", align = 'center'),
                                 h5("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
-                 por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2018 se
+                 por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2019 se
                  realizan predicciones"),
                                 fluidRow(
                                   box(width = 4,
