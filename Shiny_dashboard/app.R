@@ -36,6 +36,7 @@ list_barrios <- sort(unique(datos$BARRIO))
 list_comunas <- sort(unique(datos$COMUNA))
 
 source('source/source_models.R')
+source('maps/source_map.R')
 
 
 header <-   dashboardHeader(  ### changing logo
