@@ -33,21 +33,23 @@ knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', size="footnotesize",
 
 Los accidentes viales son una problemática que ha afectado de gran manera a  la ciudad de Medellín. El crecimiento económico de la ciudad y la rápida urbanización causan un gran aumento en el parque automotor, la densidad vehícular y las dificutlrades de transitar en las vías que conforman la ciudad. En este trabajo se plantea crear un sistema que pueda ayudar a mitigar los accidentes en las vías, además de servir como guía para tomar medidas frente a la situación actual.
 
-Durante el periodo entre 2014 y 2018 se logró tomar una cantidad significativa de datos sobre la accidentalidad en Medellín y algunas de sus zonas aledañas, para evidenciar así, el problema de movilidad que presenta el área. Estos datos se encuentran en el portal geomed, donde cada uno de estos incidentes se encuentra georreferenciado, dividido por barrio y comuna. Cuenta, además, con la información sobre la vía donde el accidente ocurrió y también sobre el tipo de accidente que se dio, la fecha de éste e incluso los daños perjudiciales causados a los ciudadanos -muertos, heridos o solo daños materiales-.
+Durante el periodo entre 2014 y 2018 se logró tomar una cantidad significativa de datos sobre la accidentalidad en Medellín y algunas de sus zonas aledañas, para evidenciar así, el problema de movilidad que presenta el área. Estos datos se encuentran en el portal [GeoMedellín](https://www.medellin.gov.co/geomedellin/), donde cada uno de estos incidentes se encuentra georreferenciado, dividido por barrio y comuna. Cuenta, además, con la información sobre la vía donde el accidente ocurrió y también sobre el tipo de accidente que se dio, la fecha de éste e incluso los daños perjudiciales causados a los ciudadanos -muertos, heridos o solo daños materiales.
 
-Ahora bien, al tener más de 200.000 datos durante este intervalo, el equipo se planteó el objetivo de darle un buen uso a estos, no sólo para analizar lo que sucedió en este lapso, sino también para ayudar a predecir accidentes a futuro y así poder esgrimir una función prevencionista. En ese orden de ideas, para acceder a la información recolectada y al presente análisis se habilitará el siguiente enlace XXXX. En donde la información a la que se accede estará presentada de una forma muy innovadora pues está desarrollada y pensada de forma interactiva e intuitiva, para obtener un mejor entendimiento del usuario.
+Ahora bien, al tener más de 200.000 datos durante este intervalo, el equipo se planteó el objetivo de darle un buen uso a estos, no sólo para analizar lo que sucedió en este lapso, sino también para ayudar a predecir accidentes a futuro y así poder esgrimir un modelo prevencionista. En ese orden de ideas, para acceder a la información recolectada y al presente análisis se habilitará un enlace a aplicación **TransitApp**, donde la información a la que se accede estará presentada de una forma interactiva e intuitiva, para obtener un mejor entendimiento del usuario.
+
+En el presente reporte se encuentra información detallada respecto a la depuración, imputación, análisis descriptivo, creación de clusters y modelos predictivos realizados para crear la aplicación **TransitApp**. Se verá que los modelos mixtos (modelos jerárquicos) presentan una buena estimación de la accidentalidad (número de accidentes) en la ciudad de Medellín.
 
 # Justificación
 
-La ciudad de Medellín presenta un índice de accidentalidad vial bastante alto comparada con otras ciudades de la región e incluso con la capital del país, Bogotá. Según el "Ránking (sic) Latinoamericano de Ciudades Fatales" de 2018, informe realizado por el centro de pensamiento LA Network, Medellín estaba ranqueada en el puesto 29 de las ciudades con más muertes en las vías de Latinoamérica, con 10.9 muertos por cada 100 mil habitantes. Además, durante el año 2017 hubo un total 41.667 accidentes viales en medellin, los cuales ocasionaron 258 muertes.
+La ciudad de Medellín presenta un índice de accidentalidad vial bastante alto comparada con otras ciudades de la región e incluso con la capital del país, Bogotá. Según el "Ránking (sic) Latinoamericano de Ciudades Fatales" de 2018, informe realizado por el centro de pensamiento *LA Network*, Medellín estaba ranqueada en el puesto 29 de las ciudades con más muertes en las vías de Latinoamérica, con 10.9 muertos por cada 100 mil habitantes. Además, durante el año 2017 hubo un total 41.667 accidentes viales en Medellín, los cuales ocasionaron 258 muertes.
 
 También es necesario tener en cuenta al sistema de salud en los accidentes viales, debido a que estos afectan gravemente la capacidad de cobertura para otro tipo de emergencias. Solo en 2017, 14000 de los 30000 heridos en los accidentes viales requirieron asistencia médica, y de este grupo, 3800 presentaron heridas graves. Aunque durante los años 2019 y 2020 se ha notado una disminución de estas estadísticas sobre la accidentalidad vial, se puede evidenciar que existe la necesidad de tener un mayor entendimiento de los datos, especialmente para los conductores, motociclistas y hasta ciclistas y peatones. Con la implementación del sistema planteado en este trabajo, se pretende crear una política de prevención de accidentalidad y además una conciencia ciudadana para manejar con mayor precaución en ciertos lugares y poder planear mejor sus viajes.
 
 # Objetivos
 
-El análisis y los modelos que se pretenden construir sólo abarcan el área urbana de Medellín correspondiente a sus 16 comunas y sus respectivos barrios.
+El análisis y los modelos que se pretenden construir sólo abarca el área urbana de Medellín correspondiente a sus 16 comunas y sus respectivos barrios.
 
-## General
+## Objetivo general
 
 Construir un sistema que le permita a la Secretaría de Movilidad de Medellín tomar decisiones en la creación de estrategias que ayuden a reducir la accidentalidad en zona específicas de Medellín, observando cuales son los tipos de accidentes más frecuentes en las diferentes comunas y sus barrios.
 
@@ -55,11 +57,11 @@ También se busca que el sistema les permita a todos los ciudadanos que se movil
 
 Lo anterior creando una interfaz amigable para los usuarios y fácil de utilizar.
 
-## Específicos
+## Objetivos específicos
 
 - Construir modelos que predigan el número de accidentes de cada tipo, tomando como entradas una ventana y una resolución temporal específicas, además de una zona espacial que puede ser un barrio o comuna de Medellín.
 
-- Elaborar un sistema que agrupe barrios con características similares por los tipos de accidentes (clase) y que tienen lugar en estos.
+- Elaborar un sistema que agrupe barrios con características similares por los tipos de accidentes (clase) y la gravedad que tienen lugar en estos.
 
 - Crear una interfaz gráfica que le permita al usuario visualizar con mayor comodidad la accidentalidad que hay en Medellín y las predicciones de esta a futuro.
 
