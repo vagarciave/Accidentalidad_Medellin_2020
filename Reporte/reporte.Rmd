@@ -1,5 +1,5 @@
 ---
-title: "Reporte Técnico"
+title: "TAE - Accidentalidad en Medellín - Reporte Técnico"
 author: "Jaime Andres Molina Correa <br> Valentina García Velasquez <br> Felipe Villarreal Piedrahita <br> Ricardo Penaloza Velasquez <br> Daniel Chanci Restrepo"
 output:
   html_document:
@@ -210,9 +210,9 @@ Finalmente se decide usar solo las comunas del área urbana de Medellín y dejar
 
 Tras las modificaciones mencionadas, de las 228693 observaciones originales entre las bases de datos del 2014 al 2018, se utilizarán 204002 observaciones en el análisis y construcción de los modelos. La base de datos luce de esta manera:
 
-```{r, rows.print = 5}
-df <- read.csv(file = "Base_definitiva.csv", header = T, nrows = 10000,
-               stringsAsFactors = T)
+```{r, rows.print = 5, echo=F}
+df <- read.csv(file = "Base_definitiva.csv", header = T,
+               stringsAsFactors = T, encoding = "UTF-8")
 df$FECHA <- as.Date(df$FECHA)
 df
 ```
@@ -231,26 +231,13 @@ library(plotly)
 library(ggplot2)
 ```
 
+Luego de la depuración e imputación de los datos, se cuenta con un total de 204002 incidentes de tránsito, los cuales tienen 14 características que se pueden llamar "variables". De las 14 variables 7 son categorícas (OBJECTID, CLASE , GRAVEDAD, COMUNA, BARRIO, DISENO, DIA_NOMBRE). Hay un total de 16 comunas, 268 barrios, 6 clases de accidente, 3 niveles de gravedad, 13 tipos de diseño de vía.
 
-```{r}
-# Cargar datos
-df <- read.csv("Base_definitiva.csv", encoding = 'UTF-8', stringsAsFactors=FALSE,header = T)
-
-```
-
-```{r}
-str(df)
-sum(is.na(df))
-```
-
-
-La base de datos tiene variables, de las cuales la mayoría de ellas son categóricas, exceptuando la latitud y la longitud que serán utilizadas para la construcción del mapa. Luego de la limpieza de la base de datos se imputan en su totalidad los datos faltantes, además se considera añadir otras dos variables que podrían ser significativas a la hora de modelar el total de accidentes.
-
-Para este análisis no se considerarán las variable FECHA, LATITUD y LONGITUD.
+Para este análisis no se considerarán las variables FECHA, LATITUD y LONGITUD.
 
 ## Periodo
 
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=4}
 per <- table(df$PERIODO)
 library(RColorBrewer)
 barxperiodo <- barplot(per, ylim = c(0,50000), xlab = "Año",
@@ -269,14 +256,13 @@ La cantidad total de accidentes por periodo es bastante simular, se nota una lev
 ```{r, message=F, warning=F, echo=F}
 df %>% group_by(MES,CLASE, PERIODO) %>% 
   summarise(total = n()) %>% 
-  ggplot(aes(x = MES, y = total , color = factor(CLASE))) +
+  ggplot(aes(x = MES, y = total , color = CLASE)) +
   geom_line() +
   geom_point() +
   facet_wrap(~PERIODO) + 
   scale_x_discrete("Mes", limits=c(1:12))
   theme(legend.position="bottom")
 ```
-
 
 
 Para clase, es claro que en cada periodo lo que más se presentan son choques, de manera análoga es poco común que hayan incendios, de igual forma los volcamientos también son poco comunes.  Para las clases atropello, caída de ocupante y otro parece haber cantidades muy similares, estos comportamientos son parecidos en cada periodo pero hay diferencias que podrían ser significativas en los modelos.
@@ -286,7 +272,7 @@ Para clase, es claro que en cada periodo lo que más se presentan son choques, d
 ```{r, message=F, warning=F, echo=F}
 df %>% group_by(MES, GRAVEDAD, PERIODO) %>% 
   summarise(total = n()) %>% 
-  ggplot(aes(x = MES, y = total , color = (GRAVEDAD))) +
+  ggplot(aes(x = MES, y = total , color = GRAVEDAD)) +
   geom_line() +
   geom_point() +
   facet_wrap(~PERIODO) + 
@@ -298,7 +284,7 @@ En los accidentes de tránsito lo más común es que se presenten heridos, segui
 
 ## Comuna
 
-````{r echo=FALSE}
+````{r, echo=FALSE, fig.height=4.5}
 df_comuna <- table(df$COMUNA)
 accidentesxcomuna <- barplot(df_comuna, ylim = c(0,47000), xlab = " ",
                 ylab = "Número de accidentes", main = "CANTIDAD DE ACCIDENTES EN COMUNAS DE  MEDELLIN
@@ -308,8 +294,9 @@ text(x=accidentesxcomuna, y=df_comuna, pos=3, cex=0.7, col="black",label=df_comu
 ```
 
 
-En los accidentes por comuna se evidencia que la comuna "La Candelaria" es la que mas accidentes ha registrado durante los periodos analizados, la de menor cantidad de accidentes es la comuna "Santa Cruz", esto para todos los periodos.
+En los accidentes por comuna se evidencia que la comuna "La Candelaria" es la que mas accidentes ha registrado durante los periodos analizados, la de menor cantidad de accidentes es la comuna "Santa Cruz", esto es con el número de accidentes observado, del 2014 al 2018.
 
+## Comunas por periodo
 
 ```{r, message=F, warning=F, echo=F}
 df_comuna <- df %>% 
@@ -321,9 +308,9 @@ df_comuna %>% ggplot(aes(COMUNA)) +
   theme(axis.text.x = element_text(angle = 90, size = 7),legend.position='none') +
   facet_wrap(~PERIODO)
 ```
+Ahora discriminando el número de accidentes en las comunas por periodo, se observa que se presenta una tendencia similar para cada periodo, por lo que se piensa que cada año van a existir tendencias similares de la accidentalidad por comuna.
 
 
-## Barrio
 
 ```{r echo=FALSE}
 completa_gravedad <- df %>%
@@ -356,7 +343,7 @@ general_g<-general_g[order(-general_g$TOTAL),]
 ```
 
 
-## Barrio
+## Barrios por periodo
 
 ```{r, message=F, warning=F, echo=F}
 
@@ -409,7 +396,7 @@ df %>% group_by(MES, DISENO, PERIODO) %>%
   theme(legend.position="bottom")
 ```
 
-El diseño que más accidentalidad presenta en el tramo de vía, esto para todos los periodos. De 2014 a 2018 hubo una disminución en este tipo de accidentes, por su lado los accidentes para intersección y Lote o predio aumentaron levemente de 2014 a 2018.
+El diseño que más accidentalidad presenta es el tramo de vía, esto para todos los periodos. De 2014 a 2018 hubo una disminución en este tipo de accidentes, por su lado los accidentes para intersección y Lote o predio aumentaron levemente de 2014 a 2018.
 
 
 ## Accidentalidad por mes
@@ -441,9 +428,10 @@ df %>% group_by(DIA_NOMBRE, DIA_FESTIVO) %>%
 
 Es claro que los días festivos son un factor realmente influyente en el número de accidentes, pues para estos se presentan menor cantidad de accidentes, para el día domingo el total de accidentes es menor, para los demás días no se observa una diferencia significativa.
 
-## Conclusión:
+## Conclusión del análisis
 
-Del análisis descriptivo se concluye que las variables temporales son influyentes en la accidentalidad, para el mes y el periodo hay variaciones significativas en el número total de accidentes, por su parte para la clase de accidente, gravedad y diseño también varía el total de accidentes. Principalmente la variabilidad a nivel de accidentalidad depende en mayor medida de barrio y comuna
+Del análisis descriptivo se concluye que las variables temporales no son influyentes en la accidentalidad, para el mes hay variaciones significativas en el número total de accidentes, por su parte para la clase de accidente, gravedad y diseño también varía el total de accidentes. Principalmente la variabilidad a nivel de accidentalidad depende en mayor medida de barrio y comuna
+
 
 
 # Modelos Predictivos
@@ -508,11 +496,7 @@ Se debe modificar la base de datos depurada para poder realizar los modelos. Se 
     #2019
     '2019-01-01','2019-01-07','2019-03-25','2019-04-18','2019-04-19','2019-05-1',
     '2019-06-03','2019-06-24','2019-07-01','2019-07-20','2019-08-07','2019-08-19',
-    '2019-10-14','2019-11-04','2019-11-11','2019-12-08','2019-12-25',
-    #2020
-    '2020-01-01','2020-01-06','2020-03-23','2020-04-9','2020-04-10','2020-05-01',
-    '2020-05-25','2020-06-15','2020-06-22','2020-06-29','2020-07-20','2020-08-07',
-    '2020-08-17','2020-10-12','2020-11-02','2020-11-16','2020-12-08','2020-12-25'
+    '2019-10-14','2019-11-04','2019-11-11','2019-12-08','2019-12-25'
     ))
 
 df <- df %>% select(COMUNA, CLASE, FECHA, PERIODO, MES, DIA_NOMBRE)
@@ -1015,7 +999,6 @@ summary(mod_dia_barrio)
 Con los siguientes *Train_MSE* y *Test_MSE*
 
 ```{r}
-# Modelo
 y_est_train_dia_barrio <- round(predict(mod_dia_barrio, newdata = train_dia_barrio,
                                          type = "response"),0)
 y_est_test_dia_barrio <- round(predict(mod_dia_barrio, newdata = test_dia_barrio,
@@ -1085,7 +1068,6 @@ summary(mod_semana_barrio)
 ```
 
 ```{r}
-# Modelo
 y_est_train_semana_barrio <- round(predict(mod_semana_barrio, newdata = train_semana_barrio,
                                          type = "response"),0)
 y_est_test_semana_barrio <- round(predict(mod_semana_barrio, newdata = test_semana_barrio,
@@ -1154,7 +1136,6 @@ summary(mod_mes_barrio)
 ```
 
 ```{r}
-# Modelo
 y_est_train_mes_barrio <- round(predict(mod_mes_barrio, newdata = train_mes_barrio,
                                          type = "response"),0)
 y_est_test_mes_barrio <- round(predict(mod_mes_barrio, newdata = test_mes_barrio,
@@ -1225,3 +1206,25 @@ Al realizar la respectiva clasificación se arrojó la siguiente gráfica, donde
 ![](Parte8.png){#id .class width=50% height=50%}
 
 Para finalizar esta sección, se agregó la tabla que clasifica el riesgo del barrio en la base de datos pricipal, para proximamente mostrar esta distribución en el mapa de Medellín asignando colores a los clusters. La columna quedó con el nombre SEGURIDAD_BARRIO.
+
+
+# Referencias
+
+  Andrew Gelman, Jennifer Hill (2007). Data Analysis Using Regression and
+  Multilevel/Hierarchical Models.
+
+  Douglas Bates, Martin Maechler, Ben Bolker, Steve Walker (2015). Fitting
+  Linear Mixed-Effects Models Using lme4. Journal of Statistical Software,
+  67(1), 1-48. doi:10.18637/jss.v067.i01.
+
+  Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A,   Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J,           Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H        (2019). “Welcome to the tidyverse.” Journal of Open Source Software, 4(43), 1686.
+
+  Achim Zeileis and Gabor Grothendieck (2005). zoo: S3 Infrastructure for
+  Regular and Irregular Time Series. Journal of Statistical Software, 14(6),
+  1-27. doi:10.18637/jss.v014.i06
+
+  C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and
+  shiny. Chapman and Hall/CRC Florida, 2020.
+
+
+
