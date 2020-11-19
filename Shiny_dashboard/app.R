@@ -143,7 +143,7 @@ ui <- dashboardPage(header,
                       
                         # Second tab content
                         tabItem(tabName = "acc",
-                                h1("Predicción de accidentes de tránsito", align = 'center'),
+                                h1("Total de accidentes de tránsito", align = 'center'),
                                 h5("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
                  por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2018 se
                  realizan predicciones"),
@@ -190,19 +190,19 @@ ui <- dashboardPage(header,
                                         condition = "input.tipo_modelo == 'comuna'",
                                         tabsetPanel(
                                           # Muestra el grafico de predichos por accidente diarios
-                                          tabPanel("Predicción por dia",
+                                          tabPanel("Accidentalidad por dia",
                                                    h1(),
                                                    plotlyOutput("plotpred_dia") %>% shinycssloaders::withSpinner(color="#3498db"),
                                                    h1(),
                                                    DTOutput("dfpred_dia")),
                                           # Muestra el grafico de predichos por accidente semanal
-                                          tabPanel("Predicción por semana",
+                                          tabPanel("Accidentalidad por semana",
                                                    h1(),
                                                    plotlyOutput("plotpred_semana") %>% shinycssloaders::withSpinner(color="#3498db"),
                                                    h1(),
                                                    DTOutput("dfpred_semana")),
                                           # Muestra el grafico de predichos por accidente mensual
-                                          tabPanel("Predicción por mes",
+                                          tabPanel("Accidentalidad por mes",
                                                    h1(),
                                                    plotlyOutput("plotpred_mes") %>% shinycssloaders::withSpinner(color="#3498db"),
                                                    h1(),
