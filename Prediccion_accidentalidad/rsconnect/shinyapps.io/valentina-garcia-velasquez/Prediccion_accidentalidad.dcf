@@ -1,0 +1,12 @@
+name: Prediccion_accidentalidad
+title: Prediccion_accidentalidad
+username:
+account: valentina-garcia-velasquez
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3263442
+bundleId: 3879230
+url: https://valentina-garcia-velasquez.shinyapps.io/Prediccion_accidentalidad/
+when: 1605768318.83948
+asMultiple: FALSE
+asStatic: FALSE
