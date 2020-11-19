@@ -1,9 +1,9 @@
-source('maps_scripts.R')
+source('maps/maps_scripts.R')
 create_map <- function(){
   # Leer datos
-  medellin_map_location <-"Barrio_Vereda.shp"
+  medellin_map_location <-"maps/Barrio_Vereda.shp"
   # Datos con los clusters
-  df_coloring <- read.csv("clusters_final-2.csv", header = TRUE, fileEncoding = "UTF-8")[,-c(1,2)]
+  df_coloring <- read.csv("maps/clusters_final-2.csv", header = TRUE, fileEncoding = "UTF-8")[,-c(1,2)]
   barrios_med <- shapefile(medellin_map_location,
                            encoding="UTF-8",
                            use_iconv=TRUE)
