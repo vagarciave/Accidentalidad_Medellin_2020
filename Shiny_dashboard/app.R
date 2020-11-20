@@ -2,12 +2,10 @@
 
 # Cargar paquetes
 library(shiny)
-library(shinythemes)
 library(shinydashboard)
 library(DT)
-require(dplyr)
-require(tidyr)
-require(lubridate)
+library(dplyr)
+library(lubridate)
 library(readr)
 library(leaflet)
 library(plotly)
@@ -27,7 +25,6 @@ list_comunas <- sort(unique(datos$COMUNA))
 
 source('source_models.R')
 source('source_map.R')
-
 
 header <-   dashboardHeader(  ### changing logo
   title = shinyDashboardLogo(
@@ -198,7 +195,7 @@ server <- function(input, output) {
   
   # Mapa
   output$mymap <- renderLeaflet({
-    medellin_map
+    create_map()
   })
 ################Tabla para el mapa########
   output$clusters_table <- renderUI({

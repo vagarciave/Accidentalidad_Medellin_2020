@@ -5,8 +5,8 @@ account: valentina-garcia-velasquez
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 3269892
-bundleId: 3883103
+bundleId: 3883127
 url: https://valentina-garcia-velasquez.shinyapps.io/TransitAPP_2020/
-when: 1605839889.86188
+when: 1605840393.79288
 asMultiple: FALSE
 asStatic: FALSE
