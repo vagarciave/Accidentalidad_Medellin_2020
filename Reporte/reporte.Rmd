@@ -1191,10 +1191,6 @@ remove(mod_dia_barrio)
 
 # Clustering
 
-'''
-Según el boletín 070 del concejo de Medellín, se dice que en el 2017 murieron 258 personas por incidentes de transito, por lo cual, se está convirtiendo en un problema de salud pública. La ciudad ocupa el primer lugar de accidentalidad en todo el territorio nacional, por dichos motivos, sugieren que que es muy importante trabajar en proyectos que se encarguen de velar por la seguridad de las personas en la vía, y, si es necesario, brindar sanciones ejemplares.
-'''
-
 Según los descrito en la introcucción, es necesario centrarse en los métodos preventivos más que en las sanciones, debido a que, si la población conoce sus cifras y logra entender qué es lo que esta pasando dentro de la ciudad, se logrará no sólo reducir los incidentes de tránsito, sino también crear conciencia en las generaciones futuras.
 
 Asimismo, para reducir los accidentes de transito en la ciudad es necesario comprender qué esta sucediendo a profundidad dentro de ella, y, gracias al acceso a las bases de datos anuales de Geomedellin, es posible clasificar las zonas donde más ocurren, para que estas sean intervenidas de una forma más rigurosa. En esta sección del proyecto fue necesario plantearnos la siguiente pregunta: ¿Cómo podríamos clasificar los barrios de Medellín de acuerdo a su accidentalidad?. 
