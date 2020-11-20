@@ -211,10 +211,7 @@ Finalmente se decide usar solo las comunas del área urbana de Medellín y dejar
 Tras las modificaciones mencionadas, de las 228693 observaciones originales entre las bases de datos del 2014 al 2018, se utilizarán 204002 observaciones en el análisis y construcción de los modelos. La base de datos luce de esta manera:
 
 ```{r, rows.print = 5, echo=F}
-df <- read.csv(file = "Base_definitiva.csv", header = T,
-               stringsAsFactors = T, encoding = "UTF-8")
-df$FECHA <- as.Date(df$FECHA)
-df
+load(file = "Base_definitiva.RData")
 ```
 
 A continuación se encuentra el acceso al código utilizado en todo este proceso
@@ -262,6 +259,7 @@ df %>% group_by(MES,CLASE, PERIODO) %>%
   facet_wrap(~PERIODO) + 
   scale_x_discrete("Mes", limits=c(1:12))
   theme(legend.position="bottom")
+
 ```
 
 
@@ -346,7 +344,6 @@ general_g<-general_g[order(-general_g$TOTAL),]
 ## Barrios por periodo
 
 ```{r, message=F, warning=F, echo=F}
-
 df_barrio<- df %>% 
   group_by(BARRIO, PERIODO) %>%
   summarise(total = n()) %>% 
@@ -364,7 +361,6 @@ df_barrio %>% ggplot(aes(BARRIO)) +
 Para los barrios se tiene el cuenta el top 10 con más accidentes por cada periodo, el barrio que presentó mayor número de accidentes de 2014 a 2017 fue la Candelaria, para 2018 este barrio fue superado por una cantidad no muy grande por el barrio campo amor, se evidencia como a través del tiempo algunos barrios ingresan o salen del top 10, por ejemplo el Carlos E. Restrepo empezó a tener una accidentalidad más alta a partir del 2016, por su parte Guayaquil redujo su accidentalidad para 2018, el barrio Naranjal solo estuvo en el top 10 en el año 2015.
 
 **Los primeros 5 barrios con mas cantidad de accidentes por gravedad**
-
 
 
 ```{r echo=FALSE, include = F}
@@ -627,7 +623,7 @@ Al parecer cada modelo explica mejor la accidentalidad que el anterior, pero se 
 
 Se procede a calcular el MSE de entrenamiento y de prueba en cada uno de los modelos, cabe resaltar que los valores predichos se redondearán al entero más cercano debido a que son datos de conteo y la función `predict` devuelve valores en la escala original pero con décimales.
 
-```{r}
+```{r, eval=FALSE}
 # Modelo 0
 y_est_train_dia_comuna0 <- round(predict(mod_dia_comuna0, newdata = train_dia_comuna,
                                          type = "response"),0)
@@ -681,8 +677,20 @@ mse_test_dia_comuna4 <- round(MSE(test_dia_comuna$ACCIDENTALIDAD,
 ```
 
 
-```{r, include=F}
-datos_mse <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ 1 + (1 | COMUNA/CLASE)",
+```{r, include = F}
+y_est_train_dia_comuna4 <- round(predict(mod_dia_comuna4, newdata = train_dia_comuna,
+                                         type = "response"),0)
+y_est_test_dia_comuna4 <- round(predict(mod_dia_comuna4, newdata = test_dia_comuna,
+                                        type = "response"),0)
+mse_train_dia_comuna4 <- round(MSE(train_dia_comuna$ACCIDENTALIDAD,
+                                   y_est_train_dia_comuna4),4)
+mse_test_dia_comuna4 <- round(MSE(test_dia_comuna$ACCIDENTALIDAD,
+                                  y_est_test_dia_comuna4),4)
+```
+
+
+```{r, include=F, eval = F}
+mse_comuna_dia <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ 1 + (1 | COMUNA/CLASE)",
                                           "ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | COMUNA/CLASE)",
                                           "ACCIDENTALIDAD ~ DIA_FESTIVO + TIEMPO_DIA + (1 | COMUNA/CLASE)",
                                           "ACCIDENTALIDAD ~ DIA_FESTIVO + DIA_NOMBRE + (1 | COMUNA/CLASE)",
@@ -693,12 +701,17 @@ datos_mse <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ 1 + (1 | COMU
                         Test_MSE = c(mse_test_dia_comuna0, mse_test_dia_comuna1,
                                      mse_test_dia_comuna2, mse_test_dia_comuna3,
                                      mse_test_dia_comuna4))
-datos_mse <- datos_mse %>%
+mse_comuna_dia <- mse_comuna_dia %>%
   mutate(Porcentaje_Variacion = round(100*abs(Train_MSE-Test_MSE)/(Train_MSE+Test_MSE), 2))
 ```
 
+```{r, include = F}
+load(file = "mse_comuna_dia.RData")
+```
+
+
 ```{r, echo = FALSE}
-knitr::kable(datos_mse)
+knitr::kable(mse_comuna_dia)
 ```
 
 En los modelos *mod_dia_comuna3* y *mod_dia_comuna4* se descarta usar la variable TIEMPO_DIA debido a que en lugar en disminuir el Test_MSE, lo aumentó, y tampoco mejoró el Train_MSE significativamente, por lo que se considera que no es significativa para explicar la accidentalidad en las comunas de Medellín por tipo de accidente.
@@ -717,6 +730,10 @@ data.frame(test_dia_comuna, A.PREDICHA = y_est_test_dia_comuna4)
 
 ```{r, include=F}
 remove(y_est_train_dia_comuna0, y_est_train_dia_comuna1, y_est_train_dia_comuna2, y_est_train_dia_comuna3, y_est_train_dia_comuna4, y_est_test_dia_comuna0, y_est_test_dia_comuna1, y_est_test_dia_comuna2, y_est_test_dia_comuna3, y_est_test_dia_comuna4,mse_train_dia_comuna0,mse_train_dia_comuna1,mse_train_dia_comuna2,mse_train_dia_comuna3,mse_train_dia_comuna4,mse_test_dia_comuna0,mse_test_dia_comuna1,mse_test_dia_comuna2,mse_test_dia_comuna3,mse_test_dia_comuna4)
+```
+
+```{r, include=F}
+remove(mod_dia_comuna0, mod_dia_comuna1, mod_dia_comuna2, mod_dia_comuna3, mod_dia_comuna4)
 ```
 
 
@@ -850,6 +867,10 @@ data.frame(test_semana_comuna, A.PREDICHA = y_est_test_semana_comuna3)
 remove(y_est_train_semana_comuna0, y_est_train_semana_comuna1, y_est_train_semana_comuna2, y_est_train_semana_comuna3, y_est_test_semana_comuna0, y_est_test_semana_comuna1, y_est_test_semana_comuna2, y_est_test_semana_comuna3,mse_train_semana_comuna0,mse_train_semana_comuna1,mse_train_semana_comuna2,mse_train_semana_comuna3,mse_test_semana_comuna0,mse_test_semana_comuna1,mse_test_semana_comuna2,mse_test_semana_comuna3)
 ```
 
+```{r, include=F}
+remove(mod_semana_comuna0, mod_semana_comuna1, mod_semana_comuna2, mod_semana_comuna3)
+```
+
 ### Modelos - unidad de tiempo Mes
 
 Para este modelo se agrupa la unidad de tiempo por meses, en los cuales se suma la cantidad de accidentes que suceden el el mismo, también se suma el número de días festivos que hay en dicho mes. La base luce como sigue:
@@ -886,7 +907,7 @@ mod_mes_comuna2 <- glmer(ACCIDENTALIDAD ~  DIA_FESTIVO + (1 + DIA_FESTIVO | COMU
                data = train_mes_comuna, family= poisson())
 ```
 
-Analísis de varianza ANOVA
+Análisis de varianza ANOVA
 
 ```{r}
 anova(mod_mes_comuna0, mod_mes_comuna1, mod_mes_comuna2)
@@ -956,6 +977,10 @@ data.frame(test_mes_comuna, A.PREDICHA = y_est_test_mes_comuna2)
 remove(y_est_train_mes_comuna0,y_est_train_mes_comuna1,y_est_train_mes_comuna2,y_est_test_mes_comuna0,y_est_test_mes_comuna1,y_est_test_mes_comuna2,mse_train_mes_comuna0,mse_train_mes_comuna1,mse_train_mes_comuna2,mse_test_mes_comuna0,mse_test_mes_comuna1,mse_test_mes_comuna2)
 ```
 
+```{r, include=F}
+remove(mod_mes_comuna0, mod_mes_comuna1, mod_mes_comuna2)
+```
+
 ## Modelos predictivos para los Barrios
 
 La base de datos para realizar el ajuste de los barrios se obtuvo igual a como se realizó para las comunas, es decir, con un `expand.grid` pero esta vez agrupando la base de datos por barrios.
@@ -993,12 +1018,9 @@ mod_dia_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
                data = train_dia_barrio, family= poisson())
 ```
 
-```{r}
-summary(mod_dia_barrio)
-```
 Con los siguientes *Train_MSE* y *Test_MSE*
 
-```{r}
+```{r, eval = F}
 y_est_train_dia_barrio <- round(predict(mod_dia_barrio, newdata = train_dia_barrio,
                                          type = "response"),0)
 y_est_test_dia_barrio <- round(predict(mod_dia_barrio, newdata = test_dia_barrio,
@@ -1009,26 +1031,28 @@ mse_test_dia_barrio <- round(MSE(test_dia_barrio$ACCIDENTALIDAD,
                                  y_est_test_dia_barrio),4)
 ```
 
-```{r, include=F}
-datos_mse <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE)"),
+```{r, eval=F, include=F}
+mse_barrio_dia <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE)"),
                         Train_MSE = c(mse_train_dia_barrio),
                         Test_MSE = c(mse_test_dia_barrio))
-datos_mse <- datos_mse %>%
+mse_barrio_dia <- mse_barrio_dia %>%
   mutate(Porcentaje_Variacion = round(100*abs(Train_MSE-Test_MSE)/(Train_MSE+Test_MSE), 2))
 ```
 
+```{r, include=F}
+load(file = "mse_barrio_dia.RData")
+```
+
 ```{r, echo = FALSE}
-knitr::kable(datos_mse)
+knitr::kable(mse_barrio_dia)
 ```
 
 Modelo:
 
 $$\widehat{\text{ACCIDENTALIDAD}} = \text{DIA_FESTIVO} + (1 ~|~ \text{COMUNA/CLASE})$$
 
-A continuación se enseña la comparación entre la accidentalidad observada y la accidentalidad predicha diariamente para la base de prueba (columna final).
-
-```{r, rows.print = 5}
-data.frame(test_dia_barrio, A.PREDICHA = y_est_test_dia_barrio)
+```{r, include=F}
+remove(mod_dia_barrio)
 ```
 
 
@@ -1063,11 +1087,8 @@ mod_semana_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
                data = train_semana_barrio, family= poisson())
 ```
 
-```{r}
-summary(mod_semana_barrio)
-```
 
-```{r}
+```{r, eval = F}
 y_est_train_semana_barrio <- round(predict(mod_semana_barrio, newdata = train_semana_barrio,
                                          type = "response"),0)
 y_est_test_semana_barrio <- round(predict(mod_semana_barrio, newdata = test_semana_barrio,
@@ -1078,27 +1099,26 @@ mse_test_semana_barrio <- round(MSE(test_semana_barrio$ACCIDENTALIDAD,
                                  y_est_test_semana_barrio),4)
 ```
 
-```{r, include=F}
-datos_mse <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE)"),
+```{r, include=F, eval=F}
+mse_barrio_semana <- data.frame(Modelo_Mixto_Poisson = c("ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE)"),
                         Train_MSE = c(mse_train_semana_barrio),
                         Test_MSE = c(mse_test_semana_barrio))
-datos_mse <- datos_mse %>%
+mse_barrio_semana <- mse_barrio_semana %>%
   mutate(Porcentaje_Variacion = round(100*abs(Train_MSE-Test_MSE)/(Train_MSE+Test_MSE), 2))
 ```
 
+```{r, include = F}
+load(file = "mse_barrio_semana.RData")
+```
+
+
 ```{r, echo = FALSE}
-knitr::kable(datos_mse)
+knitr::kable(mse_barrio_semana)
 ```
 
 Modelo:
 
 $$\widehat{\text{ACCIDENTALIDAD}} = \text{DIA_FESTIVO} + (1 ~|~ \text{COMUNA/CLASE})$$
-
-A continuación se enseña la comparación entre la accidentalidad observada y la accidentalidad predicha semanalmente para la base de prueba (columna final).
-
-```{r, rows.print = 5}
-data.frame(test_semana_barrio, A.PREDICHA = y_est_test_semana_barrio)
-```
 
 ### Modelo - unidad de tiempo Mes
 
@@ -1110,7 +1130,7 @@ accidentes_mes_barrio <- accidentes_dia_barrio %>% group_by(BARRIO, CLASE, PERIO
 ```
 
 ```{r, rows.print = 5}
-accidentes_mes_barrio # Base de datos mesria
+accidentes_mes_barrio # Base de datos mes
 ```
 
 Conjunto de prueba y conjunto de validación:
@@ -1129,10 +1149,6 @@ load(file = "mod_mes_barrio.RData")
 ```{r, eval=FALSE}
 mod_mes_barrio <- glmer(ACCIDENTALIDAD ~ DIA_FESTIVO + (1 | BARRIO/CLASE),
                data = train_mes_barrio, family= poisson())
-```
-
-```{r}
-summary(mod_mes_barrio)
 ```
 
 ```{r}
@@ -1166,6 +1182,10 @@ A continuación se enseña la comparación entre la accidentalidad observada y l
 
 ```{r, rows.print = 5}
 data.frame(test_mes_barrio, A.PREDICHA = y_est_test_mes_barrio)
+```
+
+```{r}
+remove(mod_dia_barrio)
 ```
 
 
@@ -1209,9 +1229,10 @@ Más adelante y ahora con sólo los datos necesarios, se realizó el método del
 Al realizar la respectiva clasificación se arrojó la siguiente gráfica, donde se puede observar la distribución de los barrios y se acepta la siguiente premisa: los 3 tipos de gravedad se relacionan entre sí, evidenciandose que a mayor numero de heridos, también hay mayor número de solo daños y muertos. En ese orden de ideas, se muestra otra información importante: Unos cúantos barrios son los que presentan la mayor concentración de accidentes, con una frecuencia mayor con respecto a los más seguros.
 
 ![](3tablas.jpeg){#id .class width=60% height=60%}
+
 Teniendo en cuenta lo anterior, se analizó la media de accidentes por cluster, lo que arrojó una diferencia significativa entre ellos a la hora de analizar los heridos, muertos y daños ocasionados. El heatmap que se encuentra a continuación describe lo visto en las gráficas anteriores de una manera mas precisa. Por lo tanto, los números muestran una diferencia mucho mayor cuando se comparan los 2 grupos más sguros con los 2 peligrosos, donde visualmente se puede notar al igual que en los gráficos anteriores. Igualmente es importnte resaltar que en las 3 componentes, el promedio del cluster con más accidentes es mayor a la suma de los otros 3
 
-Estos datos se muestran en la aplicación de shiny, debajo de la sección de agrupamiento.
+Estos datos se muestran en la aplicación de shiny, en la parte de abajo de la sección de agrupamiento.
 
 ![](Heatmap.png){#id .class width=50% height=50%}
 
@@ -1257,6 +1278,3 @@ Para finalizar esta sección, se agregó la tabla que clasifica el riesgo del ba
 
   C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and
   shiny. Chapman and Hall/CRC Florida, 2020.
-
-
-
