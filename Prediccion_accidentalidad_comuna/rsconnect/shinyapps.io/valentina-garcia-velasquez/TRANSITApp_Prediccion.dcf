@@ -1,0 +1,12 @@
+name: TRANSITApp_Prediccion
+title: TRANSITApp_Prediccion
+username:
+account: valentina-garcia-velasquez
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3269975
+bundleId: 3883021
+url: https://valentina-garcia-velasquez.shinyapps.io/TRANSITApp_Prediccion/
+when: 1605838146.07707
+asMultiple: FALSE
+asStatic: FALSE

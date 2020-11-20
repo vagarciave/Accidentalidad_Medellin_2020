@@ -43,7 +43,8 @@ header <-   dashboardHeader(  ### changing logo
 header$children[[2]]$children[[2]] <- header$children[[2]]$children[[1]]
 header$children[[2]]$children[[1]] <- tags$a(tags$img(src='transitapp.png',width = "50%", height = "50%"),
                                              target = '_blank') 
-ui <- dashboardPage(header,
+ui <- dashboardPage(title = "TRANSITApp",
+                    header,
 
                     dashboardSidebar(
                       sidebarMenu(
@@ -52,9 +53,9 @@ ui <- dashboardPage(header,
                         menuItem("Visualizacion", tabName = "visualizacion", icon = icon("chart-bar")),
                         menuItem("Accidentalidad", tabName = "acc",icon = icon("car-crash"),
                                  menuSubItem("Accidentalidad comunas",
-                                             tabName = "comunas"),
+                                             href = "https://valentina-garcia-velasquez.shinyapps.io/Prediccion_accidentalidad_comuna/"),
                                  menuSubItem("Accidentalidad barrios",
-                                             tabName = "barrios")),
+                                             href = "https://valentina-garcia-velasquez.shinyapps.io/Prediccion_accidentalidad_barrio/")),
                         menuItem("Agrupamiento", tabName = "agrupamiento", icon = icon("map-marked-alt")),
                         menuItem("Equipo", tabName = "equipo", icon = icon("users"))
                       )
@@ -197,7 +198,7 @@ server <- function(input, output) {
   
   # Mapa
   output$mymap <- renderLeaflet({
-    create_map()
+    medellin_map
   })
 ################Tabla para el mapa########
   output$clusters_table <- renderUI({
