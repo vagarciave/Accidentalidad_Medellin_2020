@@ -1257,6 +1257,20 @@ Al igual que la información del heatmap, estos datos se muestran en la aplicaci
 
 Para finalizar esta sección, se agregó la tabla que clasifica el riesgo del barrio en la base de datos pricipal, para proximamente mostrar esta distribución en el mapa de Medellín asignando colores a los clusters. La columna quedó con el nombre SEGURIDAD_BARRIO.
 
+# Conclusiones
+  El modelo mixto o modelo jerárquico demuestra ser una buena alternativa para el entrenamiento del modelo predictivo debido a que presenta un error en entrenamiento del 6% y un error en validación del 5%
+
+  El clustering realizado para el agrupamiento de mapas y el criterio elegido para agruparlos (número de accidentes) demuestran ser bien elegidos debido a que la forma en que se agrupan los datos tiene sentido con la realidad de la ciudad (La Candelaria y Laureles son barrios con mucho flujo vehicular y se encuentran en zonas donde hay mucha afluencia de personas de todo el Valle de Aburrá)
+
+  En los meses de agosto se puede observar que la accidentalidad es mucho mas alta que en los demás meses, algo a destacar es que el mes de agosto en los años analizados se festejaba la feria de flores, esto lleva a que la cantidad de personas en la ciudad de Medellín sea mas alta y por ende mas probabilidad de accidentes abra, ya que la ciudad estará mas congestionada, en cambio que en los meses de diciembre y enero la ciudad esta un poco mas descongestionada esto causa una posible disminución en la accidentalidad de Medellín.
+
+# Recomendaciones
+
+  Crear un plan de acción inmediato en los 9 barrios que se encuentran con la categoría de       "Accidentalidad alta" ya que presentan índices muy altos que pueden tener como consecuencia un incremento en   la accidentalidad y muertes en las vías.
+  
+  Invertir en una campaña de conciencia y responsabilidad automovilista en el centro ya que en este lugar es donde mas se presentan accidentes en Medellín.
+
+  Cuando hay eventos como la feria de flores tener planes de movilidad  mas estrictas esto con el fin de disminuir la alta accidentalidad en esa festividad.
 
 # Referencias
 
@@ -1275,3 +1289,13 @@ Para finalizar esta sección, se agregó la tabla que clasifica el riesgo del ba
 
   C. Sievert. Interactive Web-Based Data Visualization with R, plotly, and
   shiny. Chapman and Hall/CRC Florida, 2020.
+  
+  Rstudio.github.io. 2020. Leaflet For R - Introduction. [online] Available at: <https://rstudio.github.io/leaflet/> [Accessed 20 November 2020].
+  
+
+  Tiempo, C., 2020. Estos Son Los 5 Puntos Con Más Accidentes De Tránsito En Medellín. [online] El Tiempo. Available at: <https://www.eltiempo.com/colombia/medellin/estos-son-los-5-untos-con-mas-accidentes-de-transito-en-medellin-229534> [Accessed 20 November 2020].
+  
+  Ctumedellin.com. 2020. Medellín, Una De Las Ciudades Más Letales Para Manejar – CTU COLOMBIA. [online] Available at: <http://ctumedellin.com/sitio/2018/01/16/medellin-una-de-las-ciudades-mas-letales-para-manejar/> [Accessed 20 November 2020].
+
+  LA.Network. 2020. Estas Son Las 10 Ciudades Latinoamericanas Con Más Muertes En Las Vías. [online] Available at: <https://la.network/ciudades-latinoamericanas-muertes-vias/> [Accessed 20 November 2020].
+
