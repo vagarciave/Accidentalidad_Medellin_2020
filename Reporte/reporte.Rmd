@@ -35,9 +35,13 @@ Los accidentes viales son una problemática que ha afectado de gran manera a  la
 
 Durante el periodo entre 2014 y 2018 se logró tomar una cantidad significativa de datos sobre la accidentalidad en Medellín y algunas de sus zonas aledañas, para evidenciar así, el problema de movilidad que presenta el área. Estos datos se encuentran en el portal [GeoMedellín](https://www.medellin.gov.co/geomedellin/), donde cada uno de estos incidentes se encuentra georreferenciado, dividido por barrio y comuna. Cuenta, además, con la información sobre la vía donde el accidente ocurrió y también sobre el tipo de accidente que se dio, la fecha de éste e incluso los daños perjudiciales causados a los ciudadanos -muertos, heridos o solo daños materiales-.
 
-Ahora bien, al tener más de 200.000 datos durante este intervalo, el equipo se planteó el objetivo de darle un buen uso a estos, no sólo para analizar lo que sucedió en este lapso, sino también para ayudar a predecir accidentes a futuro y así poder esgrimir un modelo prevencionista. En ese orden de ideas, para acceder a la información recolectada y al presente análisis se habilitará un enlace a aplicación **TransitApp**, donde la información a la que se accede estará presentada de una forma interactiva e intuitiva, para obtener un mejor entendimiento del usuario.
+Ahora bien, al tener más de 200.000 datos durante este intervalo, el equipo se planteó el objetivo de darle un buen uso a estos, no sólo para analizar lo que sucedió en este lapso, sino también para ayudar a predecir accidentes a futuro y así poder esgrimir un modelo prevencionista. En ese orden de ideas, para acceder a la información recolectada y al presente análisis se habilitará un enlace a aplicación [TransitApp](https://valentina-garcia-velasquez.shinyapps.io/TransitAPP_2020/), donde la información a la que se accede estará presentada de una forma interactiva e intuitiva, para obtener un mejor entendimiento del usuario.
 
-En el presente reporte se encuentra información detallada respecto a la depuración, imputación, análisis descriptivo, creación de clusters y modelos predictivos realizados para crear la aplicación **TransitApp**. Se verá que los modelos mixtos (modelos jerárquicos) presentan una buena estimación de la accidentalidad (número de accidentes) en la ciudad de Medellín.
+En el presente reporte se encuentra información detallada respecto a la depuración, imputación, análisis descriptivo, creación de clusters y modelos predictivos realizados para crear la aplicación [TransitApp](https://valentina-garcia-velasquez.shinyapps.io/TransitAPP_2020/). Se verá que los modelos mixtos (modelos jerárquicos) presentan una buena estimación de la accidentalidad (número de accidentes) en la ciudad de Medellín.
+
+Enlace aplicativo TransitApp: https://valentina-garcia-velasquez.shinyapps.io/TransitAPP_2020/
+
+Enlace repositorio GitHub: https://github.com/vagarciave/TransitApp_1.0/
 
 # Justificación
 
@@ -216,7 +220,7 @@ load(file = "Base_definitiva.RData")
 
 A continuación se encuentra el acceso al código utilizado en todo este proceso
 
-Enlace: https://github.com/vagarciave/Project_x/blob/master/limpieza/Depuracion.Rmd
+Enlace: https://github.com/vagarciave/TransitApp_1.0/blob/master/limpieza/Depuracion.Rmd
 
 # Análisis descriptivo
 
@@ -1258,19 +1262,23 @@ Al igual que la información del heatmap, estos datos se muestran en la aplicaci
 Para finalizar esta sección, se agregó la tabla que clasifica el riesgo del barrio en la base de datos pricipal, para proximamente mostrar esta distribución en el mapa de Medellín asignando colores a los clusters. La columna quedó con el nombre SEGURIDAD_BARRIO.
 
 # Conclusiones
-  El modelo mixto o modelo jerárquico demuestra ser una buena alternativa para el entrenamiento del modelo predictivo debido a que presenta un error en entrenamiento del 6% y un error en validación del 5%
+  
+El modelo mixto o modelo jerárquico demuestra ser una buena alternativa para predecir la accidentalidad en las comuna y barrios de Medellín en las diferentes unidades de tiempo planteadas en este trabajo (día, semana, mes), ya que presenta un *Train_MSE* y un *Test_MSE* relativamente pequeño.
 
-  El clustering realizado para el agrupamiento de mapas y el criterio elegido para agruparlos (número de accidentes) demuestran ser bien elegidos debido a que la forma en que se agrupan los datos tiene sentido con la realidad de la ciudad (La Candelaria y Laureles son barrios con mucho flujo vehicular y se encuentran en zonas donde hay mucha afluencia de personas de todo el Valle de Aburrá)
+Al incluir todos los casos posibles en la construcción de los modelos, es decir, incluso los eventos donde no ocurren accidentes, los modelos mixtos se hacen muy pesados computacionalmente, y las bases de datos consideras crecen en observaciones significativamente, por lo que se recomienda crear una alternativa de optimización para el uso de los mismos.
 
-  En los meses de agosto se puede observar que la accidentalidad es mucho mas alta que en los demás meses, algo a destacar es que el mes de agosto en los años analizados se festejaba la feria de flores, esto lleva a que la cantidad de personas en la ciudad de Medellín sea mas alta y por ende mas probabilidad de accidentes abra, ya que la ciudad estará mas congestionada, en cambio que en los meses de diciembre y enero la ciudad esta un poco mas descongestionada esto causa una posible disminución en la accidentalidad de Medellín.
+El clustering realizado para el agrupamiento de mapas y el criterio elegido para agruparlos (número de accidentes) demuestran ser bien elegidos debido a que la forma en que se agrupan los datos tiene sentido con la realidad de la ciudad (La Candelaria y Laureles son barrios con mucho flujo vehícular y se encuentran en zonas donde hay mucha afluencia de personas de todo el Valle de Aburrá)
+
+En los meses de agosto se puede observar que la accidentalidad es mucho mas alta que en los demás meses, algo a destacar es que el mes de agosto en los años analizados se festejaba la feria de flores, esto lleva a que la cantidad de personas en la ciudad de Medellín sea mas alta y por ende mas probabilidad de accidentes abra, ya que la ciudad estará mas congestionada, en cambio que en los meses de diciembre y enero la ciudad esta un poco mas descongestionada esto causa una posible disminución en la accidentalidad de Medellín.
+
 
 # Recomendaciones
 
-  Crear un plan de acción inmediato en los 9 barrios que se encuentran con la categoría de       "Accidentalidad alta" ya que presentan índices muy altos que pueden tener como consecuencia un incremento en   la accidentalidad y muertes en las vías.
+Crear un plan de acción inmediato en los 9 barrios que se encuentran con la categoría de "Accidentalidad alta" ya que presentan índices muy altos que pueden tener como consecuencia un incremento en   la accidentalidad y muertes en las vías.
   
-  Invertir en una campaña de conciencia y responsabilidad automovilista en el centro ya que en este lugar es donde mas se presentan accidentes en Medellín.
+Invertir en una campaña de conciencia y responsabilidad automovilista en el centro ya que en este lugar es donde mas se presentan accidentes en Medellín.
 
-  Cuando hay eventos como la feria de flores tener planes de movilidad  mas estrictas esto con el fin de disminuir la alta accidentalidad en esa festividad.
+Cuando hay eventos como la feria de flores tener planes de movilidad  mas estrictas esto con el fin de disminuir la alta accidentalidad en esa festividad.
 
 # Referencias
 
@@ -1281,7 +1289,8 @@ Para finalizar esta sección, se agregó la tabla que clasifica el riesgo del ba
   Linear Mixed-Effects Models Using lme4. Journal of Statistical Software,
   67(1), 1-48. doi:10.18637/jss.v067.i01.
 
-  Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A,   Henry L, Hester J, Kuhn M, Pedersen TL, Miller E, Bache SM, Müller K, Ooms J,           Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H        (2019). “Welcome to the tidyverse.” Journal of Open Source Software, 4(43), 1686.
+  Wickham et al., (2019). Welcome to the tidyverse. Journal of Open Source
+  Software, 4(43), 1686, https://doi.org/10.21105/joss.01686
 
   Achim Zeileis and Gabor Grothendieck (2005). zoo: S3 Infrastructure for
   Regular and Irregular Time Series. Journal of Statistical Software, 14(6),
