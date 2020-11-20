@@ -15,15 +15,6 @@ library(raster)
 library(dashboardthemes)
 library(rgdal)
 
- # Cargar datos 
-load(file = 'barrio_dia_2019pred.RData',.GlobalEnv)
-load(file = 'barrio_semana_2019pred.RData',.GlobalEnv)
-load(file = 'barrio_mes_2019pred.RData',.GlobalEnv)
-load(file = 'comuna_dia_2019pred.RData',.GlobalEnv)
-load(file = 'comuna_semana_2019pred.RData',.GlobalEnv)
-load(file = 'comuna_mes_2019pred.RData',.GlobalEnv)
-load(file = 'historicos.RData',.GlobalEnv)
-
 # Cargar mapa
 load('medellin_map.RData',.GlobalEnv)
 
@@ -59,7 +50,11 @@ ui <- dashboardPage(header,
                         menuItem("Inicio", tabName = "inicio", icon = icon("home")),
                         menuItem("Tabla de datos históricos", tabName = "datos", icon = icon("table")),
                         menuItem("Visualizacion", tabName = "visualizacion", icon = icon("chart-bar")),
-                        menuItem("Accidentalidad", tabName = "acc",icon = icon("car-crash")),
+                        menuItem("Accidentalidad", tabName = "acc",icon = icon("car-crash"),
+                                 menuSubItem("Accidentalidad comunas",
+                                             tabName = "comunas"),
+                                 menuSubItem("Accidentalidad barrios",
+                                             tabName = "barrios")),
                         menuItem("Agrupamiento", tabName = "agrupamiento", icon = icon("map-marked-alt")),
                         menuItem("Equipo", tabName = "equipo", icon = icon("users"))
                       )
@@ -141,96 +136,8 @@ ui <- dashboardPage(header,
                                 
                         ),
                         
-                      
                         # Second tab content
-                        tabItem(tabName = "acc",
-                                h1("Total de accidentes de tránsito", align = 'center'),
-                                h5("A continuación podrá seleccionar un periodo de tiempo para obtener el total de accidentes 
-                 por día, semana y mes. Recuerde que de 2014 a 2018 se mostrarán los datos reales, a partir de 2019 se
-                 realizan predicciones"),
-                                fluidRow(
-                                  box(width = 4,
-                                      dateRangeInput("daterange_pred", "Rango de Tiempo:",
-                                                     start  = "2014-01-01",
-                                                     end    = "2019-12-31",
-                                                     min    = "2014-01-01",
-                                                     max    = "2019-12-31",
-                                                     format = "dd/mm/yyyy",
-                                                     separator = " - ",
-                                                     language = "es")
-                                  ),
-                                  
-                                  box(width = 4 ,
-                                      selectInput("tipo_modelo", "Seleccione el tipo de modelo",
-                                                  c(Comuna = "comuna"
-                                                    ,Barrio = "barrio")
-                                                  )
-                                  ),
-                                  # Only show this panel if tipo_modelo is comuna
-                                  
-                                  box(width = 4,
-                                      conditionalPanel(
-                                        condition = "input.tipo_modelo == 'comuna'",
-                                        selectInput("nombre_comuna", "Nombre de la comuna",
-                                                    list_comunas)
-                                      ),
-                                      
-                                      # Only show this panel if tipo_modelo is barrio
-                                      conditionalPanel(
-                                        condition = "input.tipo_modelo == 'barrio'",
-                                        selectInput("nombre_barrio", "Nombre del barrio",
-                                                    list_barrios)
-                                      )
-                                  )
-                                  
-                                ),
-                                
-                                fluidRow(
-                                  box(width = 12,
-                                      conditionalPanel(
-                                        condition = "input.tipo_modelo == 'comuna'",
-                                        tabsetPanel(
-                                          # Muestra el grafico de predichos por accidente diarios
-                                          # Muestra el grafico de predichos por accidente mensual
-                                          tabPanel("Accidentalidad por mes",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_mes") %>% shinycssloaders::withSpinner(color="#3498db")
-                                          ),
-                                          # Muestra el grafico de predichos por accidente semanal
-                                          tabPanel("Accidentalidad por semana",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_semana") %>% shinycssloaders::withSpinner(color="#3498db")
-                                                  ),
-                                          
-                                          tabPanel("Accidentalidad por dia",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_dia") %>% shinycssloaders::withSpinner(color="#3498db")
-                                                  )
-                                        )
-                                      ),
-                                      conditionalPanel(
-                                        condition = "input.tipo_modelo == 'barrio'",
-                                        tabsetPanel(
-                                          # Muestra el grafico de predichos por accidente diarios
-                                          tabPanel("Predicción por mes",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_mesb") %>% shinycssloaders::withSpinner(color="#3498db")
-                                          ),
-                                          # Muestra el grafico de predichos por accidente semanal
-                                          tabPanel("Predicción por semana",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_semanab") %>% shinycssloaders::withSpinner(color="#3498db")
-                                          ),
-                                          tabPanel("Predicción por dia",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_diab") %>% shinycssloaders::withSpinner(color="#3498db")
-                                                   )
-                                        )
-                                      )
-
-                                  ),
-                                )
-                                
+                        tabItem(tabName = "acc"
                                 
                         ),
                         # Second tab content
@@ -274,60 +181,6 @@ ui <- dashboardPage(header,
 ) # dashboardBody
 
 server <- function(input, output) {
-  # Grafica de dia
-  output$plotpred_dia <- renderPlotly({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_comuna_dia(fecha_inicio = input$daterange_pred[1],
-                    fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_comuna)
-  })
-  
-  # Grafica de semana
-  output$plotpred_semana <- renderPlotly({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_comuna_semana(fecha_inicio = input$daterange_pred[1],
-                       fecha_fin = input$daterange_pred[2],
-                       nombre = input$nombre_comuna)
-  })
-  
-  # Grafica de mes
-  output$plotpred_mes <- renderPlotly({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_comuna_mes(fecha_inicio = input$daterange_pred[1],
-                    fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_comuna)
-  })
-  
-
-  # Grafica de dia
-  output$plotpred_diab <- renderPlotly({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_barrio_dia(fecha_inicio = input$daterange_pred[1],
-                    fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_barrio)
-  })
-  
-  # Grafica de semana
-  output$plotpred_semanab <- renderPlotly({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_barrio_semana(fecha_inicio = input$daterange_pred[1],
-                       fecha_fin = input$daterange_pred[2],
-                       nombre = input$nombre_barrio)
-  })
-  
-  # Grafica de mes
-  output$plotpred_mesb <- renderPlotly({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_barrio_mes(fecha_inicio = input$daterange_pred[1],
-                    fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_barrio)
-  })
 
   #Datos de visualizacion
   output$Data <- DT::renderDataTable(
