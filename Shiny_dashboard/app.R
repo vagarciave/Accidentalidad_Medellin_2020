@@ -5,28 +5,27 @@ library(shiny)
 library(shinythemes)
 library(shinydashboard)
 library(DT)
-require(RMySQL)
 require(dplyr)
 require(tidyr)
 require(lubridate)
 library(readr)
 library(leaflet)
-library(readr)
 library(plotly)
 library(raster)
 library(dashboardthemes)
 library(rgdal)
 
  # Cargar datos 
-load(file = 'data/barrio_dia_2019pred.RData',.GlobalEnv)
-load(file = 'data/barrio_semana_2019pred.RData',.GlobalEnv)
-load(file = 'data/barrio_mes_2019pred.RData',.GlobalEnv)
-load(file = 'data/comuna_dia_2019pred.RData',.GlobalEnv)
-load(file = 'data/comuna_semana_2019pred.RData',.GlobalEnv)
-load(file = 'data/comuna_mes_2019pred.RData',.GlobalEnv)
+load(file = 'barrio_dia_2019pred.RData',.GlobalEnv)
+load(file = 'barrio_semana_2019pred.RData',.GlobalEnv)
+load(file = 'barrio_mes_2019pred.RData',.GlobalEnv)
+load(file = 'comuna_dia_2019pred.RData',.GlobalEnv)
+load(file = 'comuna_semana_2019pred.RData',.GlobalEnv)
+load(file = 'comuna_mes_2019pred.RData',.GlobalEnv)
+load(file = 'historicos.RData',.GlobalEnv)
 
 # Cargar mapa
-load('maps/medellin_map.RData',.GlobalEnv)
+load('medellin_map.RData',.GlobalEnv)
 
 # Cargar datos
 load(file = 'datos.RData', .GlobalEnv)
@@ -35,8 +34,8 @@ load(file = 'datos.RData', .GlobalEnv)
 list_barrios <- sort(unique(datos$BARRIO))
 list_comunas <- sort(unique(datos$COMUNA))
 
-source('source/source_models.R')
-source('maps/source_map.R')
+source('source_models.R')
+source('source_map.R')
 
 
 header <-   dashboardHeader(  ### changing logo
@@ -71,8 +70,9 @@ ui <- dashboardPage(header,
                       shinyDashboardThemes(
                         theme = "poor_mans_flatly"
                       ),
+                      includeCSS("www/style.css"),
                       tabItems(
-                        
+                       # ,
                         tabItem(tabName = "inicio",
                                 # En esta parte de inicio se pone el video
                                 # la descripcion de la app
@@ -87,7 +87,7 @@ ui <- dashboardPage(header,
                                 h4(),
                                 h5("A continuación un video donde se explica como utilizar las diferentes herramientas de la 
                  aplicación web"),
-                                HTML('<p align = "center"><iframe width="560" height="315" src="https://www.youtube.com/embed/iX-QaNzd-0Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></p>')
+                                HTML('<p align = "center"><iframe width="560" height="315" src="https://www.youtube.com/embed/5qn82BmX6B8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></p>')
                                 
                         ),
                         
@@ -125,18 +125,18 @@ ui <- dashboardPage(header,
                                 
                                 fluidRow(
                                   box(width = 4,
-                                      plotlyOutput("chart_clase") %>% shinycssloaders::withSpinner(color="#3498db")),
+                                      plotlyOutput("chart_clase")%>% shinycssloaders::withSpinner(color="#3498db")),
                                   box(width = 4,
-                                      plotlyOutput("chart_gravedad") %>% shinycssloaders::withSpinner(color="#3498db")),
+                                      plotlyOutput("chart_gravedad")%>% shinycssloaders::withSpinner(color="#3498db")),
                                   box(width = 4,
-                                      plotlyOutput("chart_diseno") %>% shinycssloaders::withSpinner(color="#3498db"))
+                                      plotlyOutput("chart_diseno")%>% shinycssloaders::withSpinner(color="#3498db"))
                                   
                                 ),
                                 fluidRow(
                                   box(width = 6,
-                                      plotlyOutput("chart_comuna") %>% shinycssloaders::withSpinner(color="#3498db")),
+                                      plotlyOutput("chart_comuna")%>% shinycssloaders::withSpinner(color="#3498db")),
                                   box(width = 6,
-                                      plotlyOutput("chart_barrio") %>% shinycssloaders::withSpinner(color="#3498db"))
+                                      plotlyOutput("chart_barrio")%>% shinycssloaders::withSpinner(color="#3498db"))
                                 )
                                 
                         ),
@@ -191,48 +191,40 @@ ui <- dashboardPage(header,
                                         condition = "input.tipo_modelo == 'comuna'",
                                         tabsetPanel(
                                           # Muestra el grafico de predichos por accidente diarios
-                                          tabPanel("Accidentalidad por dia",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_dia") %>% shinycssloaders::withSpinner(color="#3498db"),
-                                                   h1(),
-                                                   DTOutput("dfpred_dia")),
-                                          # Muestra el grafico de predichos por accidente semanal
-                                          tabPanel("Accidentalidad por semana",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_semana") %>% shinycssloaders::withSpinner(color="#3498db"),
-                                                   h1(),
-                                                   DTOutput("dfpred_semana")),
                                           # Muestra el grafico de predichos por accidente mensual
                                           tabPanel("Accidentalidad por mes",
                                                    h1(),
-                                                   plotlyOutput("plotpred_mes") %>% shinycssloaders::withSpinner(color="#3498db"),
+                                                   plotlyOutput("plotpred_mes") %>% shinycssloaders::withSpinner(color="#3498db")
+                                          ),
+                                          # Muestra el grafico de predichos por accidente semanal
+                                          tabPanel("Accidentalidad por semana",
                                                    h1(),
-                                                   DTOutput("dfpred_mes"))
+                                                   plotlyOutput("plotpred_semana") %>% shinycssloaders::withSpinner(color="#3498db")
+                                                  ),
                                           
+                                          tabPanel("Accidentalidad por dia",
+                                                   h1(),
+                                                   plotlyOutput("plotpred_dia") %>% shinycssloaders::withSpinner(color="#3498db")
+                                                  )
                                         )
                                       ),
                                       conditionalPanel(
                                         condition = "input.tipo_modelo == 'barrio'",
                                         tabsetPanel(
                                           # Muestra el grafico de predichos por accidente diarios
-                                          tabPanel("Predicción por dia",
+                                          tabPanel("Predicción por mes",
                                                    h1(),
-                                                   plotlyOutput("plotpred_diab") %>% shinycssloaders::withSpinner(color="#3498db"),
-                                                   h1(),
-                                                   DTOutput("dfpred_diab")),
+                                                   plotlyOutput("plotpred_mesb") %>% shinycssloaders::withSpinner(color="#3498db")
+                                          ),
                                           # Muestra el grafico de predichos por accidente semanal
                                           tabPanel("Predicción por semana",
                                                    h1(),
-                                                   plotlyOutput("plotpred_semanab") %>% shinycssloaders::withSpinner(color="#3498db"),
+                                                   plotlyOutput("plotpred_semanab") %>% shinycssloaders::withSpinner(color="#3498db")
+                                          ),
+                                          tabPanel("Predicción por dia",
                                                    h1(),
-                                                   DTOutput("dfpred_semanab")),
-                                          # Muestra el grafico de predichos por accidente mensual
-                                          tabPanel("Predicción por mes",
-                                                   h1(),
-                                                   plotlyOutput("plotpred_mesb") %>% shinycssloaders::withSpinner(color="#3498db"),
-                                                   h1(),
-                                                   DTOutput("dfpred_mesb"))
-                                          
+                                                   plotlyOutput("plotpred_diab") %>% shinycssloaders::withSpinner(color="#3498db")
+                                                   )
                                         )
                                       )
 
@@ -282,16 +274,8 @@ ui <- dashboardPage(header,
 ) # dashboardBody
 
 server <- function(input, output) {
-  
-  min_date <- reactive({
-    ifelse(ymd(input$daterange_pred[2]) - 365 < ymd("2014-01-01"),"2014-01-01",input$daterange_pred[2] - 365 )
-  })
-  
-  max_date <- reactive({
-    ymd(input$daterange_pred[1]) + 365
-  })
-  # Funcion para predicciones de dia
-  comuna_pred_dia <- reactive({
+  # Grafica de dia
+  output$plotpred_dia <- renderPlotly({
     validate(need(input$daterange_pred[1] < input$daterange_pred[2],
                   "Error: la fecha final no puede ser menor que la fecha de inicio"))
     pred_comuna_dia(fecha_inicio = input$daterange_pred[1],
@@ -299,172 +283,52 @@ server <- function(input, output) {
                     nombre = input$nombre_comuna)
   })
   
-  # Funcion para predicciones de semana
-  comuna_pred_semana <- reactive({
+  # Grafica de semana
+  output$plotpred_semana <- renderPlotly({
     validate(need(input$daterange_pred[1] < input$daterange_pred[2],
                   "Error: la fecha final no puede ser menor que la fecha de inicio"))
     pred_comuna_semana(fecha_inicio = input$daterange_pred[1],
-                    fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_comuna)
+                       fecha_fin = input$daterange_pred[2],
+                       nombre = input$nombre_comuna)
   })
-  # Funcion para predicciones de dia
-  comuna_pred_mes <- reactive({
+  
+  # Grafica de mes
+  output$plotpred_mes <- renderPlotly({
     validate(need(input$daterange_pred[1] < input$daterange_pred[2],
                   "Error: la fecha final no puede ser menor que la fecha de inicio"))
     pred_comuna_mes(fecha_inicio = input$daterange_pred[1],
                     fecha_fin = input$daterange_pred[2],
                     nombre = input$nombre_comuna)
   })
-  # Funcion para predicciones de dia
-  barrio_pred_dia <- reactive({
+  
+
+  # Grafica de dia
+  output$plotpred_diab <- renderPlotly({
     validate(need(input$daterange_pred[1] < input$daterange_pred[2],
                   "Error: la fecha final no puede ser menor que la fecha de inicio"))
     pred_barrio_dia(fecha_inicio = input$daterange_pred[1],
                     fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_comuna)
-  })
-  # Funcion para predicciones de dia
-  barrio_pred_semana <- reactive({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_barrio_semana(fecha_inicio = input$daterange_pred[1],
-                    fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_comuna)
-  })
-  # Funcion para predicciones de dia
-  barrio_pred_mes <- reactive({
-    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
-                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
-    pred_barrio_mes(fecha_inicio = input$daterange_pred[1],
-                    fecha_fin = input$daterange_pred[2],
-                    nombre = input$nombre_comuna)
-  })
-  
-  # Grafica de dia
-  output$plotpred_dia <- renderPlotly({
-    gp <- comuna_pred_dia()
-    gp$fig
-  })
-  
-  # Grafica de semana
-  output$plotpred_semana <- renderPlotly({
-    gp <- comuna_pred_semana()
-    gp$fig
-  })
-  
-  # Grafica de mes
-  output$plotpred_mes <- renderPlotly({
-    gp <- comuna_pred_mes()
-    gp$fig
-  })
-  
-  # datos de dia
-  output$dfpred_dia <- renderDT({
-    gp <- comuna_pred_dia()
-    DT::datatable({
-      gp$df
-    },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
-    filter = "top",
-    selection = "multiple",
-    style = "bootstrap"
-    )
-    
-  })
-  
-  # datos de semana
-  output$dfpred_semana <- renderDT({
-    gp <- comuna_pred_semana()
-    DT::datatable({
-      gp$df
-    },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
-    filter = "top",
-    selection = "multiple",
-    style = "bootstrap"
-    )
-    
-  })
-  
-  # datos de mes
-  output$dfpred_mes <- renderDT({
-    gp <- comuna_pred_mes()
-    DT::datatable({
-      gp$df
-    },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
-    filter = "top",
-    selection = "multiple",
-    style = "bootstrap"
-    )
-    
-  })
-  
-  # Grafica de dia
-  output$plotpred_diab <- renderPlotly({
-    gp <- barrio_pred_dia()
-    gp$fig
+                    nombre = input$nombre_barrio)
   })
   
   # Grafica de semana
   output$plotpred_semanab <- renderPlotly({
-    gp <- barrio_pred_semana()
-    gp$fig
+    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
+                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
+    pred_barrio_semana(fecha_inicio = input$daterange_pred[1],
+                       fecha_fin = input$daterange_pred[2],
+                       nombre = input$nombre_barrio)
   })
   
   # Grafica de mes
   output$plotpred_mesb <- renderPlotly({
-    gp <- barrio_pred_mes()
-    gp$fig
+    validate(need(input$daterange_pred[1] < input$daterange_pred[2],
+                  "Error: la fecha final no puede ser menor que la fecha de inicio"))
+    pred_barrio_mes(fecha_inicio = input$daterange_pred[1],
+                    fecha_fin = input$daterange_pred[2],
+                    nombre = input$nombre_barrio)
   })
-  
-  # datos de dia
-  output$dfpred_diab <- renderDT({
-    gp <- barrio_pred_dia()
-    DT::datatable({
-      gp$df
-    },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
-    filter = "top",
-    selection = "multiple",
-    style = "bootstrap"
-    )
-    
-  })
-  
-  # datos de semana
-  output$dfpred_semanab <- renderDT({
-    gp <- barrio_pred_semana()
-    DT::datatable({
-      gp$df
-    },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
-    filter = "top",
-    selection = "multiple",
-    style = "bootstrap"
-    )
-    
-  })
-  
-  # datos de mes
-  output$dfpred_mesb <- renderDT({
-    gp <- barrio_pred_mes()
-    DT::datatable({
-      gp$df
-    },
-    options = list(lenghtMenu = list(c(7, 15, -1), c('5', '15', 'All')), pageLenght = 15),
-    filter = "top",
-    selection = "multiple",
-    style = "bootstrap"
-    )
-    
-  })
-  
-  
-  
-  output$txtout <- renderText({
-    paste(weekdays(ymd(input$daterange[1])),ymd(input$daterange[2]), sep = ',')
-  })
+
   #Datos de visualizacion
   output$Data <- DT::renderDataTable(
     DT::datatable({
@@ -480,7 +344,7 @@ server <- function(input, output) {
   
   # Mapa
   output$mymap <- renderLeaflet({
-    medellin_map
+    create_map()
   })
 ################Tabla para el mapa########
   output$clusters_table <- renderUI({
@@ -612,9 +476,10 @@ server <- function(input, output) {
   # Grafico diseño
   output$chart_diseno <- renderPlotly(({
     df_diseno <- datos %>% filter(ymd(FECHA) >= input$daterange2[1],
-                                  ymd(FECHA) <= input$daterange2[2]) %>%
+                        ymd(FECHA) <= input$daterange2[2]) %>%
       group_by(DISENO) %>% 
-      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) 
+      summarise(TOTAL = n())  %>% arrange(desc(TOTAL)) %>%
+      arrange(desc(TOTAL))
     fig <- plot_ly(
       type = 'table',
       header = list(
